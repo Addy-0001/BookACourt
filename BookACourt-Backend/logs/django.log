@@ -1,0 +1,293 @@
+ERROR 2025-11-27 17:14:19,544 redis 588537 130986936624704 Connection to Redis lost: Retry (0/20) now.
+ERROR 2025-11-27 17:14:19,544 redis 588537 130986936624704 Connection to Redis lost: Retry (1/20) in 1.00 second.
+ERROR 2025-11-27 17:14:20,550 redis 588537 130986936624704 Connection to Redis lost: Retry (2/20) in 1.00 second.
+ERROR 2025-11-27 17:14:21,555 redis 588537 130986936624704 Connection to Redis lost: Retry (3/20) in 1.00 second.
+ERROR 2025-11-27 17:14:22,561 redis 588537 130986936624704 Connection to Redis lost: Retry (4/20) in 1.00 second.
+ERROR 2025-11-27 17:14:23,566 redis 588537 130986936624704 Connection to Redis lost: Retry (5/20) in 1.00 second.
+ERROR 2025-11-27 17:14:24,572 redis 588537 130986936624704 Connection to Redis lost: Retry (6/20) in 1.00 second.
+ERROR 2025-11-27 17:14:25,577 redis 588537 130986936624704 Connection to Redis lost: Retry (7/20) in 1.00 second.
+ERROR 2025-11-27 17:14:26,583 redis 588537 130986936624704 Connection to Redis lost: Retry (8/20) in 1.00 second.
+ERROR 2025-11-27 17:14:27,588 redis 588537 130986936624704 Connection to Redis lost: Retry (9/20) in 1.00 second.
+ERROR 2025-11-27 17:14:28,594 redis 588537 130986936624704 Connection to Redis lost: Retry (10/20) in 1.00 second.
+ERROR 2025-11-27 17:14:29,599 redis 588537 130986936624704 Connection to Redis lost: Retry (11/20) in 1.00 second.
+ERROR 2025-11-27 17:14:30,604 redis 588537 130986936624704 Connection to Redis lost: Retry (12/20) in 1.00 second.
+ERROR 2025-11-27 17:14:31,610 redis 588537 130986936624704 Connection to Redis lost: Retry (13/20) in 1.00 second.
+ERROR 2025-11-27 17:14:32,616 redis 588537 130986936624704 Connection to Redis lost: Retry (14/20) in 1.00 second.
+ERROR 2025-11-27 17:14:33,621 redis 588537 130986936624704 Connection to Redis lost: Retry (15/20) in 1.00 second.
+ERROR 2025-11-27 17:14:34,627 redis 588537 130986936624704 Connection to Redis lost: Retry (16/20) in 1.00 second.
+ERROR 2025-11-27 17:14:35,632 redis 588537 130986936624704 Connection to Redis lost: Retry (17/20) in 1.00 second.
+ERROR 2025-11-27 17:14:36,637 redis 588537 130986936624704 Connection to Redis lost: Retry (18/20) in 1.00 second.
+ERROR 2025-11-27 17:14:37,643 redis 588537 130986936624704 Connection to Redis lost: Retry (19/20) in 1.00 second.
+CRITICAL 2025-11-27 17:14:38,648 redis 588537 130986936624704 
+Retry limit exceeded while trying to reconnect to the Celery redis result store backend. The Celery application must be restarted.
+
+ERROR 2025-11-27 17:14:38,723 log 588537 130986936624704 Internal Server Error: /api/auth/users/register/
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 855, in connect_check_health
+    sock = self.retry.call_with_retry(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/retry.py", line 116, in call_with_retry
+    return do()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 856, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 1306, in _connect
+    raise err
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 1290, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 127, in reconnect_on_error
+    yield
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 177, in _consume_from
+    self._pubsub.subscribe(key)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/client.py", line 1090, in subscribe
+    ret_val = self.execute_command("SUBSCRIBE", *new_channels.keys())
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/client.py", line 914, in execute_command
+    self.connection = self.connection_pool.get_connection()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/utils.py", line 196, in wrapper
+    return func(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 2603, in get_connection
+    connection.connect()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 846, in connect
+    self.connect_check_health(check_health=True)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 863, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 855, in connect_check_health
+    sock = self.retry.call_with_retry(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/retry.py", line 116, in call_with_retry
+    return do()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 856, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 1306, in _connect
+    raise err
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 1290, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/kombu/connection.py", line 472, in _reraise_as_library_errors
+    yield
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/app/base.py", line 929, in send_task
+    self.backend.on_task_call(P, task_id)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 378, in on_task_call
+    self.result_consumer.consume_from(task_id)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 169, in consume_from
+    return self.start(task_id)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 147, in start
+    self._consume_from(initial_task_id)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 176, in _consume_from
+    with self.reconnect_on_error():
+  File "/usr/lib/python3.10/contextlib.py", line 153, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 130, in reconnect_on_error
+    self._ensure(self._reconnect_pubsub, ())
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 389, in ensure
+    return retry_over_time(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/kombu/utils/functional.py", line 318, in retry_over_time
+    return fun(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/backends/redis.py", line 106, in _reconnect_pubsub
+    metas = self.backend.client.mget(self.subscribed_to)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/commands/core.py", line 2091, in mget
+    return self.execute_command("MGET", *args, **options)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/client.py", line 657, in execute_command
+    return self._execute_command(*args, **options)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/client.py", line 663, in _execute_command
+    conn = self.connection or pool.get_connection()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/utils.py", line 196, in wrapper
+    return func(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 2603, in get_connection
+    connection.connect()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 846, in connect
+    self.connect_check_health(check_health=True)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/redis/connection.py", line 863, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/user_management/views.py", line 47, in register
+    send_verification_email.delay(user.id, token)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/app/task.py", line 444, in delay
+    return self.apply_async(args, kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/app/task.py", line 601, in apply_async
+    return app.send_task(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/celery/app/base.py", line 927, in send_task
+    with P.connection._reraise_as_library_errors():
+  File "/usr/lib/python3.10/contextlib.py", line 153, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/kombu/connection.py", line 476, in _reraise_as_library_errors
+    raise ConnectionError(str(exc)) from exc
+kombu.exceptions.OperationalError: Error 111 connecting to localhost:6379. Connection refused.
+ERROR 2025-11-27 17:14:38,726 basehttp 588537 130986936624704 "POST /api/auth/users/register/ HTTP/1.1" 500 318767
+ERROR 2025-11-27 17:21:41,885 log 601548 140082472269376 Internal Server Error: /api/auth/users/register/
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/sqlite3/base.py", line 360, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: UNIQUE constraint failed: users.username
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/user_management/views.py", line 31, in register
+    user = serializer.save()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/user_management/serializers.py", line 29, in create
+    user.save()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/contrib/auth/base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/sqlite3/base.py", line 360, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: UNIQUE constraint failed: users.username
+ERROR 2025-11-27 17:21:41,888 basehttp 601548 140082472269376 "POST /api/auth/users/register/ HTTP/1.1" 500 210793
+ERROR 2025-11-27 17:34:54,658 log 618697 127068705125952 Internal Server Error: /api/auth/users/register/
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/sqlite3/base.py", line 360, in execute
+    return super().execute(query, params)
+sqlite3.IntegrityError: UNIQUE constraint failed: users.username
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/user_management/views.py", line 31, in register
+    user = serializer.save()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/user_management/serializers.py", line 29, in create
+    user.save()
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/contrib/auth/base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/db/backends/sqlite3/base.py", line 360, in execute
+    return super().execute(query, params)
+django.db.utils.IntegrityError: UNIQUE constraint failed: users.username
+ERROR 2025-11-27 17:34:54,661 basehttp 618697 127068705125952 "POST /api/auth/users/register/ HTTP/1.1" 500 213489
+ERROR 2025-11-27 17:49:41,199 log 635108 124412720313920 Internal Server Error: /api/auth/auth/verify-email/
+Traceback (most recent call last):
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+  File "/home/adamya-pop/Desktop/Ui-Project/BookACourt-Backend/env/lib/python3.10/site-packages/rest_framework/views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2025-11-27 17:49:41,200 basehttp 635108 124412720313920 "POST /api/auth/auth/verify-email/ HTTP/1.1" 500 92903
