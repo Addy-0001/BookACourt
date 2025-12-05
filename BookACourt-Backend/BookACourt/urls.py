@@ -15,9 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('user_management.urls'))
 ]
+
+
+admin.site.site_header = "Book A Court Main Admin Panel"
+admin.site.site_title = 'Book A Court Admin'
+admin.site.index_title = 'Welcome to Book A Court Admin Panel'
+admin.site.unregister_group = None
+
+# change favicon for admin panel
+admin.site.site_url = None
+admin.site.site_favicon = '/static/images/favicon.ico'
+
+# change admin footer
+admin.site.footer = "Book A Court © 2024. All rights reserved."

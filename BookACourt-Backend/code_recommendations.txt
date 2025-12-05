@@ -1,0 +1,84 @@
+
+class Court(models.Model):
+    """Model for sports courts"""
+    name = models.CharField(max_length=255)
+    owner = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='owned_courts',
+        limit_choices_to={'role': UserRole.COURT_OWNER}
+    )
+    managers = models.ManyToManyField(
+        User,
+        related_name='managed_courts',
+        blank=True,
+        limit_choices_to={'role': UserRole.COURT_MANAGER}
+    )
+    
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    
+    # Court details
+    court_type = models.CharField(max_length=50)  # e.g., Basketball, Tennis, Badminton
+    indoor = models.BooleanField(default=False)
+    
+    # Pricing
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Availability
+    is_active = models.BooleanField(default=True)
+    opening_time = models.TimeField()
+    closing_time = models.TimeField()
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'courts'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.court_type}"
+
+
+class Booking(models.Model):
+    """Model for court bookings"""
+    class BookingStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending'
+        CONFIRMED = 'CONFIRMED', 'Confirmed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+        COMPLETED = 'COMPLETED', 'Completed'
+    
+    court = models.ForeignKey(Court, on_delete=models.CASCADE, related_name='bookings')
+    player = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='bookings',
+        limit_choices_to={'role': UserRole.PLAYER}
+    )
+    
+    booking_date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    
+    status = models.CharField(
+        max_length=20,
+        choices=BookingStatus.choices,
+        default=BookingStatus.PENDING
+    )
+    
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'bookings'
+        ordering = ['-booking_date', '-start_time']
+        unique_together = ['court', 'booking_date', 'start_time']
+    
+    def __str__(self):
+        return f"{self.court.name} - {self.booking_date} {self.start_time}"

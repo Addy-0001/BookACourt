@@ -1,107 +1,173 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
-import uuid
-from django.core.validators import RegexValidator
+# users/models.py
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
+import pyotp
+
+class UserRole(models.TextChoices):
+    PLAYER = 'PLAYER', 'Player/User'
+    COURT_MANAGER = 'COURT_MANAGER', 'Court Manager'
+    COURT_OWNER = 'COURT_OWNER', 'Court Owner'
+    SUPER_USER = 'SUPER_USER', 'Super User (Admin)'
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("The Email must be set")
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+    def create_user(self, phone_number, password=None, **extra_fields):
+        if not phone_number:
+            raise ValueError('Phone number is required')
+        
+        user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
+    
+    def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        return self.create_user(email, password, **extra_fields)
+        extra_fields.setdefault('role', UserRole.SUPER_USER)
+        extra_fields.setdefault('is_phone_verified', True)
+        
+        return self.create_user(phone_number, password, **extra_fields)
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
-    USER_ROLE_CHOICES = (
-        ('player', 'Player'),
-        ('court_owner', 'Court Owner'),
-        ('court_manager', 'Court Manager'),
-        ('admin', 'Admin'),
+class User(AbstractBaseUser, PermissionsMixin):
+    phone_number = PhoneNumberField(unique=True)
+    email = models.EmailField(blank=True, null=True)
+    full_name = models.CharField(max_length=255)
+    
+    role = models.CharField(
+        max_length=20,
+        choices=UserRole.choices,
+        default=UserRole.PLAYER
     )
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(
-        max_length=15,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Enter a valid phone number')],
-        blank=True,
-        null=True
-    )
-    first_name = models.CharField(max_length=150, blank=True, null=True)
-    last_name = models.CharField(max_length=150, blank=True, null=True)
-
-    role = models.CharField(max_length=20, choices=USER_ROLE_CHOICES, default='player')
-    is_email_verified = models.BooleanField(default=False)
-    is_phone_verified = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    
+    # For Court Owner/Manager - link to their courts
+    # This will be used in related models
+    
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-
+    is_phone_verified = models.BooleanField(default=False)
+    
+    # OTP fields
+    otp_secret = models.CharField(max_length=32, blank=True)
+    otp_created_at = models.DateTimeField(null=True, blank=True)
+    
+    # Profile fields
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
     objects = CustomUserManager()
-
+    
+    USERNAME_FIELD = 'phone_number'
+    REQUIRED_FIELDS = ['full_name']
+    
     class Meta:
         db_table = 'users'
+        verbose_name = 'User'
         verbose_name_plural = 'Users'
-
+        indexes = [
+            models.Index(fields=['phone_number']),
+            models.Index(fields=['role']),
+        ]
+    
     def __str__(self):
-        return self.email
+        return f"{self.full_name} ({self.phone_number})"
+    
+    def generate_otp(self):
+        """Generate a new OTP secret and return the OTP code"""
+        self.otp_secret = pyotp.random_base32()
+        self.otp_created_at = timezone.now()
+        self.save()
+        
+        totp = pyotp.TOTP(self.otp_secret, interval=300)  # 5 minutes validity
+        return totp.now()
+    
+    def verify_otp(self, otp_code):
+        """Verify the provided OTP code"""
+        if not self.otp_secret or not self.otp_created_at:
+            return False
+        
+        # Check if OTP is expired (5 minutes)
+        time_diff = timezone.now() - self.otp_created_at
+        if time_diff.total_seconds() > 300:
+            return False
+        
+        totp = pyotp.TOTP(self.otp_secret, interval=300)
+        return totp.verify(otp_code, valid_window=1)
+    
+    @property
+    def is_super_user(self):
+        return self.role == UserRole.SUPER_USER
+    
+    @property
+    def is_court_owner(self):
+        return self.role == UserRole.COURT_OWNER
+    
+    @property
+    def is_court_manager(self):
+        return self.role == UserRole.COURT_MANAGER
+    
+    @property
+    def is_player(self):
+        return self.role == UserRole.PLAYER
+    
+    @property
+    def role_permissions(self):
+        """Return permissions based on role"""
+        permissions = {
+            UserRole.PLAYER: [
+                'view_courts',
+                'book_court',
+                'view_own_bookings',
+                'cancel_own_booking',
+                'view_profile',
+                'update_own_profile',
+            ],
+            UserRole.COURT_MANAGER: [
+                'view_courts',
+                'view_assigned_courts',
+                'manage_bookings',
+                'view_court_schedule',
+                'update_court_availability',
+                'view_revenue_reports',
+                'manage_court_pricing',
+            ],
+            UserRole.COURT_OWNER: [
+                'view_courts',
+                'create_court',
+                'update_own_courts',
+                'delete_own_courts',
+                'assign_managers',
+                'view_all_bookings',
+                'manage_bookings',
+                'view_analytics',
+                'view_revenue_reports',
+                'manage_pricing',
+                'manage_court_amenities',
+            ],
+            UserRole.SUPER_USER: [
+                'all_permissions',
+                'manage_all_users',
+                'manage_all_courts',
+                'view_platform_analytics',
+                'manage_system_settings',
+                'approve_court_owners',
+                'suspend_users',
+                'view_all_transactions',
+            ]
+        }
+        return permissions.get(self.role, [])
+    
+    def can_manage_court(self, court):
+        """Check if user can manage a specific court"""
+        if self.is_super_user:
+            return True
+        if self.is_court_owner:
+            return court.owner == self
+        if self.is_court_manager:
+            return court.managers.filter(id=self.id).exists()
+        return False
 
-
-
-class EmailVerificationToken(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='email_verification')
-    token = models.CharField(max_length=255, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'email_verification_tokens'
-
-    def __str__(self):
-        return f"Email verification for {self.user.email}"
-
-
-class PhoneVerificationToken(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='phone_verification')
-    token = models.CharField(max_length=6)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
-    attempts = models.IntegerField(default=0)
-
-    class Meta:
-        db_table = 'phone_verification_tokens'
-
-    def __str__(self):
-        return f"Phone verification for {self.user.phone_number}"
-
-
-class PasswordResetToken(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='password_reset')
-    token = models.CharField(max_length=255, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'password_reset_tokens'
-
-    def __str__(self):
-        return f"Password reset for {self.user.email}"
