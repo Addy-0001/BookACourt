@@ -21,8 +21,8 @@ urlpatterns = [
          name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    # API Endpoints (to be implemented)
-    # path('api/', include('api.urls')),
+    # API Endpoints
+    path('api/', include('api.urls')),
 ]
 
 # Serve media files in development

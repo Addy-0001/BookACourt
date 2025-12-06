@@ -37,13 +37,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for allauth
 
     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',  # Required for dj-rest-auth
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     'corsheaders',
     'phonenumber_field',
+
+    # Authentication apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 
     # Local Applications
     'user_management',
@@ -61,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Required for allauth
 ]
 
 ROOT_URLCONF = 'BookACourt.urls'
@@ -151,6 +162,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User Model
 AUTH_USER_MODEL = 'user_management.User'
 
+# Sites Framework (Required for allauth)
+SITE_ID = 1
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
@@ -171,7 +184,6 @@ REST_FRAMEWORK = {
 }
 
 # JWT Settings
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -185,6 +197,33 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
+
+# Django Allauth Configuration (New Style)
+ACCOUNT_ADAPTER = 'api.adapters.CustomAccountAdapter'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+
+# Login methods configuration
+ACCOUNT_LOGIN_METHODS = {}  # Empty set - we'll handle login in custom views
+ACCOUNT_UNIQUE_EMAIL = False  # We handle uniqueness via constraint
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Disable username
+ACCOUNT_USERNAME_REQUIRED = False
+
+# Social account settings
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# dj-rest-auth Configuration
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_HTTPONLY': False,
+    'JWT_AUTH_COOKIE': 'bookacourt-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'bookacourt-refresh-token',
+    'USER_DETAILS_SERIALIZER': 'api.serializers.UserDetailsSerializer',
+    'REGISTER_SERIALIZER': 'api.serializers.RegisterSerializer',
 }
 
 # CORS Settings
@@ -201,6 +240,10 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Court booking and management system',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'COMPONENT_SPLIT_REQUEST': True,
 }
 
 # Phone Number Field Settings

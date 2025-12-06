@@ -4,11 +4,13 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 import pyotp
 
+
 class UserRole(models.TextChoices):
     PLAYER = 'PLAYER', 'Player/User'
     COURT_MANAGER = 'COURT_MANAGER', 'Court Manager'
     COURT_OWNER = 'COURT_OWNER', 'Court Owner'
     SUPER_USER = 'SUPER_USER', 'Super User (Admin)'
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -31,7 +33,8 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     phone_number = PhoneNumberField(unique=True)
-    email = models.EmailField(blank=True, null=True)
+    # Use empty string instead of null
+    email = models.EmailField(blank=True, default='')
     full_name = models.CharField(max_length=255)
 
     role = models.CharField(
@@ -66,6 +69,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['full_name']
 
+    # Required for allauth compatibility
+    EMAIL_FIELD = 'email'
+
     class Meta:
         db_table = 'users'
         verbose_name = 'User'
@@ -75,9 +81,22 @@ class User(AbstractBaseUser, PermissionsMixin):
             models.Index(fields=['role']),
             models.Index(fields=['is_active']),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['email'],
+                condition=~models.Q(email=''),
+                name='unique_email_when_provided'
+            )
+        ]
 
     def __str__(self):
         return f"{self.full_name} ({self.phone_number})"
+
+    # Add this property for allauth compatibility
+    @property
+    def username(self):
+        """Return phone_number as username for allauth"""
+        return str(self.phone_number)
 
     def generate_otp(self):
         """Generate a new OTP secret and return the OTP code"""
