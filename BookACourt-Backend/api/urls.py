@@ -38,4 +38,5 @@ urlpatterns = [
 
     # User profile
     path('user/profile/', UserProfileView.as_view(), name='user_profile'),
+    path('courts/', include('api.court_urls'))
 ]
