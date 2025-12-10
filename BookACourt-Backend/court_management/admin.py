@@ -251,13 +251,18 @@ class CourtAdmin(admin.ModelAdmin):
     inlines = [CourtImageInline, DynamicPricingInline]
 
     def rating_display(self, obj):
-        """Display rating with stars"""
-        stars = '⭐' * int(obj.average_rating)
+        rating = float(obj.average_rating or 0)
+        stars = '⭐' * int(rating)
+
+        # make stars safe separately
+        safe_stars = format_html("{}", stars)
+
+        # now combine safely without float formatting bugs
         return format_html(
-            '{} <span style="color: gray;">({:.2f})</span>',
-            stars, obj.average_rating
+            "{} <span style='color: gray;'>({})</span>",
+            safe_stars,
+            f"{rating:.2f}"
         )
-    rating_display.short_description = 'Rating'
 
     def booking_count(self, obj):
         """Display booking count"""
@@ -361,11 +366,9 @@ class DynamicPricingAdmin(admin.ModelAdmin):
     time_range.short_description = 'Time'
 
     def days_display(self, obj):
-        """Display days of week"""
-        day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        days = [day_names[int(d)]
-                for d in obj.days_of_week.split(',') if d.strip()]
-        return ', '.join(days)
+        """Display days of week safely"""
+        return obj.days_of_week
+
     days_display.short_description = 'Days'
 
 
