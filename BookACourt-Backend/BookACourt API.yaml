@@ -242,6 +242,1500 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
           description: ''
+  /api/bookings/booking-shares/:
+    get:
+      operationId: bookings_booking_shares_list
+      description: |-
+        ViewSet for Booking Shares
+        Addresses User Story: 46 - Share bookings with friends
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingShareList'
+          description: ''
+    post:
+      operationId: bookings_booking_shares_create
+      description: |-
+        ViewSet for Booking Shares
+        Addresses User Story: 46 - Share bookings with friends
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingShareCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingShareCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingShareCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingShareCreate'
+          description: ''
+  /api/bookings/booking-shares/{id}/:
+    get:
+      operationId: bookings_booking_shares_retrieve
+      description: |-
+        ViewSet for Booking Shares
+        Addresses User Story: 46 - Share bookings with friends
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking share.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingShare'
+          description: ''
+    put:
+      operationId: bookings_booking_shares_update
+      description: |-
+        ViewSet for Booking Shares
+        Addresses User Story: 46 - Share bookings with friends
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking share.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingShareRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingShareRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingShareRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingShare'
+          description: ''
+    patch:
+      operationId: bookings_booking_shares_partial_update
+      description: |-
+        ViewSet for Booking Shares
+        Addresses User Story: 46 - Share bookings with friends
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking share.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingShareRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingShareRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingShareRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingShare'
+          description: ''
+    delete:
+      operationId: bookings_booking_shares_destroy
+      description: |-
+        ViewSet for Booking Shares
+        Addresses User Story: 46 - Share bookings with friends
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking share.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/booking-shares/join/:
+    post:
+      operationId: bookings_booking_shares_join_create
+      description: Join a booking using a share token
+      summary: Join via share link
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingShareRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingShareRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingShareRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingShare'
+          description: ''
+  /api/bookings/bookings/:
+    get:
+      operationId: bookings_bookings_list
+      description: |-
+        ViewSet for Bookings
+        Addresses User Stories: 13, 20, 22, 34, 35, 38
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+    post:
+      operationId: bookings_bookings_create
+      description: |-
+        ViewSet for Bookings
+        Addresses User Stories: 13, 20, 22, 34, 35, 38
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingCreate'
+          description: ''
+  /api/bookings/bookings/{id}/:
+    get:
+      operationId: bookings_bookings_retrieve
+      description: |-
+        ViewSet for Bookings
+        Addresses User Stories: 13, 20, 22, 34, 35, 38
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    put:
+      operationId: bookings_bookings_update
+      description: |-
+        ViewSet for Bookings
+        Addresses User Stories: 13, 20, 22, 34, 35, 38
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    patch:
+      operationId: bookings_bookings_partial_update
+      description: |-
+        ViewSet for Bookings
+        Addresses User Stories: 13, 20, 22, 34, 35, 38
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    delete:
+      operationId: bookings_bookings_destroy
+      description: |-
+        ViewSet for Bookings
+        Addresses User Stories: 13, 20, 22, 34, 35, 38
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/bookings/{id}/cancel/:
+    post:
+      operationId: bookings_bookings_cancel_create
+      description: Cancel a booking and process refund
+      summary: Cancel booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/bookings/{id}/confirm/:
+    post:
+      operationId: bookings_bookings_confirm_create
+      description: Confirm a pending booking (court staff only)
+      summary: Confirm booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/bookings/my_bookings/:
+    get:
+      operationId: bookings_bookings_my_bookings_retrieve
+      description: Get all bookings for the current user
+      summary: Get my bookings
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/bookings/cancellation-policies/:
+    get:
+      operationId: bookings_cancellation_policies_list
+      description: |-
+        ViewSet for Cancellation Policies
+        Addresses User Story: 15 - View and set cancellation policies
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCancellationPolicyList'
+          description: ''
+    post:
+      operationId: bookings_cancellation_policies_create
+      description: |-
+        ViewSet for Cancellation Policies
+        Addresses User Story: 15 - View and set cancellation policies
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationPolicyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CancellationPolicyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CancellationPolicyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationPolicy'
+          description: ''
+  /api/bookings/cancellation-policies/{id}/:
+    get:
+      operationId: bookings_cancellation_policies_retrieve
+      description: |-
+        ViewSet for Cancellation Policies
+        Addresses User Story: 15 - View and set cancellation policies
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cancellation Policy.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationPolicy'
+          description: ''
+    put:
+      operationId: bookings_cancellation_policies_update
+      description: |-
+        ViewSet for Cancellation Policies
+        Addresses User Story: 15 - View and set cancellation policies
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cancellation Policy.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationPolicyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CancellationPolicyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CancellationPolicyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationPolicy'
+          description: ''
+    patch:
+      operationId: bookings_cancellation_policies_partial_update
+      description: |-
+        ViewSet for Cancellation Policies
+        Addresses User Story: 15 - View and set cancellation policies
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cancellation Policy.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCancellationPolicyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCancellationPolicyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCancellationPolicyRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationPolicy'
+          description: ''
+    delete:
+      operationId: bookings_cancellation_policies_destroy
+      description: |-
+        ViewSet for Cancellation Policies
+        Addresses User Story: 15 - View and set cancellation policies
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Cancellation Policy.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/equipment-rentals/:
+    get:
+      operationId: bookings_equipment_rentals_list
+      description: |-
+        ViewSet for Equipment Rentals
+        Addresses User Story: 29 - Rent equipment
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEquipmentRentalList'
+          description: ''
+    post:
+      operationId: bookings_equipment_rentals_create
+      description: |-
+        ViewSet for Equipment Rentals
+        Addresses User Story: 29 - Rent equipment
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRental'
+          description: ''
+  /api/bookings/equipment-rentals/{id}/:
+    get:
+      operationId: bookings_equipment_rentals_retrieve
+      description: |-
+        ViewSet for Equipment Rentals
+        Addresses User Story: 29 - Rent equipment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment rental.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRental'
+          description: ''
+    put:
+      operationId: bookings_equipment_rentals_update
+      description: |-
+        ViewSet for Equipment Rentals
+        Addresses User Story: 29 - Rent equipment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment rental.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRental'
+          description: ''
+    patch:
+      operationId: bookings_equipment_rentals_partial_update
+      description: |-
+        ViewSet for Equipment Rentals
+        Addresses User Story: 29 - Rent equipment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment rental.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentRentalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentRentalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentRentalRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRental'
+          description: ''
+    delete:
+      operationId: bookings_equipment_rentals_destroy
+      description: |-
+        ViewSet for Equipment Rentals
+        Addresses User Story: 29 - Rent equipment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment rental.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/equipment-rentals/{id}/return_equipment/:
+    post:
+      operationId: bookings_equipment_rentals_return_equipment_create
+      description: Mark equipment as returned (court staff only)
+      summary: Return equipment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment rental.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EquipmentRentalRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentRental'
+          description: ''
+  /api/bookings/match-events/:
+    get:
+      operationId: bookings_match_events_list
+      description: |-
+        ViewSet for Match Events
+        Addresses User Stories: 27, 28, 36, 37
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMatchEventList'
+          description: ''
+    post:
+      operationId: bookings_match_events_create
+      description: |-
+        ViewSet for Match Events
+        Addresses User Stories: 27, 28, 36, 37
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEventCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MatchEventCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MatchEventCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEventCreate'
+          description: ''
+  /api/bookings/match-events/{id}/:
+    get:
+      operationId: bookings_match_events_retrieve
+      description: |-
+        ViewSet for Match Events
+        Addresses User Stories: 27, 28, 36, 37
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+          description: ''
+    put:
+      operationId: bookings_match_events_update
+      description: |-
+        ViewSet for Match Events
+        Addresses User Stories: 27, 28, 36, 37
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+          description: ''
+    patch:
+      operationId: bookings_match_events_partial_update
+      description: |-
+        ViewSet for Match Events
+        Addresses User Stories: 27, 28, 36, 37
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMatchEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMatchEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMatchEventRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+          description: ''
+    delete:
+      operationId: bookings_match_events_destroy
+      description: |-
+        ViewSet for Match Events
+        Addresses User Stories: 27, 28, 36, 37
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/match-events/{id}/cancel_match/:
+    post:
+      operationId: bookings_match_events_cancel_match_create
+      description: Cancel a match event (creator only)
+      summary: Cancel match
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+          description: ''
+  /api/bookings/match-events/{id}/join/:
+    post:
+      operationId: bookings_match_events_join_create
+      description: Join an open match event
+      summary: Join match
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+          description: ''
+  /api/bookings/match-events/{id}/leave/:
+    post:
+      operationId: bookings_match_events_leave_create
+      description: Leave a match event
+      summary: Leave match
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this match event.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MatchEventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+          description: ''
+  /api/bookings/notifications/:
+    get:
+      operationId: bookings_notifications_list
+      description: |-
+        ViewSet for Booking Notifications
+        Addresses User Story: 41 - View booking notifications
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingNotificationList'
+          description: ''
+  /api/bookings/notifications/{id}/:
+    get:
+      operationId: bookings_notifications_retrieve
+      description: |-
+        ViewSet for Booking Notifications
+        Addresses User Story: 41 - View booking notifications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking notification.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingNotification'
+          description: ''
+  /api/bookings/notifications/{id}/mark_read/:
+    post:
+      operationId: bookings_notifications_mark_read_create
+      description: Mark a notification as read
+      summary: Mark as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this booking notification.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingNotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingNotification'
+          description: ''
+  /api/bookings/notifications/mark_all_read/:
+    post:
+      operationId: bookings_notifications_mark_all_read_create
+      description: Mark all notifications as read
+      summary: Mark all as read
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingNotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingNotification'
+          description: ''
+  /api/bookings/notifications/unread/:
+    get:
+      operationId: bookings_notifications_unread_retrieve
+      description: Get all unread notifications for the current user
+      summary: Get unread notifications
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingNotification'
+          description: ''
+  /api/bookings/player-ratings/:
+    get:
+      operationId: bookings_player_ratings_list
+      description: |-
+        ViewSet for Player Ratings
+        Addresses User Story: 40 - Rate other players
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPlayerRatingList'
+          description: ''
+    post:
+      operationId: bookings_player_ratings_create
+      description: |-
+        ViewSet for Player Ratings
+        Addresses User Story: 40 - Rate other players
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerRatingCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlayerRatingCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlayerRatingCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerRatingCreate'
+          description: ''
+  /api/bookings/player-ratings/{id}/:
+    get:
+      operationId: bookings_player_ratings_retrieve
+      description: |-
+        ViewSet for Player Ratings
+        Addresses User Story: 40 - Rate other players
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this player rating.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerRating'
+          description: ''
+    put:
+      operationId: bookings_player_ratings_update
+      description: |-
+        ViewSet for Player Ratings
+        Addresses User Story: 40 - Rate other players
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this player rating.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerRatingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlayerRatingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlayerRatingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerRating'
+          description: ''
+    patch:
+      operationId: bookings_player_ratings_partial_update
+      description: |-
+        ViewSet for Player Ratings
+        Addresses User Story: 40 - Rate other players
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this player rating.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPlayerRatingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPlayerRatingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPlayerRatingRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerRating'
+          description: ''
+    delete:
+      operationId: bookings_player_ratings_destroy
+      description: |-
+        ViewSet for Player Ratings
+        Addresses User Story: 40 - Rate other players
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this player rating.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/courts/categories/:
     get:
       operationId: courts_categories_list
@@ -1864,8 +3358,1106 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserDetails'
           description: ''
+  /api/users/friendships/:
+    get:
+      operationId: users_friendships_list
+      description: |-
+        ViewSet for Friendships
+        Addresses User Story: 42 - Add friends and view friend lists
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFriendshipList'
+          description: ''
+    post:
+      operationId: users_friendships_create
+      description: Send a friend request to another user
+      summary: Send friend request
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendshipCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FriendshipCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FriendshipCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendshipCreate'
+          description: ''
+  /api/users/friendships/{id}/:
+    get:
+      operationId: users_friendships_retrieve
+      description: |-
+        ViewSet for Friendships
+        Addresses User Story: 42 - Add friends and view friend lists
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this friendship.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+    put:
+      operationId: users_friendships_update
+      description: |-
+        ViewSet for Friendships
+        Addresses User Story: 42 - Add friends and view friend lists
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this friendship.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+    patch:
+      operationId: users_friendships_partial_update
+      description: |-
+        ViewSet for Friendships
+        Addresses User Story: 42 - Add friends and view friend lists
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this friendship.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFriendshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFriendshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFriendshipRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+    delete:
+      operationId: users_friendships_destroy
+      description: Remove a friend or cancel a request
+      summary: Remove friend
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this friendship.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/users/friendships/{id}/accept/:
+    post:
+      operationId: users_friendships_accept_create
+      description: Accept a pending friend request
+      summary: Accept friend request
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this friendship.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+  /api/users/friendships/{id}/reject/:
+    post:
+      operationId: users_friendships_reject_create
+      description: Reject a pending friend request
+      summary: Reject friend request
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this friendship.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FriendshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+  /api/users/friendships/my_friends/:
+    get:
+      operationId: users_friendships_my_friends_retrieve
+      description: Get list of accepted friends
+      summary: Get my friends
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+  /api/users/friendships/pending_requests/:
+    get:
+      operationId: users_friendships_pending_requests_retrieve
+      description: Get friend requests pending your response
+      summary: Get pending requests
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+  /api/users/friendships/sent_requests/:
+    get:
+      operationId: users_friendships_sent_requests_retrieve
+      description: Get friend requests you've sent
+      summary: Get sent requests
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friendship'
+          description: ''
+  /api/users/player-stats/:
+    get:
+      operationId: users_player_stats_list
+      description: |-
+        ViewSet for Player Statistics
+        Addresses User Story: 44 - View player statistics
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPlayerStatsList'
+          description: ''
+  /api/users/player-stats/{id}/:
+    get:
+      operationId: users_player_stats_retrieve
+      description: |-
+        ViewSet for Player Statistics
+        Addresses User Story: 44 - View player statistics
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Player Statistics.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+          description: ''
+  /api/users/player-stats/leaderboard/:
+    get:
+      operationId: users_player_stats_leaderboard_retrieve
+      description: Get top players by various metrics
+      summary: Get leaderboard
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+          description: ''
+  /api/users/player-stats/me/:
+    get:
+      operationId: users_player_stats_me_retrieve
+      description: Get statistics for the current user
+      summary: Get my stats
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+          description: ''
+  /api/users/preferences/:
+    get:
+      operationId: users_preferences_list
+      description: |-
+        ViewSet for User Preferences
+        Addresses User Story: 31 - Manage notification preferences
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserPreferenceList'
+          description: ''
+    post:
+      operationId: users_preferences_create
+      description: |-
+        ViewSet for User Preferences
+        Addresses User Story: 31 - Manage notification preferences
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: ''
+  /api/users/preferences/{id}/:
+    get:
+      operationId: users_preferences_retrieve
+      description: |-
+        ViewSet for User Preferences
+        Addresses User Story: 31 - Manage notification preferences
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user preference.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: ''
+    put:
+      operationId: users_preferences_update
+      description: |-
+        ViewSet for User Preferences
+        Addresses User Story: 31 - Manage notification preferences
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user preference.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserPreferenceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: ''
+    patch:
+      operationId: users_preferences_partial_update
+      description: |-
+        ViewSet for User Preferences
+        Addresses User Story: 31 - Manage notification preferences
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user preference.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPreferenceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: ''
+    delete:
+      operationId: users_preferences_destroy
+      description: |-
+        ViewSet for User Preferences
+        Addresses User Story: 31 - Manage notification preferences
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user preference.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/users/preferences/me/:
+    get:
+      operationId: users_preferences_me_retrieve
+      description: Get preferences for the current user
+      summary: Get my preferences
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: ''
+  /api/users/preferences/update_me/:
+    patch:
+      operationId: users_preferences_update_me_partial_update
+      description: Update preferences for the current user
+      summary: Update my preferences
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserPreferenceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreference'
+          description: ''
 components:
   schemas:
+    Booking:
+      type: object
+      description: Serializer for bookings
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking_reference:
+          type: string
+          readOnly: true
+        court:
+          type: integer
+        court_name:
+          type: string
+          readOnly: true
+        player:
+          type: integer
+          readOnly: true
+        player_name:
+          type: string
+          readOnly: true
+        booking_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/BookingStatusEnum'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        loyalty_points_used:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        notes:
+          type: string
+        special_requests:
+          type: string
+        is_walk_in:
+          type: boolean
+        walk_in_guest_name:
+          type: string
+          maxLength: 255
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancellation_reason:
+          type: string
+          readOnly: true
+        refund_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - base_amount
+      - booking_date
+      - booking_reference
+      - cancellation_reason
+      - cancelled_at
+      - court
+      - court_name
+      - created_at
+      - end_time
+      - id
+      - player
+      - player_name
+      - refund_amount
+      - start_time
+      - total_amount
+      - updated_at
+    BookingCreate:
+      type: object
+      description: Serializer for creating bookings
+      properties:
+        court:
+          type: integer
+        booking_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        notes:
+          type: string
+        special_requests:
+          type: string
+        loyalty_points_used:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - booking_date
+      - court
+      - end_time
+      - start_time
+    BookingCreateRequest:
+      type: object
+      description: Serializer for creating bookings
+      properties:
+        court:
+          type: integer
+        booking_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        notes:
+          type: string
+        special_requests:
+          type: string
+        loyalty_points_used:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - booking_date
+      - court
+      - end_time
+      - start_time
+    BookingNotification:
+      type: object
+      description: Serializer for booking notifications
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking:
+          type: integer
+        user:
+          type: integer
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        message:
+          type: string
+        is_read:
+          type: boolean
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+        sent_via_email:
+          type: boolean
+        sent_via_sms:
+          type: boolean
+        sent_via_push:
+          type: boolean
+      required:
+      - booking
+      - id
+      - message
+      - notification_type
+      - sent_at
+      - user
+    BookingNotificationRequest:
+      type: object
+      description: Serializer for booking notifications
+      properties:
+        booking:
+          type: integer
+        user:
+          type: integer
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        message:
+          type: string
+          minLength: 1
+        is_read:
+          type: boolean
+        sent_via_email:
+          type: boolean
+        sent_via_sms:
+          type: boolean
+        sent_via_push:
+          type: boolean
+      required:
+      - booking
+      - message
+      - notification_type
+      - user
+    BookingRequest:
+      type: object
+      description: Serializer for bookings
+      properties:
+        court:
+          type: integer
+        booking_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/BookingStatusEnum'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        loyalty_points_used:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        notes:
+          type: string
+        special_requests:
+          type: string
+        is_walk_in:
+          type: boolean
+        walk_in_guest_name:
+          type: string
+          maxLength: 255
+      required:
+      - base_amount
+      - booking_date
+      - court
+      - end_time
+      - start_time
+      - total_amount
+    BookingShare:
+      type: object
+      description: Serializer for booking shares
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking:
+          type: integer
+        booking_reference:
+          type: string
+          readOnly: true
+        share_token:
+          type: string
+          readOnly: true
+        shared_by:
+          type: integer
+          readOnly: true
+        shared_by_name:
+          type: string
+          readOnly: true
+        joined_users:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+        max_joins:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        expires_at:
+          type: string
+          format: date-time
+        is_valid:
+          type: string
+          readOnly: true
+        joined_count:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - booking
+      - booking_reference
+      - created_at
+      - expires_at
+      - id
+      - is_valid
+      - joined_count
+      - joined_users
+      - share_token
+      - shared_by
+      - shared_by_name
+    BookingShareCreate:
+      type: object
+      description: Serializer for creating booking shares
+      properties:
+        booking:
+          type: integer
+        max_joins:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - booking
+      - expires_at
+    BookingShareCreateRequest:
+      type: object
+      description: Serializer for creating booking shares
+      properties:
+        booking:
+          type: integer
+        max_joins:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - booking
+      - expires_at
+    BookingShareRequest:
+      type: object
+      description: Serializer for booking shares
+      properties:
+        booking:
+          type: integer
+        max_joins:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - booking
+      - expires_at
+    BookingStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - CANCELLED
+      - COMPLETED
+      - NO_SHOW
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `CONFIRMED` - Confirmed
+        * `CANCELLED` - Cancelled
+        * `COMPLETED` - Completed
+        * `NO_SHOW` - No Show
+    CancellationPolicy:
+      type: object
+      description: Serializer for cancellation policies
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        court:
+          type: integer
+        court_name:
+          type: string
+          readOnly: true
+        cancellation_deadline_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        full_refund_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Full refund if cancelled this many hours before
+        partial_refund_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Partial refund if cancelled this many hours before
+        partial_refund_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Percentage of refund for partial refund
+        no_show_penalty_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Percentage charged for no-show
+        policy_text:
+          type: string
+          description: Full policy description for players
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - court
+      - court_name
+      - created_at
+      - id
+      - policy_text
+      - updated_at
+    CancellationPolicyRequest:
+      type: object
+      description: Serializer for cancellation policies
+      properties:
+        court:
+          type: integer
+        cancellation_deadline_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        full_refund_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Full refund if cancelled this many hours before
+        partial_refund_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Partial refund if cancelled this many hours before
+        partial_refund_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Percentage of refund for partial refund
+        no_show_penalty_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Percentage charged for no-show
+        policy_text:
+          type: string
+          minLength: 1
+          description: Full policy description for players
+      required:
+      - court
+      - policy_text
     ChangePasswordRequest:
       type: object
       description: Serializer for changing password
@@ -2472,7 +5064,7 @@ components:
           format: uri
         status:
           allOf:
-          - $ref: '#/components/schemas/StatusEnum'
+          - $ref: '#/components/schemas/CourtRegistrationStatusEnum'
           readOnly: true
         rejection_reason:
           type: string
@@ -2621,6 +5213,16 @@ components:
       - owner
       - phone_number
       - registration_documents
+    CourtRegistrationStatusEnum:
+      enum:
+      - PENDING
+      - APPROVED
+      - REJECTED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `APPROVED` - Approved
+        * `REJECTED` - Rejected
     CourtReview:
       type: object
       description: Serializer for court reviews
@@ -2820,6 +5422,176 @@ components:
       required:
       - name
       - rental_rate
+    EquipmentRental:
+      type: object
+      description: Serializer for equipment rentals
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        booking:
+          type: integer
+        booking_reference:
+          type: string
+          readOnly: true
+        equipment:
+          type: integer
+        equipment_name:
+          type: string
+          readOnly: true
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        rental_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/EquipmentRentalStatusEnum'
+        returned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        damage_notes:
+          type: string
+        damage_charge:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        returned_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - booking
+      - booking_reference
+      - created_at
+      - equipment
+      - equipment_name
+      - id
+      - rental_cost
+      - returned_at
+      - returned_by
+      - updated_at
+    EquipmentRentalRequest:
+      type: object
+      description: Serializer for equipment rentals
+      properties:
+        booking:
+          type: integer
+        equipment:
+          type: integer
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        status:
+          $ref: '#/components/schemas/EquipmentRentalStatusEnum'
+        damage_notes:
+          type: string
+        damage_charge:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - booking
+      - equipment
+    EquipmentRentalStatusEnum:
+      enum:
+      - ACTIVE
+      - RETURNED
+      - DAMAGED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `RETURNED` - Returned
+        * `DAMAGED` - Damaged
+    Friendship:
+      type: object
+      description: Serializer for friendships
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        from_user:
+          type: integer
+          readOnly: true
+        from_user_details:
+          allOf:
+          - $ref: '#/components/schemas/UserDetails'
+          readOnly: true
+        to_user:
+          type: integer
+        to_user_details:
+          allOf:
+          - $ref: '#/components/schemas/UserDetails'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/FriendshipStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - from_user
+      - from_user_details
+      - id
+      - status
+      - to_user
+      - to_user_details
+      - updated_at
+    FriendshipCreate:
+      type: object
+      description: Serializer for creating friend requests
+      properties:
+        to_user:
+          type: integer
+      required:
+      - to_user
+    FriendshipCreateRequest:
+      type: object
+      description: Serializer for creating friend requests
+      properties:
+        to_user:
+          type: integer
+      required:
+      - to_user
+    FriendshipRequest:
+      type: object
+      description: Serializer for friendships
+      properties:
+        to_user:
+          type: integer
+      required:
+      - to_user
+    FriendshipStatusEnum:
+      enum:
+      - PENDING
+      - ACCEPTED
+      - REJECTED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `ACCEPTED` - Accepted
+        * `REJECTED` - Rejected
     JWT:
       type: object
       description: Serializer for JWT authentication.
@@ -2847,6 +5619,284 @@ components:
       required:
       - password
       - phone_number
+    MatchEvent:
+      type: object
+      description: Serializer for match events
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        court:
+          type: integer
+        court_name:
+          type: string
+          readOnly: true
+        booking:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        sport_type:
+          type: string
+          maxLength: 50
+        created_by:
+          type: integer
+          readOnly: true
+        creator_name:
+          type: string
+          readOnly: true
+        max_players:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        current_players:
+          type: integer
+          readOnly: true
+        match_date:
+          type: string
+          format: date
+        match_time:
+          type: string
+          format: time
+        duration_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MatchEventStatusEnum'
+          readOnly: true
+        skill_level:
+          $ref: '#/components/schemas/SkillLevelEnum'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchParticipant'
+          readOnly: true
+        is_full:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - court
+      - court_name
+      - created_at
+      - created_by
+      - creator_name
+      - current_players
+      - id
+      - is_full
+      - match_date
+      - match_time
+      - max_players
+      - participants
+      - sport_type
+      - status
+      - title
+      - updated_at
+    MatchEventCreate:
+      type: object
+      description: Serializer for creating match events
+      properties:
+        court:
+          type: integer
+        booking:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        sport_type:
+          type: string
+          maxLength: 50
+        max_players:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        match_date:
+          type: string
+          format: date
+        match_time:
+          type: string
+          format: time
+        duration_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        skill_level:
+          $ref: '#/components/schemas/SkillLevelEnum'
+      required:
+      - court
+      - match_date
+      - match_time
+      - max_players
+      - sport_type
+      - title
+    MatchEventCreateRequest:
+      type: object
+      description: Serializer for creating match events
+      properties:
+        court:
+          type: integer
+        booking:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        sport_type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        max_players:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        match_date:
+          type: string
+          format: date
+        match_time:
+          type: string
+          format: time
+        duration_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        skill_level:
+          $ref: '#/components/schemas/SkillLevelEnum'
+      required:
+      - court
+      - match_date
+      - match_time
+      - max_players
+      - sport_type
+      - title
+    MatchEventRequest:
+      type: object
+      description: Serializer for match events
+      properties:
+        court:
+          type: integer
+        booking:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        sport_type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        max_players:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        match_date:
+          type: string
+          format: date
+        match_time:
+          type: string
+          format: time
+        duration_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        skill_level:
+          $ref: '#/components/schemas/SkillLevelEnum'
+      required:
+      - court
+      - match_date
+      - match_time
+      - max_players
+      - sport_type
+      - title
+    MatchEventStatusEnum:
+      enum:
+      - OPEN
+      - FULL
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `OPEN` - Open
+        * `FULL` - Full
+        * `IN_PROGRESS` - In Progress
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    MatchParticipant:
+      type: object
+      description: Serializer for match participants
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        match_event:
+          type: integer
+        player:
+          type: integer
+        player_name:
+          type: string
+          readOnly: true
+        joined_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_confirmed:
+          type: boolean
+        attended:
+          type: boolean
+      required:
+      - id
+      - joined_at
+      - match_event
+      - player
+      - player_name
+    MatchParticipantRequest:
+      type: object
+      description: Serializer for match participants
+      properties:
+        match_event:
+          type: integer
+        player:
+          type: integer
+        is_confirmed:
+          type: boolean
+        attended:
+          type: boolean
+      required:
+      - match_event
+      - player
+    NotificationTypeEnum:
+      enum:
+      - CONFIRMATION
+      - REMINDER
+      - CANCELLATION
+      - MODIFICATION
+      type: string
+      description: |-
+        * `CONFIRMATION` - Booking Confirmation
+        * `REMINDER` - Booking Reminder
+        * `CANCELLATION` - Booking Cancellation
+        * `MODIFICATION` - Booking Modification
     OTPRequestRequest:
       type: object
       description: Serializer for OTP request
@@ -2870,6 +5920,98 @@ components:
       required:
       - otp_code
       - phone_number
+    PaginatedBookingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    PaginatedBookingNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingNotification'
+    PaginatedBookingShareList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingShare'
+    PaginatedCancellationPolicyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancellationPolicy'
     PaginatedCourtBlockedSlotList:
       type: object
       required:
@@ -3031,6 +6173,144 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EquipmentItem'
+    PaginatedEquipmentRentalList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentRental'
+    PaginatedFriendshipList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Friendship'
+    PaginatedMatchEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchEvent'
+    PaginatedPlayerRatingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerRating'
+    PaginatedPlayerStatsList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerStats'
+    PaginatedUserPreferenceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPreference'
     PasswordResetConfirmRequest:
       type: object
       description: Serializer for password reset confirmation
@@ -3055,6 +6335,99 @@ components:
       - new_password2
       - otp_code
       - phone_number
+    PatchedBookingRequest:
+      type: object
+      description: Serializer for bookings
+      properties:
+        court:
+          type: integer
+        booking_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        status:
+          $ref: '#/components/schemas/BookingStatusEnum'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        loyalty_points_used:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        notes:
+          type: string
+        special_requests:
+          type: string
+        is_walk_in:
+          type: boolean
+        walk_in_guest_name:
+          type: string
+          maxLength: 255
+    PatchedBookingShareRequest:
+      type: object
+      description: Serializer for booking shares
+      properties:
+        booking:
+          type: integer
+        max_joins:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        expires_at:
+          type: string
+          format: date-time
+    PatchedCancellationPolicyRequest:
+      type: object
+      description: Serializer for cancellation policies
+      properties:
+        court:
+          type: integer
+        cancellation_deadline_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        full_refund_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Full refund if cancelled this many hours before
+        partial_refund_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Partial refund if cancelled this many hours before
+        partial_refund_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Percentage of refund for partial refund
+        no_show_penalty_percentage:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Percentage charged for no-show
+        policy_text:
+          type: string
+          minLength: 1
+          description: Full policy description for players
     PatchedCourtBlockedSlotRequest:
       type: object
       description: Serializer for blocked time slots
@@ -3234,6 +6607,86 @@ components:
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         is_active:
           type: boolean
+    PatchedEquipmentRentalRequest:
+      type: object
+      description: Serializer for equipment rentals
+      properties:
+        booking:
+          type: integer
+        equipment:
+          type: integer
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        status:
+          $ref: '#/components/schemas/EquipmentRentalStatusEnum'
+        damage_notes:
+          type: string
+        damage_charge:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+    PatchedFriendshipRequest:
+      type: object
+      description: Serializer for friendships
+      properties:
+        to_user:
+          type: integer
+    PatchedMatchEventRequest:
+      type: object
+      description: Serializer for match events
+      properties:
+        court:
+          type: integer
+        booking:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        sport_type:
+          type: string
+          minLength: 1
+          maxLength: 50
+        max_players:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        match_date:
+          type: string
+          format: date
+        match_time:
+          type: string
+          format: time
+        duration_hours:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        skill_level:
+          $ref: '#/components/schemas/SkillLevelEnum'
+    PatchedPlayerRatingRequest:
+      type: object
+      description: Serializer for player ratings
+      properties:
+        match_event:
+          type: integer
+        rated_player:
+          type: integer
+        rating:
+          allOf:
+          - $ref: '#/components/schemas/RatingEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        feedback:
+          type: string
+        misconduct_reported:
+          type: boolean
+        misconduct_details:
+          type: string
     PatchedUserDetailsRequest:
       type: object
       description: Serializer for user details
@@ -3267,6 +6720,218 @@ components:
         city:
           type: string
           maxLength: 100
+    PatchedUserPreferenceRequest:
+      type: object
+      description: Serializer for user preferences
+      properties:
+        email_notifications:
+          type: boolean
+        sms_notifications:
+          type: boolean
+        push_notifications:
+          type: boolean
+        preferred_sports:
+          type: string
+          maxLength: 255
+        preferred_time_slots:
+          type: string
+          maxLength: 255
+    PaymentMethodEnum:
+      enum:
+      - ONLINE
+      - CASH
+      - OFFLINE
+      type: string
+      description: |-
+        * `ONLINE` - Online Payment
+        * `CASH` - Cash Payment
+        * `OFFLINE` - Offline Payment
+    PaymentStatusEnum:
+      enum:
+      - PENDING
+      - COMPLETED
+      - REFUNDED
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `COMPLETED` - Completed
+        * `REFUNDED` - Refunded
+        * `FAILED` - Failed
+    PlayerRating:
+      type: object
+      description: Serializer for player ratings
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        match_event:
+          type: integer
+        rated_by:
+          type: integer
+          readOnly: true
+        rated_by_name:
+          type: string
+          readOnly: true
+        rated_player:
+          type: integer
+        rated_player_name:
+          type: string
+          readOnly: true
+        rating:
+          allOf:
+          - $ref: '#/components/schemas/RatingEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        feedback:
+          type: string
+        misconduct_reported:
+          type: boolean
+        misconduct_details:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - match_event
+      - rated_by
+      - rated_by_name
+      - rated_player
+      - rated_player_name
+      - rating
+    PlayerRatingCreate:
+      type: object
+      description: Serializer for creating player ratings
+      properties:
+        match_event:
+          type: integer
+        rated_player:
+          type: integer
+        rating:
+          allOf:
+          - $ref: '#/components/schemas/RatingEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        feedback:
+          type: string
+        misconduct_reported:
+          type: boolean
+        misconduct_details:
+          type: string
+      required:
+      - match_event
+      - rated_player
+      - rating
+    PlayerRatingCreateRequest:
+      type: object
+      description: Serializer for creating player ratings
+      properties:
+        match_event:
+          type: integer
+        rated_player:
+          type: integer
+        rating:
+          allOf:
+          - $ref: '#/components/schemas/RatingEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        feedback:
+          type: string
+        misconduct_reported:
+          type: boolean
+        misconduct_details:
+          type: string
+      required:
+      - match_event
+      - rated_player
+      - rating
+    PlayerRatingRequest:
+      type: object
+      description: Serializer for player ratings
+      properties:
+        match_event:
+          type: integer
+        rated_player:
+          type: integer
+        rating:
+          allOf:
+          - $ref: '#/components/schemas/RatingEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        feedback:
+          type: string
+        misconduct_reported:
+          type: boolean
+        misconduct_details:
+          type: string
+      required:
+      - match_event
+      - rated_player
+      - rating
+    PlayerStats:
+      type: object
+      description: Serializer for player statistics
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        player:
+          type: integer
+        player_name:
+          type: string
+          readOnly: true
+        total_bookings:
+          type: integer
+          readOnly: true
+        total_matches_played:
+          type: integer
+          readOnly: true
+        matches_won:
+          type: integer
+          readOnly: true
+        matches_lost:
+          type: integer
+          readOnly: true
+        win_loss_ratio:
+          type: string
+          readOnly: true
+        sportsmanship_rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Rating out of 5.00
+        total_ratings_received:
+          type: integer
+          readOnly: true
+        no_show_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - matches_lost
+      - matches_won
+      - no_show_count
+      - player
+      - player_name
+      - sportsmanship_rating
+      - total_bookings
+      - total_matches_played
+      - total_ratings_received
+      - updated_at
+      - win_loss_ratio
     RatingEnum:
       enum:
       - 1
@@ -3324,16 +6989,18 @@ components:
         * `COURT_MANAGER` - Court Manager
         * `COURT_OWNER` - Court Owner
         * `SUPER_USER` - Super User (Admin)
-    StatusEnum:
+    SkillLevelEnum:
       enum:
-      - PENDING
-      - APPROVED
-      - REJECTED
+      - BEGINNER
+      - INTERMEDIATE
+      - ADVANCED
+      - ANY
       type: string
       description: |-
-        * `PENDING` - Pending
-        * `APPROVED` - Approved
-        * `REJECTED` - Rejected
+        * `BEGINNER` - Beginner
+        * `INTERMEDIATE` - Intermediate
+        * `ADVANCED` - Advanced
+        * `ANY` - Any Level
     TokenRefresh:
       type: object
       properties:
@@ -3409,6 +7076,93 @@ components:
       - loyalty_points
       - phone_number
       - updated_at
+    UserDetailsRequest:
+      type: object
+      description: Serializer for user details
+      properties:
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 128
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        address:
+          type: string
+        city:
+          type: string
+          maxLength: 100
+      required:
+      - full_name
+      - phone_number
+    UserPreference:
+      type: object
+      description: Serializer for user preferences
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        email_notifications:
+          type: boolean
+        sms_notifications:
+          type: boolean
+        push_notifications:
+          type: boolean
+        preferred_sports:
+          type: string
+          maxLength: 255
+        preferred_time_slots:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - updated_at
+      - user
+    UserPreferenceRequest:
+      type: object
+      description: Serializer for user preferences
+      properties:
+        email_notifications:
+          type: boolean
+        sms_notifications:
+          type: boolean
+        push_notifications:
+          type: boolean
+        preferred_sports:
+          type: string
+          maxLength: 255
+        preferred_time_slots:
+          type: string
+          maxLength: 255
   securitySchemes:
     cookieAuth:
       type: apiKey
