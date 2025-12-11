@@ -53,10 +53,52 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/bookings/join/:token',
+      name: 'booking-join',
+      component: () => import('../views/BookingJoinView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/matches',
       name: 'matches',
       component: () => import('../views/MatchesView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/matches/:id',
+      name: 'match-detail',
+      component: () => import('../views/MatchDetailView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/friends',
+      name: 'friends',
+      component: () => import('../views/FriendsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: () => import('../views/NotificationsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('../views/LeaderboardView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/preferences',
+      name: 'preferences',
+      component: () => import('../views/PreferencesView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/court-registration',
+      name: 'court-registration',
+      component: () => import('../views/CourtRegistrationView.vue'),
+      meta: { requiresAuth: true, requiresRole: ['COURT_OWNER'] }
     },
     {
       path: '/about',
@@ -84,6 +126,13 @@ router.beforeEach(async (to, from, next) => {
     next('/login')
   } else if (to.meta.guest && authStore.isAuthenticated) {
     next('/')
+  } else if (to.meta.requiresRole) {
+    const hasRole = to.meta.requiresRole.includes(authStore.user?.role)
+    if (!hasRole) {
+      next('/')
+    } else {
+      next()
+    }
   } else {
     next()
   }
