@@ -1,6 +1,5 @@
 <template>
     <div class="min-h-screen bg-gray-50">
-        <!-- Navigation -->
         <nav class="bg-white shadow-sm sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
@@ -27,11 +26,10 @@
             </div>
         </nav>
 
-        <!-- Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Filters -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 flex-wrap">
                     <button v-for="status in statuses" :key="status.value" @click="filterStatus = status.value" :class="[
                         'px-4 py-2 rounded-lg font-medium transition-colors',
                         filterStatus === status.value
@@ -48,17 +46,30 @@
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
 
+            <!-- Error State -->
+            <div v-else-if="error" class="text-center py-20">
+                <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-xl text-gray-600 mb-4">{{ error }}</p>
+                <button @click="loadBookings" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Try Again
+                </button>
+            </div>
+
             <!-- Bookings List -->
             <div v-else-if="filteredBookings.length > 0" class="space-y-4">
                 <div v-for="booking in filteredBookings" :key="booking.id"
                     class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
                     <div class="flex items-start justify-between mb-4">
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900">{{ booking.court_name }}</h3>
-                            <p class="text-gray-600">{{ booking.court_address }}</p>
+                            <h3 class="text-xl font-bold text-gray-900">{{ booking.court?.name || 'Court' }}</h3>
+                            <p class="text-gray-600">{{ booking.court?.address || booking.court?.city }}</p>
+                            <p class="text-sm text-gray-500 mt-1">Ref: {{ booking.booking_reference }}</p>
                         </div>
                         <span :class="getStatusClass(booking.status)"
-                            class="px-3 py-1 rounded-full text-sm font-medium">
+                            class="px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap">
                             {{ booking.status }}
                         </span>
                     </div>
@@ -87,18 +98,31 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-500">Booking ID: {{ booking.booking_reference }}</span>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                        <span>Payment: {{ booking.payment_method }}</span>
+                        <span>•</span>
+                        <span :class="getPaymentStatusClass(booking.payment_status)">
+                            {{ booking.payment_status }}
+                        </span>
+                    </div>
+
+                    <div v-if="booking.notes" class="text-sm text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">
+                        <p class="font-medium text-gray-700">Notes:</p>
+                        <p>{{ booking.notes }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between border-t pt-4">
+                        <span class="text-xs text-gray-400">
+                            Booked {{ formatDateTime(booking.created_at) }}
+                        </span>
                         <div class="flex items-center gap-2">
-                            <button v-if="booking.status === 'PENDING' || booking.status === 'CONFIRMED'"
-                                @click="viewBookingDetail(booking.id)"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                View Details
-                            </button>
-                            <button v-if="booking.status === 'PENDING' || booking.status === 'CONFIRMED'"
-                                @click="cancelBooking(booking)"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            <button v-if="canCancel(booking)" @click="showCancelModal(booking)"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
                                 Cancel
+                            </button>
+                            <button v-if="canReview(booking)" @click="showReviewModal(booking)"
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                                Leave Review
                             </button>
                         </div>
                     </div>
@@ -118,18 +142,42 @@
                 </router-link>
             </div>
         </div>
+
+        <!-- Cancel Modal -->
+        <div v-if="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Cancel Booking</h3>
+                <p class="text-gray-600 mb-4">Are you sure you want to cancel this booking?</p>
+                <textarea v-model="cancelReason" placeholder="Reason for cancellation (optional)"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+                <div class="flex gap-3">
+                    <button @click="cancelModal = null"
+                        class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Keep Booking
+                    </button>
+                    <button @click="confirmCancel" :disabled="cancelling"
+                        class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400">
+                        {{ cancelling ? 'Cancelling...' : 'Cancel Booking' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import apiClient from '@/services/api'
+import { bookingService } from '@/services/bookingService'
 
 const router = useRouter()
 const loading = ref(false)
+const error = ref(null)
 const bookings = ref([])
 const filterStatus = ref('all')
+const cancelModal = ref(null)
+const cancelReason = ref('')
+const cancelling = ref(false)
 
 const statuses = [
     { value: 'all', label: 'All' },
@@ -151,6 +199,11 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+const formatDateTime = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
 const getStatusClass = (status) => {
     const classes = {
         'PENDING': 'bg-yellow-100 text-yellow-800',
@@ -162,40 +215,62 @@ const getStatusClass = (status) => {
     return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
+const getPaymentStatusClass = (status) => {
+    const classes = {
+        'PENDING': 'text-yellow-600',
+        'COMPLETED': 'text-green-600',
+        'REFUNDED': 'text-blue-600',
+        'FAILED': 'text-red-600',
+    }
+    return classes[status] || 'text-gray-600'
+}
+
+const canCancel = (booking) => {
+    return ['PENDING', 'CONFIRMED'].includes(booking.status)
+}
+
+const canReview = (booking) => {
+    return booking.status === 'COMPLETED' && !booking.has_review
+}
+
 const loadBookings = async () => {
     loading.value = true
+    error.value = null
     try {
-        // API endpoint to be implemented
-        // const response = await apiClient.get('/bookings/')
-        // bookings.value = response.data.results || response.data
-
-        // Mock data for now
-        bookings.value = []
-    } catch (error) {
-        console.error('Failed to load bookings:', error)
+        const response = await bookingService.getMyBookings()
+        bookings.value = response.results || response
+    } catch (err) {
+        console.error('Failed to load bookings:', err)
+        error.value = 'Failed to load bookings. Please try again.'
     } finally {
         loading.value = false
     }
 }
 
-const viewBookingDetail = (bookingId) => {
-    router.push(`/bookings/${bookingId}`)
+const showCancelModal = (booking) => {
+    cancelModal.value = booking
+    cancelReason.value = ''
 }
 
-const cancelBooking = async (booking) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) {
-        return
-    }
+const confirmCancel = async () => {
+    if (!cancelModal.value) return
 
+    cancelling.value = true
     try {
-        // API endpoint to be implemented
-        // await apiClient.patch(`/bookings/${booking.id}/`, { status: 'CANCELLED' })
-        // await loadBookings()
-        alert('Booking cancelled successfully')
-    } catch (error) {
-        console.error('Failed to cancel booking:', error)
-        alert('Failed to cancel booking')
+        await bookingService.cancelBooking(cancelModal.value.id, cancelReason.value)
+        await loadBookings()
+        cancelModal.value = null
+        cancelReason.value = ''
+    } catch (err) {
+        console.error('Failed to cancel booking:', err)
+        alert('Failed to cancel booking. Please try again.')
+    } finally {
+        cancelling.value = false
     }
+}
+
+const showReviewModal = (booking) => {
+    router.push(`/courts/${booking.court.id}?review=true`)
 }
 
 const goBack = () => {

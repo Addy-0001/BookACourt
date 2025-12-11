@@ -11,7 +11,7 @@ from court_management.models import (
     CourtCategory, CourtRegistration, Court, CourtImage,
     DynamicPricing, CourtBlockedSlot, CourtReview, EquipmentItem
 )
-from .serializers import (
+from .court_serializers import (
     CourtCategorySerializer, CourtRegistrationSerializer,
     CourtRegistrationCreateSerializer, CourtListSerializer,
     CourtDetailSerializer, CourtCreateUpdateSerializer,
