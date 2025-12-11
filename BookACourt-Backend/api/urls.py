@@ -38,5 +38,13 @@ urlpatterns = [
 
     # User profile
     path('user/profile/', UserProfileView.as_view(), name='user_profile'),
-    path('courts/', include('api.court_urls'))
+
+    # Court management endpoints
+    path('courts/', include('api.court_urls')),
+
+    # User management endpoints
+    path('users/', include('api.user_urls')),
+
+    # Booking management endpoints
+    path('bookings/', include('api.booking_urls')),
 ]
