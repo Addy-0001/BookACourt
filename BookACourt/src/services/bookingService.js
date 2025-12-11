@@ -326,5 +326,57 @@ export const bookingService = {
             additional_hours: additionalHours
         });
         return response.data;
+    },
+
+    // ===== BOOKING MODIFICATIONS =====
+    async requestReschedule(bookingId, newDate, newStartTime, newEndTime, reason = '') {
+        const response = await apiClient.post(`/bookings/${bookingId}/reschedule/`, {
+            new_date: newDate,
+            new_start_time: newStartTime,
+            new_end_time: newEndTime,
+            reason
+        });
+        return response.data;
+    },
+
+    async approveReschedule(requestId) {
+        const response = await apiClient.post(`/bookings/reschedule/${requestId}/approve/`);
+        return response.data;
+    },
+
+    async rejectReschedule(requestId, reason) {
+        const response = await apiClient.post(`/bookings/reschedule/${requestId}/reject/`, {
+            reason
+        });
+        return response.data;
+    },
+
+    // ===== BOOKING EXTENSIONS =====
+    async requestExtension(bookingId, additionalHours) {
+        const response = await apiClient.post(`/bookings/${bookingId}/extend/`, {
+            additional_hours: additionalHours
+        });
+        return response.data;
+    },
+
+    // ===== BOOKING SHARES (Additional methods) =====
+    async getMyBookingShares(params = {}) {
+        const response = await apiClient.get('/bookings/booking-shares/', { params });
+        return response.data;
+    },
+
+    async getBookingShareById(id) {
+        const response = await apiClient.get(`/bookings/booking-shares/${id}/`);
+        return response.data;
+    },
+
+    async updateBookingShare(id, data) {
+        const response = await apiClient.patch(`/bookings/booking-shares/${id}/`, data);
+        return response.data;
+    },
+
+    async deleteBookingShare(id) {
+        const response = await apiClient.delete(`/bookings/booking-shares/${id}/`);
+        return response.data;
     }
 };
