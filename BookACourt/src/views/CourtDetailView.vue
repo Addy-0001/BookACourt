@@ -36,8 +36,17 @@
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Images -->
                     <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div v-if="court.images && court.images.length > 0" class="h-96">
-                            <img :src="court.images[0].image" :alt="court.name" class="w-full h-full object-cover" />
+                        <div v-if="court.images && court.images.length > 0" class="h-96 relative">
+                            <img :src="court.images[currentImageIndex].image" :alt="court.name"
+                                class="w-full h-full object-cover" />
+                            <div v-if="court.images.length > 1"
+                                class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                                <button v-for="(img, idx) in court.images" :key="idx" @click="currentImageIndex = idx"
+                                    :class="[
+                                        'w-3 h-3 rounded-full transition-colors',
+                                        idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                                    ]" />
+                            </div>
                         </div>
                         <div v-else
                             class="h-96 bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
@@ -101,6 +110,41 @@
                             <h3 class="font-semibold text-gray-900 mb-2">Operating Hours</h3>
                             <p class="text-gray-600">{{ court.opening_time }} - {{ court.closing_time }}</p>
                         </div>
+
+                        <!-- Dynamic Pricing -->
+                        <div v-if="court.pricing_rules && court.pricing_rules.length" class="border-t pt-4 mt-4">
+                            <h3 class="font-semibold text-gray-900 mb-3">Pricing Schedule</h3>
+                            <div class="space-y-2">
+                                <div v-for="rule in court.pricing_rules" :key="rule.id"
+                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ rule.description }}</p>
+                                        <p class="text-sm text-gray-600">{{ rule.start_time }} - {{ rule.end_time }}</p>
+                                        <p class="text-xs text-gray-500">{{ formatDaysOfWeek(rule.days_of_week) }}</p>
+                                    </div>
+                                    <span class="text-lg font-bold text-blue-600">Rs {{ rule.hourly_rate }}/hr</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Equipment -->
+                        <div v-if="court.equipment && court.equipment.length" class="border-t pt-4 mt-4">
+                            <h3 class="font-semibold text-gray-900 mb-3">Available Equipment</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div v-for="item in court.equipment" :key="item.id"
+                                    class="p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="font-medium text-gray-900">{{ item.name }}</p>
+                                        <span :class="item.quantity_available > 0 ? 'text-green-600' : 'text-red-600'"
+                                            class="text-sm font-medium">
+                                            {{ item.quantity_available }}/{{ item.quantity_total }} available
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2">{{ item.description }}</p>
+                                    <p class="text-sm font-bold text-blue-600">Rs {{ item.rental_rate }}/session</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Reviews -->
@@ -144,9 +188,9 @@
                     <div class="bg-white rounded-xl shadow-md p-6 sticky top-24">
                         <div class="mb-6">
                             <div class="text-3xl font-bold text-blue-600 mb-1">
-                                Rs {{ court.base_hourly_rate }}<span class="text-lg text-gray-600">/hour</span>
+                                Rs {{ currentRate }}<span class="text-lg text-gray-600">/hour</span>
                             </div>
-                            <p class="text-sm text-gray-500">Base rate (may vary by time)</p>
+                            <p class="text-sm text-gray-500">{{ rateDescription }}</p>
                         </div>
 
                         <div v-if="bookingSuccess" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -161,10 +205,28 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
                                 <input v-model="bookingForm.date" type="date" :min="minDate" required
+                                    @change="loadAvailableSlots"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Available Slots -->
+                            <div v-if="bookingForm.date && availableSlots.length > 0">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Available Time Slots</label>
+                                <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                                    <button v-for="slot in availableSlots" :key="slot.start_time" type="button"
+                                        @click="selectTimeSlot(slot)" :class="[
+                                            'px-3 py-2 text-sm font-medium rounded-lg border-2 transition-colors',
+                                            isSlotSelected(slot)
+                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                : 'border-gray-200 hover:border-blue-300'
+                                        ]">
+                                        {{ slot.start_time }} - {{ slot.end_time }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Manual Time Selection -->
+                            <div v-else class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                                     <input v-model="bookingForm.start_time" type="time" required
@@ -177,21 +239,57 @@
                                 </div>
                             </div>
 
-                            <div v-if="bookingForm.date && bookingForm.start_time && bookingForm.end_time">
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <p class="text-sm text-blue-800 font-medium">Estimated Total</p>
-                                    <p class="text-2xl font-bold text-blue-900">Rs {{ estimatedTotal }}</p>
-                                    <p class="text-xs text-blue-700 mt-1">{{ duration }} hour(s)</p>
+                            <!-- Equipment Selection -->
+                            <div v-if="court.equipment && court.equipment.length > 0">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Rent Equipment
+                                    (Optional)</label>
+                                <div class="space-y-2 max-h-32 overflow-y-auto">
+                                    <label v-for="item in court.equipment.filter(e => e.quantity_available > 0)"
+                                        :key="item.id" class="flex items-center gap-2 p-2 border rounded-lg">
+                                        <input type="checkbox" :value="item.id" v-model="bookingForm.equipment_rentals"
+                                            class="rounded text-blue-600" />
+                                        <span class="flex-1 text-sm">{{ item.name }} (Rs {{ item.rental_rate
+                                            }})</span>
+                                    </label>
                                 </div>
                             </div>
 
-                            <button type="submit" :disabled="bookingLoading"
+                            <!-- Notes -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                                <textarea v-model="bookingForm.notes" rows="2"
+                                    placeholder="Any special requests or notes..."
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            </div>
+
+                            <div v-if="bookingForm.date && bookingForm.start_time && bookingForm.end_time">
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <p class="text-sm text-blue-800 font-medium">Booking Summary</p>
+                                    <div class="mt-2 space-y-1 text-sm text-blue-900">
+                                        <div class="flex justify-between">
+                                            <span>Court Fee ({{ duration }} hrs)</span>
+                                            <span class="font-medium">Rs {{ courtFee }}</span>
+                                        </div>
+                                        <div v-if="equipmentFee > 0" class="flex justify-between">
+                                            <span>Equipment Rental</span>
+                                            <span class="font-medium">Rs {{ equipmentFee }}</span>
+                                        </div>
+                                        <div class="flex justify-between pt-2 border-t border-blue-200 font-bold">
+                                            <span>Total</span>
+                                            <span>Rs {{ estimatedTotal }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" :disabled="bookingLoading || !canBook"
                                 class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors">
                                 <span v-if="bookingLoading">Processing...</span>
                                 <span v-else>Book Now</span>
                             </button>
 
-                            <button type="button" @click="checkAvailability" :disabled="availabilityLoading"
+                            <button v-if="bookingForm.date && bookingForm.start_time && bookingForm.end_time"
+                                type="button" @click="checkAvailability" :disabled="availabilityLoading"
                                 class="w-full py-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-colors">
                                 <span v-if="availabilityLoading">Checking...</span>
                                 <span v-else>Check Availability</span>
@@ -222,11 +320,15 @@ const loading = ref(true)
 const error = ref(null)
 const court = ref(null)
 const reviews = ref([])
+const availableSlots = ref([])
+const currentImageIndex = ref(0)
 
 const bookingForm = ref({
     date: '',
     start_time: '',
-    end_time: ''
+    end_time: '',
+    notes: '',
+    equipment_rentals: []
 })
 
 const bookingLoading = ref(false)
@@ -248,13 +350,75 @@ const duration = computed(() => {
     return Math.max(0, (end - start) / (1000 * 60 * 60))
 })
 
+const currentRate = computed(() => {
+    if (!court.value || !bookingForm.value.start_time || !bookingForm.value.date) {
+        return court.value?.base_hourly_rate || 0
+    }
+
+    // Check if there's a matching pricing rule
+    const dayOfWeek = new Date(bookingForm.value.date).getDay()
+    const startTime = bookingForm.value.start_time
+
+    const matchingRule = court.value.pricing_rules?.find(rule => {
+        if (!rule.is_active) return false
+        const days = rule.days_of_week.split(',').map(d => parseInt(d.trim()))
+        if (!days.includes(dayOfWeek)) return false
+        return startTime >= rule.start_time && startTime < rule.end_time
+    })
+
+    return matchingRule ? matchingRule.hourly_rate : court.value.base_hourly_rate
+})
+
+const rateDescription = computed(() => {
+    if (!court.value || !bookingForm.value.start_time || !bookingForm.value.date) {
+        return 'Base rate'
+    }
+
+    const dayOfWeek = new Date(bookingForm.value.date).getDay()
+    const startTime = bookingForm.value.start_time
+
+    const matchingRule = court.value.pricing_rules?.find(rule => {
+        if (!rule.is_active) return false
+        const days = rule.days_of_week.split(',').map(d => parseInt(d.trim()))
+        if (!days.includes(dayOfWeek)) return false
+        return startTime >= rule.start_time && startTime < rule.end_time
+    })
+
+    return matchingRule ? matchingRule.description : 'Base rate'
+})
+
+const courtFee = computed(() => {
+    return (duration.value * currentRate.value).toFixed(2)
+})
+
+const equipmentFee = computed(() => {
+    if (!court.value || !bookingForm.value.equipment_rentals.length) return 0
+    return bookingForm.value.equipment_rentals.reduce((total, equipId) => {
+        const item = court.value.equipment?.find(e => e.id === equipId)
+        return total + (item?.rental_rate || 0)
+    }, 0)
+})
+
 const estimatedTotal = computed(() => {
-    return (duration.value * (court.value?.base_hourly_rate || 0)).toFixed(2)
+    return (parseFloat(courtFee.value) + equipmentFee.value).toFixed(2)
+})
+
+const canBook = computed(() => {
+    return bookingForm.value.date &&
+        bookingForm.value.start_time &&
+        bookingForm.value.end_time &&
+        duration.value > 0
 })
 
 const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const formatDaysOfWeek = (daysStr) => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const indices = daysStr.split(',').map(d => parseInt(d.trim()))
+    return indices.map(i => days[i]).join(', ')
 }
 
 const loadCourtDetails = async () => {
@@ -278,6 +442,28 @@ const loadReviews = async () => {
     } catch (err) {
         console.error('Failed to load reviews:', err)
     }
+}
+
+const loadAvailableSlots = async () => {
+    if (!bookingForm.value.date) return
+
+    try {
+        const response = await courtService.getAvailableSlots(route.params.id, bookingForm.value.date)
+        availableSlots.value = response.available_slots || []
+    } catch (err) {
+        console.error('Failed to load available slots:', err)
+        availableSlots.value = []
+    }
+}
+
+const selectTimeSlot = (slot) => {
+    bookingForm.value.start_time = slot.start_time
+    bookingForm.value.end_time = slot.end_time
+}
+
+const isSlotSelected = (slot) => {
+    return bookingForm.value.start_time === slot.start_time &&
+        bookingForm.value.end_time === slot.end_time
 }
 
 const checkAvailability = async () => {
@@ -305,15 +491,25 @@ const handleBooking = async () => {
     bookingSuccess.value = false
 
     try {
-        await bookingService.createBooking({
+        const bookingData = {
             court: route.params.id,
             booking_date: bookingForm.value.date,
             start_time: bookingForm.value.start_time,
             end_time: bookingForm.value.end_time,
             payment_method: 'ONLINE',
-            base_amount: estimatedTotal.value,
-            total_amount: estimatedTotal.value
-        })
+            base_amount: courtFee.value,
+            total_amount: estimatedTotal.value,
+            notes: bookingForm.value.notes
+        }
+
+        const booking = await bookingService.createBooking(bookingData)
+
+        // Handle equipment rentals
+        if (bookingForm.value.equipment_rentals.length > 0) {
+            for (const equipId of bookingForm.value.equipment_rentals) {
+                await bookingService.rentEquipment(booking.id, equipId, 1)
+            }
+        }
 
         bookingSuccess.value = true
         setTimeout(() => {

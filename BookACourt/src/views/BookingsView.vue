@@ -106,6 +106,19 @@
                         </span>
                     </div>
 
+                    <!-- Equipment Rentals -->
+                    <div v-if="booking.equipment_rentals && booking.equipment_rentals.length > 0"
+                        class="mb-4 p-3 bg-blue-50 rounded-lg">
+                        <p class="font-medium text-blue-900 mb-2">Equipment Rented:</p>
+                        <div class="space-y-1">
+                            <div v-for="rental in booking.equipment_rentals" :key="rental.id"
+                                class="text-sm text-blue-800 flex items-center justify-between">
+                                <span>{{ rental.equipment?.name }} (x{{ rental.quantity }})</span>
+                                <span class="font-medium">Rs {{ rental.rental_cost }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div v-if="booking.notes" class="text-sm text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">
                         <p class="font-medium text-gray-700">Notes:</p>
                         <p>{{ booking.notes }}</p>
@@ -116,6 +129,10 @@
                             Booked {{ formatDateTime(booking.created_at) }}
                         </span>
                         <div class="flex items-center gap-2">
+                            <button v-if="canShare(booking)" @click="shareBooking(booking)"
+                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
+                                Share
+                            </button>
                             <button v-if="canCancel(booking)" @click="showCancelModal(booking)"
                                 class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
                                 Cancel
@@ -162,6 +179,100 @@
                 </div>
             </div>
         </div>
+
+        <!-- Share Modal -->
+        <div v-if="shareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Share Booking</h3>
+
+                <div v-if="shareLink" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Share Link</label>
+                        <div class="flex gap-2">
+                            <input :value="shareLink" readonly
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" />
+                            <button @click="copyShareLink"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Copy
+                            </button>
+                        </div>
+                        <p v-if="linkCopied" class="text-sm text-green-600 mt-1">Link copied!</p>
+                    </div>
+
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            This link allows up to {{ shareSettings.maxJoins }} people to join your booking
+                            and expires in {{ shareSettings.expiresInHours }} hours.
+                        </p>
+                    </div>
+                </div>
+
+                <div v-else class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Participants</label>
+                        <input v-model.number="shareSettings.maxJoins" type="number" min="1" max="10"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Expires In (hours)</label>
+                        <input v-model.number="shareSettings.expiresInHours" type="number" min="1" max="72"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                    </div>
+
+                    <button @click="createShareLink" :disabled="creatingShare"
+                        class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                        {{ creatingShare ? 'Creating...' : 'Create Share Link' }}
+                    </button>
+                </div>
+
+                <button @click="closeShareModal"
+                    class="mt-4 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Close
+                </button>
+            </div>
+        </div>
+
+        <!-- Review Modal -->
+        <div v-if="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Leave a Review</h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                        <div class="flex gap-2">
+                            <button v-for="i in 5" :key="i" type="button" @click="reviewForm.rating = i"
+                                class="w-10 h-10">
+                                <svg class="w-full h-full"
+                                    :class="i <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'"
+                                    fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                        <textarea v-model="reviewForm.review_text" rows="4" placeholder="Share your experience..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"></textarea>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button @click="reviewModal = null"
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button @click="submitReview" :disabled="submittingReview || reviewForm.rating === 0"
+                            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400">
+                            {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -169,6 +280,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { bookingService } from '@/services/bookingService'
+import { courtService } from '@/services/courtService'
 
 const router = useRouter()
 const loading = ref(false)
@@ -178,6 +290,20 @@ const filterStatus = ref('all')
 const cancelModal = ref(null)
 const cancelReason = ref('')
 const cancelling = ref(false)
+const shareModal = ref(null)
+const shareLink = ref('')
+const linkCopied = ref(false)
+const creatingShare = ref(false)
+const shareSettings = ref({
+    maxJoins: 5,
+    expiresInHours: 24
+})
+const reviewModal = ref(null)
+const reviewForm = ref({
+    rating: 0,
+    review_text: ''
+})
+const submittingReview = ref(false)
 
 const statuses = [
     { value: 'all', label: 'All' },
@@ -229,6 +355,10 @@ const canCancel = (booking) => {
     return ['PENDING', 'CONFIRMED'].includes(booking.status)
 }
 
+const canShare = (booking) => {
+    return ['PENDING', 'CONFIRMED'].includes(booking.status)
+}
+
 const canReview = (booking) => {
     return booking.status === 'COMPLETED' && !booking.has_review
 }
@@ -269,8 +399,73 @@ const confirmCancel = async () => {
     }
 }
 
+const shareBooking = (booking) => {
+    shareModal.value = booking
+    shareLink.value = ''
+    linkCopied.value = false
+}
+
+const createShareLink = async () => {
+    if (!shareModal.value) return
+
+    creatingShare.value = true
+    try {
+        const response = await bookingService.createBookingShare(
+            shareModal.value.id,
+            shareSettings.value.maxJoins,
+            shareSettings.value.expiresInHours
+        )
+        shareLink.value = `${window.location.origin}/bookings/join/${response.share_token}`
+    } catch (err) {
+        console.error('Failed to create share link:', err)
+        alert('Failed to create share link. Please try again.')
+    } finally {
+        creatingShare.value = false
+    }
+}
+
+const copyShareLink = () => {
+    navigator.clipboard.writeText(shareLink.value)
+    linkCopied.value = true
+    setTimeout(() => {
+        linkCopied.value = false
+    }, 2000)
+}
+
+const closeShareModal = () => {
+    shareModal.value = null
+    shareLink.value = ''
+    shareSettings.value = {
+        maxJoins: 5,
+        expiresInHours: 24
+    }
+}
+
 const showReviewModal = (booking) => {
-    router.push(`/courts/${booking.court.id}?review=true`)
+    reviewModal.value = booking
+    reviewForm.value = {
+        rating: 0,
+        review_text: ''
+    }
+}
+
+const submitReview = async () => {
+    if (!reviewModal.value || reviewForm.value.rating === 0) return
+
+    submittingReview.value = true
+    try {
+        await courtService.createReview(reviewModal.value.court.id, {
+            rating: reviewForm.value.rating,
+            review_text: reviewForm.value.review_text
+        })
+        await loadBookings()
+        reviewModal.value = null
+    } catch (err) {
+        console.error('Failed to submit review:', err)
+        alert('Failed to submit review. Please try again.')
+    } finally {
+        submittingReview.value = false
+    }
 }
 
 const goBack = () => {
