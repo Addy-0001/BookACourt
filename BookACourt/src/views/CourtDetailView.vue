@@ -1,22 +1,15 @@
 <template>
     <div class="min-h-screen bg-gray-50">
-        <nav class="bg-white shadow-sm sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center gap-4">
-                        <button @click="goBack" class="text-gray-600 hover:text-gray-900">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <h1 class="text-2xl font-bold text-blue-600">Court Details</h1>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Back Button -->
+            <button @click="goBack"
+                class="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="font-medium">Back to Courts</span>
+            </button>
+
             <!-- Loading -->
             <div v-if="loading" class="flex justify-center py-20">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -24,10 +17,11 @@
 
             <!-- Error -->
             <div v-else-if="error" class="text-center py-20">
-                <p class="text-xl text-red-600">{{ error }}</p>
-                <button @click="loadCourtDetails" class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg">
-                    Try Again
-                </button>
+                <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-xl text-gray-600">{{ error }}</p>
             </div>
 
             <!-- Court Details -->
@@ -65,19 +59,24 @@
                                 <p class="text-gray-600 mt-1">{{ court.category?.name || court.court_type }}</p>
                             </div>
                             <span v-if="court.is_verified"
-                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd" />
+                                </svg>
                                 Verified
                             </span>
                         </div>
 
                         <div class="flex items-center gap-4 text-gray-600 mb-4">
                             <div class="flex items-center gap-1">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                 </svg>
-                                <span>{{ court.average_rating || '0.0' }} ({{ court.total_reviews || 0 }}
-                                    reviews)</span>
+                                <span class="font-medium">{{ court.average_rating || '0.0' }}</span>
+                                <span>({{ court.total_reviews || 0 }} reviews)</span>
                             </div>
                             <span>•</span>
                             <span>{{ court.is_indoor ? 'Indoor' : 'Outdoor' }}</span>
@@ -86,7 +85,15 @@
                         </div>
 
                         <div class="border-t pt-4">
-                            <h3 class="font-semibold text-gray-900 mb-2">Location</h3>
+                            <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Location
+                            </h3>
                             <p class="text-gray-600">{{ court.address }}</p>
                             <p class="text-gray-600">{{ court.city }}</p>
                         </div>
@@ -107,7 +114,13 @@
                         </div>
 
                         <div class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-2">Operating Hours</h3>
+                            <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Operating Hours
+                            </h3>
                             <p class="text-gray-600">{{ court.opening_time }} - {{ court.closing_time }}</p>
                         </div>
 
@@ -147,14 +160,21 @@
                         </div>
                     </div>
 
-                    <!-- Reviews -->
+                    <!-- Reviews Section -->
                     <div class="bg-white rounded-xl shadow-md p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4">Reviews</h3>
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-900">Reviews</h3>
+                            <button v-if="canReview" @click="showReviewModal = true"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                {{ userReview ? 'Edit Review' : 'Write Review' }}
+                            </button>
+                        </div>
+
                         <div v-if="reviews.length > 0" class="space-y-4">
                             <div v-for="review in reviews" :key="review.id" class="border-b pb-4 last:border-0">
                                 <div class="flex items-start gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                                        class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                                         {{ review.player_name.charAt(0).toUpperCase() }}
                                     </div>
                                     <div class="flex-1">
@@ -168,6 +188,8 @@
                                                         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                                 </svg>
                                             </div>
+                                            <span v-if="review.player === authStore.user?.id"
+                                                class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">You</span>
                                         </div>
                                         <p class="text-gray-600 text-sm">{{ review.review_text }}</p>
                                         <p class="text-gray-400 text-xs mt-1">{{ formatDate(review.created_at) }}</p>
@@ -188,7 +210,7 @@
                     <div class="bg-white rounded-xl shadow-md p-6 sticky top-24">
                         <div class="mb-6">
                             <div class="text-3xl font-bold text-blue-600 mb-1">
-                                Rs {{ currentRate }}<span class="text-lg text-gray-600">/hour</span>
+                                Rs {{ displayRate }}<span class="text-lg text-gray-600">/hour</span>
                             </div>
                             <p class="text-sm text-gray-500">{{ rateDescription }}</p>
                         </div>
@@ -205,7 +227,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
                                 <input v-model="bookingForm.date" type="date" :min="minDate" required
-                                    @change="loadAvailableSlots"
+                                    @change="onDateOrTimeChange"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                             </div>
 
@@ -230,11 +252,13 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                                     <input v-model="bookingForm.start_time" type="time" required
+                                        @change="onDateOrTimeChange"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
                                     <input v-model="bookingForm.end_time" type="time" required
+                                        @change="onDateOrTimeChange"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             </div>
@@ -249,7 +273,7 @@
                                         <input type="checkbox" :value="item.id" v-model="bookingForm.equipment_rentals"
                                             class="rounded text-blue-600" />
                                         <span class="flex-1 text-sm">{{ item.name }} (Rs {{ item.rental_rate
-                                            }})</span>
+                                        }})</span>
                                     </label>
                                 </div>
                             </div>
@@ -267,7 +291,7 @@
                                     <p class="text-sm text-blue-800 font-medium">Booking Summary</p>
                                     <div class="mt-2 space-y-1 text-sm text-blue-900">
                                         <div class="flex justify-between">
-                                            <span>Court Fee ({{ duration }} hrs)</span>
+                                            <span>Court Fee ({{ duration }} hrs @ Rs {{ currentRate }}/hr)</span>
                                             <span class="font-medium">Rs {{ courtFee }}</span>
                                         </div>
                                         <div v-if="equipmentFee > 0" class="flex justify-between">
@@ -304,17 +328,63 @@
                 </div>
             </div>
         </div>
+
+        <!-- Review Modal -->
+        <div v-if="showReviewModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ userReview ? 'Edit Your Review' : 'Write a Review'
+                    }}</h3>
+
+                <form @submit.prevent="submitReview" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                        <div class="flex gap-2">
+                            <button v-for="i in 5" :key="i" type="button" @click="reviewForm.rating = i"
+                                class="w-10 h-10 transition-transform hover:scale-110">
+                                <svg class="w-full h-full"
+                                    :class="i <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'"
+                                    fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                        <textarea v-model="reviewForm.review_text" rows="4" placeholder="Share your experience..."
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="button" @click="closeReviewModal"
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" :disabled="submittingReview || reviewForm.rating === 0"
+                            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                            {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { courtService } from '@/services/courtService'
 import { bookingService } from '@/services/bookingService'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const loading = ref(true)
 const error = ref(null)
@@ -338,6 +408,13 @@ const availabilityLoading = ref(false)
 const availabilityMessage = ref(null)
 const isAvailable = ref(false)
 
+const showReviewModal = ref(false)
+const submittingReview = ref(false)
+const reviewForm = ref({
+    rating: 0,
+    review_text: ''
+})
+
 const minDate = computed(() => {
     const today = new Date()
     return today.toISOString().split('T')[0]
@@ -355,7 +432,6 @@ const currentRate = computed(() => {
         return court.value?.base_hourly_rate || 0
     }
 
-    // Check if there's a matching pricing rule
     const dayOfWeek = new Date(bookingForm.value.date).getDay()
     const startTime = bookingForm.value.start_time
 
@@ -367,6 +443,10 @@ const currentRate = computed(() => {
     })
 
     return matchingRule ? matchingRule.hourly_rate : court.value.base_hourly_rate
+})
+
+const displayRate = computed(() => {
+    return currentRate.value
 })
 
 const rateDescription = computed(() => {
@@ -410,6 +490,14 @@ const canBook = computed(() => {
         duration.value > 0
 })
 
+const userReview = computed(() => {
+    return reviews.value.find(r => r.player === authStore.user?.id)
+})
+
+const canReview = computed(() => {
+    return authStore.isAuthenticated && authStore.isPlayer
+})
+
 const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -419,6 +507,12 @@ const formatDaysOfWeek = (daysStr) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     const indices = daysStr.split(',').map(d => parseInt(d.trim()))
     return indices.map(i => days[i]).join(', ')
+}
+
+const onDateOrTimeChange = () => {
+    if (bookingForm.value.date) {
+        loadAvailableSlots()
+    }
 }
 
 const loadCourtDetails = async () => {
@@ -523,7 +617,51 @@ const handleBooking = async () => {
     }
 }
 
+const closeReviewModal = () => {
+    showReviewModal.value = false
+    reviewForm.value = {
+        rating: 0,
+        review_text: ''
+    }
+}
+
+const submitReview = async () => {
+    submittingReview.value = true
+    try {
+        if (userReview.value) {
+            // Update existing review
+            await courtService.updateReview(route.params.id, userReview.value.id, {
+                rating: reviewForm.value.rating,
+                review_text: reviewForm.value.review_text
+            })
+        } else {
+            // Create new review
+            await courtService.createReview(route.params.id, {
+                rating: reviewForm.value.rating,
+                review_text: reviewForm.value.review_text
+            })
+        }
+        await loadReviews()
+        closeReviewModal()
+    } catch (err) {
+        console.error('Failed to submit review:', err)
+        alert('Failed to submit review. Please try again.')
+    } finally {
+        submittingReview.value = false
+    }
+}
+
 const goBack = () => router.go(-1)
+
+// Watch for existing review
+watch(showReviewModal, (newVal) => {
+    if (newVal && userReview.value) {
+        reviewForm.value = {
+            rating: userReview.value.rating,
+            review_text: userReview.value.review_text
+        }
+    }
+})
 
 onMounted(() => {
     loadCourtDetails()

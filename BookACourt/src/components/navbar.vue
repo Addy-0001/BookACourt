@@ -57,7 +57,7 @@
 
                     <!-- User Menu -->
                     <div v-if="authStore.isAuthenticated" class="relative">
-                        <button @click="showUserMenu = !showUserMenu"
+                        <button @click.stop="toggleUserMenu"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                             <div
                                 class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -70,31 +70,37 @@
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div v-if="showUserMenu" v-click-outside="closeUserMenu"
-                            class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
-                            <div class="px-4 py-3 border-b border-gray-200">
-                                <p class="text-sm font-medium text-gray-900">{{ authStore.user?.full_name }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ authStore.user?.phone_number }}</p>
-                            </div>
+                        <transition name="dropdown">
+                            <div v-if="showUserMenu"
+                                class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                                <div class="px-4 py-3 border-b border-gray-200">
+                                    <p class="text-sm font-medium text-gray-900">{{ authStore.user?.full_name }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ authStore.user?.phone_number }}</p>
+                                </div>
 
-                            <router-link v-for="item in userMenuItems" :key="item.path" :to="item.path"
-                                @click="showUserMenu = false"
-                                class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                <component :is="item.icon" class="w-5 h-5 text-gray-500" />
-                                {{ item.label }}
-                            </router-link>
-
-                            <div class="border-t border-gray-200 mt-1 pt-1">
-                                <button @click="handleLogout"
-                                    class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <router-link v-for="item in userMenuItems" :key="item.path" :to="item.path"
+                                    @click="showUserMenu = false"
+                                    class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            :d="item.iconPath" />
                                     </svg>
-                                    Logout
-                                </button>
+                                    {{ item.label }}
+                                </router-link>
+
+                                <div class="border-t border-gray-200 mt-1 pt-1">
+                                    <button @click="handleLogout"
+                                        class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        </transition>
                     </div>
 
                     <!-- Login Button (for guests) -->
@@ -121,19 +127,21 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 bg-white">
-            <div class="px-4 py-4 space-y-1">
-                <router-link v-for="link in navLinks" :key="link.path" :to="link.path" @click="showMobileMenu = false"
-                    :class="[
-                        'block px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                        isActive(link.path)
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'text-gray-700 hover:bg-gray-100'
-                    ]">
-                    {{ link.label }}
-                </router-link>
+        <transition name="mobile">
+            <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 bg-white">
+                <div class="px-4 py-4 space-y-1">
+                    <router-link v-for="link in navLinks" :key="link.path" :to="link.path"
+                        @click="showMobileMenu = false" :class="[
+                            'block px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                            isActive(link.path)
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'text-gray-700 hover:bg-gray-100'
+                        ]">
+                        {{ link.label }}
+                    </router-link>
+                </div>
             </div>
-        </div>
+        </transition>
     </nav>
 </template>
 
@@ -177,12 +185,12 @@ const userMenuItems = computed(() => {
         {
             path: '/profile',
             label: 'My Profile',
-            icon: 'svg'
+            iconPath: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
         },
         {
             path: '/preferences',
             label: 'Preferences',
-            icon: 'svg'
+            iconPath: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'
         }
     ]
 
@@ -190,7 +198,7 @@ const userMenuItems = computed(() => {
         items.push({
             path: '/leaderboard',
             label: 'Leaderboard',
-            icon: 'svg'
+            iconPath: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z'
         })
     }
 
@@ -205,6 +213,18 @@ const isActive = (path) => {
     return route.path.startsWith(path)
 }
 
+// Toggle user menu
+const toggleUserMenu = () => {
+    showUserMenu.value = !showUserMenu.value
+}
+
+// Close user menu when clicking outside
+const closeUserMenu = (e) => {
+    if (!e.target.closest('.relative')) {
+        showUserMenu.value = false
+    }
+}
+
 // Load unread notifications count
 const loadUnreadCount = async () => {
     if (!authStore.isAuthenticated) return
@@ -216,11 +236,6 @@ const loadUnreadCount = async () => {
     }
 }
 
-// Close user menu
-const closeUserMenu = () => {
-    showUserMenu.value = false
-}
-
 // Logout handler
 const handleLogout = async () => {
     await authStore.logout()
@@ -228,20 +243,11 @@ const handleLogout = async () => {
     router.push('/login')
 }
 
-// Click outside directive
-const vClickOutside = {
-    mounted(el, binding) {
-        el.clickOutsideEvent = (event) => {
-            if (!(el === event.target || el.contains(event.target))) {
-                binding.value()
-            }
-        }
-        document.addEventListener('click', el.clickOutsideEvent)
-    },
-    unmounted(el) {
-        document.removeEventListener('click', el.clickOutsideEvent)
-    }
-}
+// Close menus on route change
+router.afterEach(() => {
+    showUserMenu.value = false
+    showMobileMenu.value = false
+})
 
 // Poll for notifications
 onMounted(() => {
@@ -249,11 +255,50 @@ onMounted(() => {
         loadUnreadCount()
         notificationInterval = setInterval(loadUnreadCount, 30000) // Every 30 seconds
     }
+    document.addEventListener('click', closeUserMenu)
 })
 
 onUnmounted(() => {
     if (notificationInterval) {
         clearInterval(notificationInterval)
     }
+    document.removeEventListener('click', closeUserMenu)
 })
 </script>
+
+<style scoped>
+/* Dropdown transitions */
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: all 0.2s ease;
+}
+
+.dropdown-enter-from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Mobile menu transitions */
+.mobile-enter-active,
+.mobile-leave-active {
+    transition: all 0.3s ease;
+}
+
+.mobile-enter-from,
+.mobile-leave-to {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+.mobile-enter-to,
+.mobile-leave-from {
+    opacity: 1;
+    max-height: 500px;
+}
+</style>

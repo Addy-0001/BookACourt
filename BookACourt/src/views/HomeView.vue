@@ -1,38 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-blue-600">BookACourt</h1>
-          </div>
-          <div class="flex items-center gap-4">
-            <router-link to="/courts"
-              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              Courts
-            </router-link>
-            <router-link to="/bookings"
-              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              My Bookings
-            </router-link>
-            <router-link v-if="authStore.isPlayer" to="/matches"
-              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              Matches
-            </router-link>
-            <router-link to="/profile"
-              class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Profile
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
-
     <!-- Hero Section -->
     <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -56,7 +23,8 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm font-medium">Loyalty Points</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">{{ authStore.user?.loyalty_points || 0 }}</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ authStore.user?.loyalty_points || 0 }}
+              </p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
@@ -137,10 +105,12 @@
           </div>
           <div v-else class="space-y-4">
             <div v-for="booking in recentBookings" :key="booking.id"
-              class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+              @click="router.push(`/bookings/${booking.id}`)">
               <div>
-                <h3 class="font-semibold text-gray-900">{{ booking.court }}</h3>
-                <p class="text-sm text-gray-600">{{ formatDate(booking.booking_date) }} at {{ booking.start_time }}</p>
+                <h3 class="font-semibold text-gray-900">{{ booking.court?.name || 'Court' }}</h3>
+                <p class="text-sm text-gray-600">{{ formatDate(booking.booking_date) }} at {{
+                  booking.start_time }}</p>
               </div>
               <span :class="getStatusClass(booking.status)" class="px-3 py-1 rounded-full text-sm font-medium">
                 {{ booking.status }}
@@ -155,9 +125,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import apiClient from '@/services/api'
+import { bookingService } from '@/services/bookingService'
 
+const router = useRouter()
 const authStore = useAuthStore()
 const loading = ref(false)
 const recentBookings = ref([])
@@ -189,20 +161,22 @@ const getStatusClass = (status) => {
 const loadDashboardData = async () => {
   loading.value = true
   try {
-    // Load recent bookings (adjust endpoint as needed)
-    // const bookingsResponse = await apiClient.get('/bookings/?limit=5')
-    // recentBookings.value = bookingsResponse.data.results || []
+    // Load recent bookings
+    const bookingsResponse = await bookingService.getMyBookings()
+    const allBookings = bookingsResponse.results || bookingsResponse
 
-    // Load stats
-    // const statsResponse = await apiClient.get('/user/stats/')
-    // stats.value = statsResponse.data
+    // Get recent 5 bookings
+    recentBookings.value = allBookings.slice(0, 5)
 
-    // Mock data for now
-    recentBookings.value = []
+    // Calculate stats
+    const now = new Date()
     stats.value = {
-      upcoming: 0,
-      matches: 0,
-      total: 0
+      upcoming: allBookings.filter(b =>
+        ['PENDING', 'CONFIRMED'].includes(b.status) &&
+        new Date(b.booking_date + ' ' + b.start_time) > now
+      ).length,
+      matches: 0, // Would need to load from matches endpoint
+      total: allBookings.length
     }
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
