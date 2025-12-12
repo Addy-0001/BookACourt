@@ -7,7 +7,8 @@ from .booking_views import (
     EquipmentRentalViewSet,
     MatchEventViewSet,
     PlayerRatingViewSet,
-    BookingShareViewSet
+    BookingShareViewSet,
+    RecurringBookingViewSet
 )
 
 # Create router
@@ -24,6 +25,8 @@ router.register(r'player-ratings', PlayerRatingViewSet,
                 basename='player-rating')
 router.register(r'booking-shares', BookingShareViewSet,
                 basename='booking-share')
+router.register(r'recurring', RecurringBookingViewSet,
+                basename='recurring-booking')
 
 # URL patterns
 urlpatterns = [

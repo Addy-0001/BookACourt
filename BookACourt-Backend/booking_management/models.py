@@ -394,3 +394,159 @@ class BookingShare(models.Model):
     def is_valid(self):
         """Check if share link is still valid"""
         return timezone.now() < self.expires_at and self.joined_users.count() < self.max_joins
+
+
+class RecurringBooking(models.Model):
+    """Model for recurring bookings (weekly/monthly patterns)"""
+    FREQUENCY_CHOICES = [
+        ('WEEKLY', 'Weekly'),
+        ('BIWEEKLY', 'Bi-Weekly'),
+        ('MONTHLY', 'Monthly'),
+    ]
+
+    STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('PAUSED', 'Paused'),
+        ('CANCELLED', 'Cancelled'),
+        ('COMPLETED', 'Completed'),
+    ]
+
+    court = models.ForeignKey(
+        'court_management.Court',
+        on_delete=models.CASCADE,
+        related_name='recurring_bookings'
+    )
+    player = models.ForeignKey(
+        'user_management.User',
+        on_delete=models.CASCADE,
+        related_name='recurring_bookings',
+        limit_choices_to={'role': 'PLAYER'}
+    )
+
+    # Pattern details
+    frequency = models.CharField(
+        max_length=20, choices=FREQUENCY_CHOICES, default='WEEKLY')
+    day_of_week = models.IntegerField(
+        help_text="0=Monday, 6=Sunday"
+    )  # 0-6 for Monday-Sunday
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    # Date range
+    start_date = models.DateField(help_text="First booking date")
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Leave blank for indefinite"
+    )
+
+    # Pricing
+    base_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(
+        max_length=20,
+        choices=Booking.PAYMENT_METHOD_CHOICES,
+        default='ONLINE'
+    )
+
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ACTIVE'
+    )
+
+    # Metadata
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        'user_management.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_recurring_bookings'
+    )
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'recurring_bookings'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['court', 'day_of_week', 'status']),
+            models.Index(fields=['player', 'status']),
+        ]
+
+    def __str__(self):
+        days = ['Monday', 'Tuesday', 'Wednesday',
+                'Thursday', 'Friday', 'Saturday', 'Sunday']
+        return f"{self.court.name} - Every {days[self.day_of_week]} at {self.start_time}"
+
+    def generate_bookings_for_period(self, start_date, end_date):
+        """Generate individual bookings for a date range"""
+        from datetime import timedelta
+
+        bookings_created = []
+        current_date = max(start_date, self.start_date)
+
+        # Adjust to the first occurrence of the day of week
+        days_ahead = self.day_of_week - current_date.weekday()
+        if days_ahead < 0:
+            days_ahead += 7
+        current_date += timedelta(days=days_ahead)
+
+        # Determine increment based on frequency
+        if self.frequency == 'WEEKLY':
+            increment = timedelta(weeks=1)
+        elif self.frequency == 'BIWEEKLY':
+            increment = timedelta(weeks=2)
+        elif self.frequency == 'MONTHLY':
+            increment = timedelta(weeks=4)  # Approximate
+        else:
+            increment = timedelta(weeks=1)
+
+        # Check end date
+        booking_end_date = end_date
+        if self.end_date:
+            booking_end_date = min(end_date, self.end_date)
+
+        while current_date <= booking_end_date:
+            # Check if booking already exists
+            existing = Booking.objects.filter(
+                court=self.court,
+                player=self.player,
+                booking_date=current_date,
+                start_time=self.start_time,
+                end_time=self.end_time
+            ).first()
+
+            if not existing:
+                # Check availability
+                conflicts = Booking.objects.filter(
+                    court=self.court,
+                    booking_date=current_date,
+                    status__in=['PENDING', 'CONFIRMED']
+                ).filter(
+                    start_time__lt=self.end_time,
+                    end_time__gt=self.start_time
+                )
+
+                if not conflicts.exists():
+                    # Create booking
+                    booking = Booking.objects.create(
+                        court=self.court,
+                        player=self.player,
+                        booking_date=current_date,
+                        start_time=self.start_time,
+                        end_time=self.end_time,
+                        status='CONFIRMED',
+                        payment_method=self.payment_method,
+                        base_amount=self.base_amount,
+                        total_amount=self.base_amount,
+                        notes=f"Recurring booking: {self.notes}",
+                        created_by=self.created_by
+                    )
+                    bookings_created.append(booking)
+
+            current_date += increment
+
+        return bookings_created

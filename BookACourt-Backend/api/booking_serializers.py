@@ -2,11 +2,12 @@ from rest_framework import serializers
 from booking_management.models import (
     Booking, CancellationPolicy, BookingNotification,
     EquipmentRental, MatchEvent, MatchParticipant,
-    PlayerRating, BookingShare
+    PlayerRating, BookingShare, RecurringBooking
 )
 from court_management.models import Court
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 
 
 class BookingSerializer(serializers.ModelSerializer):
@@ -36,13 +37,19 @@ class BookingSerializer(serializers.ModelSerializer):
 
 class BookingCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating bookings"""
+    base_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, allow_null=True
+    )
+    total_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, allow_null=True
+    )
 
     class Meta:
         model = Booking
         fields = [
             'court', 'booking_date', 'start_time', 'end_time',
             'payment_method', 'notes', 'special_requests',
-            'loyalty_points_used'
+            'loyalty_points_used', 'base_amount', 'total_amount'
         ]
 
     def validate(self, data):
@@ -100,16 +107,30 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             timezone.datetime.combine(timezone.datetime.today(), end_time) -
             timezone.datetime.combine(timezone.datetime.today(), start_time)
         )
-        hours = duration.total_seconds() / 3600
+        hours = Decimal(str(duration.total_seconds() / 3600))
 
-        # Calculate base amount
-        base_amount = court.base_hourly_rate * hours
+        # Use provided base_amount or calculate it
+        if 'base_amount' in validated_data and validated_data['base_amount']:
+            base_amount = validated_data['base_amount']
+        else:
+            # Calculate base amount with proper Decimal handling
+            base_amount = court.base_hourly_rate * hours
 
         # Apply loyalty points
         loyalty_points_used = validated_data.get('loyalty_points_used', 0)
-        discount_amount = loyalty_points_used * 0.1  # 10 points = 1 unit discount
+        # 10 points = 1 unit discount
+        discount_amount = Decimal(str(loyalty_points_used * 0.1))
 
-        total_amount = base_amount - discount_amount
+        # Use provided total_amount or calculate it
+        if 'total_amount' in validated_data and validated_data['total_amount']:
+            total_amount = validated_data['total_amount']
+        else:
+            total_amount = base_amount - discount_amount
+
+        # Remove base_amount and total_amount from validated_data if they exist
+        # as we'll set them explicitly
+        validated_data.pop('base_amount', None)
+        validated_data.pop('total_amount', None)
 
         # Create booking
         booking = Booking.objects.create(
@@ -416,3 +437,92 @@ class BookingShareCreateSerializer(serializers.ModelSerializer):
             validated_data['expires_at'] = timezone.now() + timedelta(days=7)
 
         return super().create(validated_data)
+
+
+class RecurringBookingSerializer(serializers.ModelSerializer):
+    """Serializer for recurring bookings"""
+    court_name = serializers.CharField(source='court.name', read_only=True)
+    player_name = serializers.CharField(
+        source='player.full_name', read_only=True)
+    day_of_week_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecurringBooking
+        fields = [
+            'id', 'court', 'court_name', 'player', 'player_name',
+            'frequency', 'day_of_week', 'day_of_week_display',
+            'start_time', 'end_time', 'start_date', 'end_date',
+            'base_amount', 'payment_method', 'status', 'notes',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['player', 'created_at', 'updated_at']
+
+    def get_day_of_week_display(self, obj):
+        days = ['Monday', 'Tuesday', 'Wednesday',
+                'Thursday', 'Friday', 'Saturday', 'Sunday']
+        return days[obj.day_of_week]
+
+
+class RecurringBookingCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating recurring bookings"""
+
+    class Meta:
+        model = RecurringBooking
+        fields = [
+            'court', 'frequency', 'day_of_week', 'start_time', 'end_time',
+            'start_date', 'end_date', 'base_amount', 'payment_method', 'notes'
+        ]
+
+    def validate(self, data):
+        """Validate recurring booking"""
+        court = data.get('court')
+        day_of_week = data.get('day_of_week')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+
+        # Validate day of week
+        if day_of_week < 0 or day_of_week > 6:
+            raise serializers.ValidationError(
+                "Day of week must be between 0 (Monday) and 6 (Sunday)")
+
+        # Validate time range
+        if start_time >= end_time:
+            raise serializers.ValidationError(
+                "End time must be after start time")
+
+        # Check operating hours
+        if start_time < court.opening_time or end_time > court.closing_time:
+            raise serializers.ValidationError(
+                f"Court operates from {court.opening_time} to {court.closing_time}"
+            )
+
+        # Validate date range
+        if end_date and end_date < start_date:
+            raise serializers.ValidationError(
+                "End date must be after start date")
+
+        return data
+
+    def create(self, validated_data):
+        """Create recurring booking"""
+        from datetime import timedelta
+
+        request = self.context.get('request')
+        validated_data['player'] = request.user
+        validated_data['created_by'] = request.user
+
+        recurring_booking = super().create(validated_data)
+
+        # Generate bookings for the next 3 months
+        end_date = validated_data.get('end_date')
+        if not end_date:
+            end_date = timezone.now().date() + timedelta(days=90)
+
+        bookings = recurring_booking.generate_bookings_for_period(
+            validated_data['start_date'],
+            end_date
+        )
+
+        return recurring_booking

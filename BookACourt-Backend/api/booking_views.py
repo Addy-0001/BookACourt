@@ -7,10 +7,11 @@ from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from datetime import timedelta
 
+from api import models
 from booking_management.models import (
     Booking, CancellationPolicy, BookingNotification,
     EquipmentRental, MatchEvent, MatchParticipant,
-    PlayerRating, BookingShare
+    PlayerRating, BookingShare, RecurringBooking
 )
 from .booking_serializers import (
     BookingSerializer, BookingCreateSerializer,
@@ -18,7 +19,7 @@ from .booking_serializers import (
     EquipmentRentalSerializer, MatchEventSerializer,
     MatchEventCreateSerializer, MatchParticipantSerializer,
     PlayerRatingSerializer, PlayerRatingCreateSerializer,
-    BookingShareSerializer, BookingShareCreateSerializer
+    BookingShareSerializer, BookingShareCreateSerializer, RecurringBookingCreateSerializer, RecurringBookingSerializer
 )
 
 
@@ -532,4 +533,131 @@ class BookingShareViewSet(viewsets.ModelViewSet):
         share.joined_users.add(request.user)
 
         serializer = self.get_serializer(share)
+        return Response(serializer.data)
+
+
+class RecurringBookingViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Recurring Bookings
+    Regular weekly/monthly bookings
+    """
+    queryset = RecurringBooking.objects.all()
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['court__name', 'notes']
+    ordering_fields = ['start_date', 'created_at']
+    ordering = ['-created_at']
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return RecurringBookingCreateSerializer
+        return RecurringBookingSerializer
+
+    def get_queryset(self):
+        """Filter based on user role"""
+        user = self.request.user
+        queryset = RecurringBooking.objects.all()
+
+        if user.is_super_user:
+            pass
+        elif user.is_court_owner or user.is_court_manager:
+            from court_management.models import Court
+            managed_courts = Court.objects.filter(
+                Q(owner=user) | Q(managers=user)
+            )
+            queryset = queryset.filter(court__in=managed_courts)
+        else:
+            queryset = queryset.filter(player=user)
+
+        # Filter by status
+        status = self.request.query_params.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        return queryset.select_related('court', 'player')
+
+    @extend_schema(
+        summary="Pause recurring booking",
+        description="Temporarily pause a recurring booking"
+    )
+    @action(detail=True, methods=['post'])
+    def pause(self, request, pk=None):
+        """Pause recurring booking"""
+        recurring = self.get_object()
+
+        if recurring.player != request.user and not request.user.is_super_user:
+            return Response(
+                {'error': 'You can only pause your own recurring bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        recurring.status = 'PAUSED'
+        recurring.save()
+
+        serializer = self.get_serializer(recurring)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Resume recurring booking",
+        description="Resume a paused recurring booking"
+    )
+    @action(detail=True, methods=['post'])
+    def resume(self, request, pk=None):
+        """Resume recurring booking"""
+        recurring = self.get_object()
+
+        if recurring.player != request.user and not request.user.is_super_user:
+            return Response(
+                {'error': 'You can only resume your own recurring bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        recurring.status = 'ACTIVE'
+        recurring.save()
+
+        # Generate any missing bookings
+        from datetime import timedelta
+        end_date = recurring.end_date or (
+            timezone.now().date() + timedelta(days=90))
+        recurring.generate_bookings_for_period(timezone.now().date(), end_date)
+
+        serializer = self.get_serializer(recurring)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Cancel recurring booking",
+        description="Cancel recurring booking and optionally cancel future bookings"
+    )
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        """Cancel recurring booking"""
+        recurring = self.get_object()
+
+        if recurring.player != request.user and not request.user.is_super_user:
+            return Response(
+                {'error': 'You can only cancel your own recurring bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        cancel_future = request.data.get('cancel_future', True)
+
+        recurring.status = 'CANCELLED'
+        recurring.save()
+
+        if cancel_future:
+            # Cancel all future bookings
+            Booking.objects.filter(
+                court=recurring.court,
+                player=recurring.player,
+                booking_date__gte=timezone.now().date(),
+                start_time=recurring.start_time,
+                end_time=recurring.end_time,
+                status__in=['PENDING', 'CONFIRMED']
+            ).update(
+                status='CANCELLED',
+                cancelled_at=timezone.now(),
+                cancellation_reason='Recurring booking cancelled'
+            )
+
+        serializer = self.get_serializer(recurring)
         return Response(serializer.data)

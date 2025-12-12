@@ -4,7 +4,7 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 from .models import (
     Booking, CancellationPolicy, BookingNotification, EquipmentRental,
-    MatchEvent, MatchParticipant, PlayerRating, BookingShare
+    MatchEvent, MatchParticipant, PlayerRating, BookingShare, RecurringBooking
 )
 
 
@@ -589,3 +589,38 @@ class BookingShareAdmin(admin.ModelAdmin):
             color, text
         )
     validity_badge.short_description = 'Valid'
+
+@admin.register(RecurringBooking)
+class RecurringBookingAdmin(admin.ModelAdmin):
+    """Admin interface for Recurring Bookings"""
+    list_display = (
+        'court', 'player', 'frequency', 'day_display',
+        'time_range', 'status_badge', 'start_date', 'end_date'
+    )
+    list_filter = ('status', 'frequency', 'day_of_week', 'court__city')
+    search_fields = ('court__name', 'player__full_name', 'notes')
+    readonly_fields = ('created_at', 'updated_at')
+    
+    def day_display(self, obj):
+        days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        return days[obj.day_of_week]
+    day_display.short_description = 'Day'
+    
+    def time_range(self, obj):
+        return f"{obj.start_time} - {obj.end_time}"
+    time_range.short_description = 'Time'
+    
+    def status_badge(self, obj):
+        colors = {
+            'ACTIVE': 'green',
+            'PAUSED': 'orange',
+            'CANCELLED': 'red',
+            'COMPLETED': 'blue',
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; '
+            'padding: 3px 8px; border-radius: 3px;">{}</span>',
+            colors.get(obj.status, 'gray'),
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
