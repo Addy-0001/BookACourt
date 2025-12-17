@@ -6,14 +6,14 @@
                 <div class="flex items-center gap-8">
                     <router-link to="/" class="flex items-center gap-2">
                         <div
-                            class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            class="w-10 h-10 bg-gradient-to-br from-[#0056B3] to-[#7C3AED] rounded-lg flex items-center justify-center">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                         </div>
                         <span
-                            class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            class="text-xl font-bold bg-gradient-to-r from-[#0056B3] to-[#7C3AED] bg-clip-text text-transparent">
                             BookACourt
                         </span>
                     </router-link>
@@ -23,8 +23,8 @@
                         <router-link v-for="link in navLinks" :key="link.path" :to="link.path" :class="[
                             'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                             isActive(link.path)
-                                ? 'bg-blue-50 text-blue-600'
-                                : 'text-gray-700 hover:bg-gray-100'
+                                ? 'bg-[#E3F2FD] text-[#0056B3]'
+                                : 'text-gray-700 hover:bg-[#F3F4F6]'
                         ]">
                             {{ link.label }}
                         </router-link>
@@ -35,20 +35,20 @@
                 <div class="flex items-center gap-3">
                     <!-- Notifications -->
                     <router-link v-if="authStore.isAuthenticated" to="/notifications"
-                        class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        class="relative p-2 text-gray-600 hover:bg-[#F3F4F6] rounded-lg transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                         <span v-if="unreadCount > 0"
-                            class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                            class="absolute top-1 right-1 w-5 h-5 bg-[#EF4444] text-white text-xs rounded-full flex items-center justify-center font-bold">
                             {{ unreadCount > 9 ? '9+' : unreadCount }}
                         </span>
                     </router-link>
 
                     <!-- Friends -->
                     <router-link v-if="authStore.isAuthenticated && authStore.isPlayer" to="/friends"
-                        class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        class="p-2 text-gray-600 hover:bg-[#F3F4F6] rounded-lg transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -58,9 +58,9 @@
                     <!-- User Menu -->
                     <div v-if="authStore.isAuthenticated" class="relative">
                         <button @click.stop="toggleUserMenu"
-                            class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#F3F4F6] transition-colors">
                             <div
-                                class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                class="w-8 h-8 bg-gradient-to-br from-[#0056B3] to-[#7C3AED] rounded-full flex items-center justify-center text-white font-bold text-sm">
                                 {{ authStore.user?.full_name?.charAt(0).toUpperCase() }}
                             </div>
                             <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +80,7 @@
 
                                 <router-link v-for="item in userMenuItems" :key="item.path" :to="item.path"
                                     @click="showUserMenu = false"
-                                    class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                    class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-[#F3F4F6] transition-colors">
                                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -105,13 +105,13 @@
 
                     <!-- Login Button (for guests) -->
                     <router-link v-else to="/login"
-                        class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium">
+                        class="px-4 py-2 bg-gradient-to-r from-[#0056B3] to-[#7C3AED] text-white rounded-lg hover:shadow-lg transition-all font-medium">
                         Login
                     </router-link>
 
                     <!-- Mobile Menu Button -->
                     <button @click="showMobileMenu = !showMobileMenu"
-                        class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        class="md:hidden p-2 text-gray-600 hover:bg-[#F3F4F6] rounded-lg transition-colors">
                         <svg v-if="!showMobileMenu" class="w-6 h-6" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -134,8 +134,8 @@
                         @click="showMobileMenu = false" :class="[
                             'block px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                             isActive(link.path)
-                                ? 'bg-blue-50 text-blue-600'
-                                : 'text-gray-700 hover:bg-gray-100'
+                                ? 'bg-[#E3F2FD] text-[#0056B3]'
+                                : 'text-gray-700 hover:bg-[#F3F4F6]'
                         ]">
                         {{ link.label }}
                     </router-link>
