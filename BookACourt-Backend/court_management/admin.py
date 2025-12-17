@@ -465,22 +465,30 @@ class CourtReviewAdmin(admin.ModelAdmin):
     actions = ['approve_reviews', 'flag_reviews', 'hide_reviews']
 
     def approve_reviews(self, request, queryset):
-        """Approve and make reviews visible"""
+        """Approve and make reviews visible - signals will update court stats"""
         updated = queryset.update(is_visible=True, is_flagged=False)
+
+    # Trigger signal by re-saving (this forces the post_save signal)
+        for review in queryset:
+            review.save()
+
         self.message_user(request, f'{updated} review(s) approved.')
-    approve_reviews.short_description = 'Approve selected reviews'
+
+    def hide_reviews(self, request, queryset):
+        """Hide abusive reviews - signals will update court stats"""
+        updated = queryset.update(is_visible=False)
+
+        # Trigger signal by re-saving
+        for review in queryset:
+            review.save()
+
+        self.message_user(request, f'{updated} review(s) hidden.')
 
     def flag_reviews(self, request, queryset):
         """Flag reviews for moderation"""
         updated = queryset.update(is_flagged=True)
         self.message_user(request, f'{updated} review(s) flagged.')
     flag_reviews.short_description = 'Flag selected reviews'
-
-    def hide_reviews(self, request, queryset):
-        """Hide abusive reviews"""
-        updated = queryset.update(is_visible=False)
-        self.message_user(request, f'{updated} review(s) hidden.')
-    hide_reviews.short_description = 'Hide selected reviews'
 
 
 @admin.register(EquipmentItem)

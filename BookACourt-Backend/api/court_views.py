@@ -528,7 +528,7 @@ class CourtReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Check if user has already reviewed this court
+    # Check if user has already reviewed this court
         court_id = request.data.get('court')
         if CourtReview.objects.filter(court_id=court_id, player=request.user).exists():
             return Response(
@@ -536,18 +536,8 @@ class CourtReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        response = super().create(request, *args, **kwargs)
-
-        # Update court rating
-        if response.status_code == status.HTTP_201_CREATED:
-            court = Court.objects.get(id=court_id)
-            reviews = CourtReview.objects.filter(court=court, is_visible=True)
-            court.average_rating = reviews.aggregate(
-                Avg('rating'))['rating__avg'] or 0
-            court.total_reviews = reviews.count()
-            court.save()
-
-        return response
+    # Create review - signals will handle updating court stats
+        return super().create(request, *args, **kwargs)
 
     @extend_schema(
         summary="Respond to review",

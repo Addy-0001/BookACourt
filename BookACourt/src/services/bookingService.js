@@ -2,43 +2,40 @@
 import apiClient from './api';
 
 export const bookingService = {
-    // ===== BOOKINGS =====
     async getBookings(params = {}) {
-        const response = await apiClient.get('/bookings/', { params });
+        const response = await apiClient.get('/bookings/bookings/', { params });
         return response.data;
     },
 
     async getBookingById(id) {
-        const response = await apiClient.get(`/bookings/${id}/`);
+        const response = await apiClient.get(`/bookings/bookings/${id}/`);
         return response.data;
     },
 
     async createBooking(data) {
-        const response = await apiClient.post('/bookings/', data);
+        const response = await apiClient.post('/bookings/bookings/', data);
         return response.data;
     },
 
     async updateBooking(id, data) {
-        const response = await apiClient.patch(`/bookings/${id}/`, data);
+        const response = await apiClient.patch(`/bookings/bookings/${id}/`, data);
         return response.data;
     },
 
     async cancelBooking(id, reason) {
-        const response = await apiClient.patch(`/bookings/${id}/`, {
-            status: 'CANCELLED',
+        const response = await apiClient.post(`/bookings/bookings/${id}/cancel/`, {
             cancellation_reason: reason
         });
         return response.data;
     },
 
     async getMyBookings(status = null) {
-        const params = status ? { status } : {};
-        const response = await apiClient.get('/bookings/', { params });
+        const response = await apiClient.get('/bookings/bookings/my_bookings/');
         return response.data;
     },
 
     async confirmBooking(id) {
-        const response = await apiClient.post(`/bookings/${id}/confirm/`);
+        const response = await apiClient.post(`/bookings/bookings/${id}/confirm/`, {});
         return response.data;
     },
 

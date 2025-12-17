@@ -90,13 +90,28 @@ export const courtService = {
     },
 
     // Court Reviews
-    async getCourtReviews(courtId) {
-        const response = await apiClient.get(`/courts/courts/${courtId}/reviews/`);
+    async getCourtReviews(courtId, params = {}) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/reviews/`, { params });
+        return response.data;
+    },
+
+    async getReviewById(courtId, reviewId) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/reviews/${reviewId}/`);
         return response.data;
     },
 
     async createReview(courtId, data) {
         const response = await apiClient.post(`/courts/courts/${courtId}/reviews/`, data);
+        return response.data;
+    },
+
+    async updateReview(courtId, reviewId, data) {
+        const response = await apiClient.patch(`/courts/courts/${courtId}/reviews/${reviewId}/`, data);
+        return response.data;
+    },
+
+    async deleteReview(courtId, reviewId) {
+        const response = await apiClient.delete(`/courts/courts/${courtId}/reviews/${reviewId}/`);
         return response.data;
     },
 
@@ -116,6 +131,11 @@ export const courtService = {
         return response.data;
     },
 
+    async getMyReviews(params = {}) {
+        const response = await apiClient.get('/courts/reviews/my_reviews/', { params });
+        return response.data;
+    },
+
     // Blocked Slots
     async getBlockedSlots(courtId, params = {}) {
         const response = await apiClient.get(`/courts/courts/${courtId}/blocked-slots/`, { params });
@@ -127,14 +147,24 @@ export const courtService = {
         return response.data;
     },
 
+    async updateBlockedSlot(courtId, slotId, data) {
+        const response = await apiClient.patch(`/courts/courts/${courtId}/blocked-slots/${slotId}/`, data);
+        return response.data;
+    },
+
     async deleteBlockedSlot(courtId, slotId) {
         const response = await apiClient.delete(`/courts/courts/${courtId}/blocked-slots/${slotId}/`);
         return response.data;
     },
 
     // Dynamic Pricing
-    async getPricingRules(courtId) {
-        const response = await apiClient.get(`/courts/courts/${courtId}/pricing/`);
+    async getPricingRules(courtId, params = {}) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/pricing/`, { params });
+        return response.data;
+    },
+
+    async getPricingRuleById(courtId, ruleId) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/pricing/${ruleId}/`);
         return response.data;
     },
 
@@ -153,9 +183,19 @@ export const courtService = {
         return response.data;
     },
 
+    async togglePricingRule(courtId, ruleId) {
+        const response = await apiClient.post(`/courts/courts/${courtId}/pricing/${ruleId}/toggle/`);
+        return response.data;
+    },
+
     // Equipment
-    async getEquipment(courtId) {
-        const response = await apiClient.get(`/courts/courts/${courtId}/equipment/`);
+    async getEquipment(courtId, params = {}) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/equipment/`, { params });
+        return response.data;
+    },
+
+    async getEquipmentById(courtId, equipmentId) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/equipment/${equipmentId}/`);
         return response.data;
     },
 
@@ -171,6 +211,96 @@ export const courtService = {
 
     async deleteEquipment(courtId, equipmentId) {
         const response = await apiClient.delete(`/courts/courts/${courtId}/equipment/${equipmentId}/`);
+        return response.data;
+    },
+
+    async updateEquipmentQuantity(courtId, equipmentId, quantity) {
+        const response = await apiClient.patch(`/courts/courts/${courtId}/equipment/${equipmentId}/`, {
+            quantity_total: quantity
+        });
+        return response.data;
+    },
+
+    // Court Images
+    async uploadCourtImage(courtId, imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        const response = await apiClient.post(`/courts/courts/${courtId}/images/`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+
+    async deleteCourtImage(courtId, imageId) {
+        const response = await apiClient.delete(`/courts/courts/${courtId}/images/${imageId}/`);
+        return response.data;
+    },
+
+    async setMainImage(courtId, imageId) {
+        const response = await apiClient.post(`/courts/courts/${courtId}/images/${imageId}/set_main/`);
+        return response.data;
+    },
+
+    // Court Statistics
+    async getCourtStatistics(courtId, params = {}) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/statistics/`, { params });
+        return response.data;
+    },
+
+    async getCourtRevenue(courtId, params = {}) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/revenue/`, { params });
+        return response.data;
+    },
+
+    async getCourtBookingHistory(courtId, params = {}) {
+        const response = await apiClient.get(`/courts/courts/${courtId}/booking_history/`, { params });
+        return response.data;
+    },
+
+    // Search and Filter
+    async searchCourts(query, params = {}) {
+        const response = await apiClient.get('/courts/courts/search/', {
+            params: { q: query, ...params }
+        });
+        return response.data;
+    },
+
+    async filterCourts(filters = {}) {
+        const response = await apiClient.get('/courts/courts/', { params: filters });
+        return response.data;
+    },
+
+    async getNearbyCourts(latitude, longitude, radius = 5) {
+        const response = await apiClient.get('/courts/courts/nearby/', {
+            params: { lat: latitude, lng: longitude, radius }
+        });
+        return response.data;
+    },
+
+    // Court Favorites (for players)
+    async addToFavorites(courtId) {
+        const response = await apiClient.post(`/courts/courts/${courtId}/favorite/`);
+        return response.data;
+    },
+
+    async removeFromFavorites(courtId) {
+        const response = await apiClient.delete(`/courts/courts/${courtId}/favorite/`);
+        return response.data;
+    },
+
+    async getFavoriteCourts(params = {}) {
+        const response = await apiClient.get('/courts/courts/favorites/', { params });
+        return response.data;
+    },
+
+    // Court Verification
+    async requestVerification(courtId) {
+        const response = await apiClient.post(`/courts/courts/${courtId}/request_verification/`);
+        return response.data;
+    },
+
+    async verifyCourt(courtId, verificationData) {
+        const response = await apiClient.post(`/courts/courts/${courtId}/verify/`, verificationData);
         return response.data;
     }
 };

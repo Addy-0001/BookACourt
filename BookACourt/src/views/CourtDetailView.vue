@@ -139,6 +139,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div v-else class="border-t pt-4 mt-4">
+                            <h3 class="font-semibold text-gray-900 mb-3">Standard Pricing</h3>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <span class="text-lg font-bold text-blue-600">Rs {{ court.base_hourly_rate }}/hr</span>
+                            </div>
+                        </div>
 
                         <!-- Equipment -->
                         <div v-if="court.equipment && court.equipment.length" class="border-t pt-4 mt-4">
@@ -291,16 +297,17 @@
                                     <p class="text-sm text-blue-800 font-medium">Booking Summary</p>
                                     <div class="mt-2 space-y-1 text-sm text-blue-900">
                                         <div class="flex justify-between">
-                                            <span>Court Fee ({{ duration }} hrs @ Rs {{ currentRate }}/hr)</span>
-                                            <span class="font-medium">Rs {{ courtFee }}</span>
+                                            <span>Court Fee ({{ duration.toFixed(1) }} hrs @ Rs {{ currentRate
+                                            }}/hr)</span>
+                                            <span class="font-medium">Rs {{ courtFeeDisplay }}</span>
                                         </div>
                                         <div v-if="equipmentFee > 0" class="flex justify-between">
                                             <span>Equipment Rental</span>
-                                            <span class="font-medium">Rs {{ equipmentFee }}</span>
+                                            <span class="font-medium">Rs {{ equipmentFeeDisplay }}</span>
                                         </div>
                                         <div class="flex justify-between pt-2 border-t border-blue-200 font-bold">
                                             <span>Total</span>
-                                            <span>Rs {{ estimatedTotal }}</span>
+                                            <span>Rs {{ estimatedTotalDisplay }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -420,69 +427,92 @@ const minDate = computed(() => {
     return today.toISOString().split('T')[0]
 })
 
+// Calculate duration in hours
 const duration = computed(() => {
     if (!bookingForm.value.start_time || !bookingForm.value.end_time) return 0
     const start = new Date(`2000-01-01 ${bookingForm.value.start_time}`)
     const end = new Date(`2000-01-01 ${bookingForm.value.end_time}`)
-    return Math.max(0, (end - start) / (1000 * 60 * 60))
+    const hours = Math.max(0, (end - start) / (1000 * 60 * 60))
+    return hours
 })
 
+// Find applicable pricing rule based on date and time
+const applicablePricingRule = computed(() => {
+    if (!court.value || !bookingForm.value.start_time || !bookingForm.value.date) {
+        return null
+    }
+
+    const dayOfWeek = new Date(bookingForm.value.date).getDay()
+    const startTime = bookingForm.value.start_time
+
+    // Find matching pricing rule
+    const matchingRule = court.value.pricing_rules?.find(rule => {
+        if (!rule.is_active) return false
+
+        // Parse days of week
+        const days = rule.days_of_week.split(',').map(d => parseInt(d.trim()))
+        if (!days.includes(dayOfWeek)) return false
+
+        // Check if time falls within rule's time range
+        return startTime >= rule.start_time && startTime < rule.end_time
+    })
+
+    return matchingRule
+})
+
+// Get current hourly rate based on pricing rules
 const currentRate = computed(() => {
-    if (!court.value || !bookingForm.value.start_time || !bookingForm.value.date) {
-        return court.value?.base_hourly_rate || 0
-    }
+    if (!court.value) return 0
 
-    const dayOfWeek = new Date(bookingForm.value.date).getDay()
-    const startTime = bookingForm.value.start_time
-
-    const matchingRule = court.value.pricing_rules?.find(rule => {
-        if (!rule.is_active) return false
-        const days = rule.days_of_week.split(',').map(d => parseInt(d.trim()))
-        if (!days.includes(dayOfWeek)) return false
-        return startTime >= rule.start_time && startTime < rule.end_time
-    })
-
-    return matchingRule ? matchingRule.hourly_rate : court.value.base_hourly_rate
+    const rule = applicablePricingRule.value
+    return rule ? parseFloat(rule.hourly_rate) : parseFloat(court.value.base_hourly_rate)
 })
 
+// Display rate with proper formatting
 const displayRate = computed(() => {
-    return currentRate.value
+    return currentRate.value.toFixed(2)
 })
 
+// Description of the rate being applied
 const rateDescription = computed(() => {
-    if (!court.value || !bookingForm.value.start_time || !bookingForm.value.date) {
-        return 'Base rate'
+    if (!court.value) return 'Base rate'
+
+    const rule = applicablePricingRule.value
+    if (rule) {
+        return rule.description
     }
 
-    const dayOfWeek = new Date(bookingForm.value.date).getDay()
-    const startTime = bookingForm.value.start_time
-
-    const matchingRule = court.value.pricing_rules?.find(rule => {
-        if (!rule.is_active) return false
-        const days = rule.days_of_week.split(',').map(d => parseInt(d.trim()))
-        if (!days.includes(dayOfWeek)) return false
-        return startTime >= rule.start_time && startTime < rule.end_time
-    })
-
-    return matchingRule ? matchingRule.description : 'Base rate'
+    return 'Base rate'
 })
 
+// Calculate court fee based on duration and current rate
 const courtFee = computed(() => {
-    return (duration.value * currentRate.value).toFixed(2)
+    const fee = duration.value * currentRate.value
+    return fee
 })
 
+// Calculate equipment rental fees
 const equipmentFee = computed(() => {
     if (!court.value || !bookingForm.value.equipment_rentals.length) return 0
-    return bookingForm.value.equipment_rentals.reduce((total, equipId) => {
+    const total = bookingForm.value.equipment_rentals.reduce((sum, equipId) => {
         const item = court.value.equipment?.find(e => e.id === equipId)
-        return total + (item?.rental_rate || 0)
+        return sum + (item ? parseFloat(item.rental_rate) : 0)
     }, 0)
+    return total
 })
 
+// Calculate total estimated cost
 const estimatedTotal = computed(() => {
-    return (parseFloat(courtFee.value) + equipmentFee.value).toFixed(2)
+    const total = courtFee.value + equipmentFee.value
+    return total
 })
 
+// For display purposes
+const courtFeeDisplay = computed(() => courtFee.value.toFixed(2))
+const equipmentFeeDisplay = computed(() => equipmentFee.value.toFixed(2))
+const estimatedTotalDisplay = computed(() => estimatedTotal.value.toFixed(2))
+
+// Check if booking form is valid
 const canBook = computed(() => {
     return bookingForm.value.date &&
         bookingForm.value.start_time &&
@@ -490,31 +520,42 @@ const canBook = computed(() => {
         duration.value > 0
 })
 
+// Find user's existing review
 const userReview = computed(() => {
     return reviews.value.find(r => r.player === authStore.user?.id)
 })
 
+// Check if user can write a review
 const canReview = computed(() => {
     return authStore.isAuthenticated && authStore.isPlayer
 })
 
+// Format date for display
 const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+// Format days of week from comma-separated string
 const formatDaysOfWeek = (daysStr) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     const indices = daysStr.split(',').map(d => parseInt(d.trim()))
     return indices.map(i => days[i]).join(', ')
 }
 
+// Handle date or time change
 const onDateOrTimeChange = () => {
+    // Clear availability message when inputs change
+    availabilityMessage.value = null
+    isAvailable.value = false
+
+    // Load available slots if date is selected
     if (bookingForm.value.date) {
         loadAvailableSlots()
     }
 }
 
+// Load court details
 const loadCourtDetails = async () => {
     loading.value = true
     error.value = null
@@ -529,6 +570,7 @@ const loadCourtDetails = async () => {
     }
 }
 
+// Load court reviews
 const loadReviews = async () => {
     try {
         const response = await courtService.getCourtReviews(route.params.id)
@@ -538,6 +580,7 @@ const loadReviews = async () => {
     }
 }
 
+// Load available time slots for selected date
 const loadAvailableSlots = async () => {
     if (!bookingForm.value.date) return
 
@@ -550,16 +593,21 @@ const loadAvailableSlots = async () => {
     }
 }
 
+// Select a time slot
 const selectTimeSlot = (slot) => {
     bookingForm.value.start_time = slot.start_time
     bookingForm.value.end_time = slot.end_time
+    availabilityMessage.value = null
+    isAvailable.value = false
 }
 
+// Check if a slot is currently selected
 const isSlotSelected = (slot) => {
     return bookingForm.value.start_time === slot.start_time &&
         bookingForm.value.end_time === slot.end_time
 }
 
+// Check court availability
 const checkAvailability = async () => {
     availabilityLoading.value = true
     availabilityMessage.value = null
@@ -579,22 +627,26 @@ const checkAvailability = async () => {
     }
 }
 
+// Handle booking submission
 const handleBooking = async () => {
     bookingLoading.value = true
     bookingError.value = null
     bookingSuccess.value = false
 
     try {
+        // Ensure amounts are sent as numeric values (not strings with toFixed)
         const bookingData = {
-            court: route.params.id,
+            court: parseInt(route.params.id),
             booking_date: bookingForm.value.date,
             start_time: bookingForm.value.start_time,
             end_time: bookingForm.value.end_time,
             payment_method: 'ONLINE',
-            base_amount: courtFee.value,
-            total_amount: estimatedTotal.value,
-            notes: bookingForm.value.notes
+            base_amount: courtFee.value.toFixed(2),
+            total_amount: estimatedTotal.value.toFixed(2),
+            notes: bookingForm.value.notes || ''
         }
+
+        console.log('Booking data being sent:', bookingData)
 
         const booking = await bookingService.createBooking(bookingData)
 
@@ -611,12 +663,14 @@ const handleBooking = async () => {
         }, 2000)
     } catch (err) {
         console.error('Booking failed:', err)
-        bookingError.value = err.response?.data?.detail || 'Failed to create booking'
+        console.error('Error response:', err.response?.data)
+        bookingError.value = err.response?.data?.detail || err.response?.data?.message || 'Failed to create booking'
     } finally {
         bookingLoading.value = false
     }
 }
 
+// Close review modal
 const closeReviewModal = () => {
     showReviewModal.value = false
     reviewForm.value = {
@@ -625,6 +679,7 @@ const closeReviewModal = () => {
     }
 }
 
+// Submit review
 const submitReview = async () => {
     submittingReview.value = true
     try {
@@ -651,9 +706,10 @@ const submitReview = async () => {
     }
 }
 
+// Go back to previous page
 const goBack = () => router.go(-1)
 
-// Watch for existing review
+// Watch for review modal opening to populate form with existing review
 watch(showReviewModal, (newVal) => {
     if (newVal && userReview.value) {
         reviewForm.value = {
@@ -663,6 +719,7 @@ watch(showReviewModal, (newVal) => {
     }
 })
 
+// Load court details on mount
 onMounted(() => {
     loadCourtDetails()
 })
