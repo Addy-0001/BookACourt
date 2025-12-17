@@ -1736,6 +1736,296 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/bookings/recurring/:
+    get:
+      operationId: bookings_recurring_list
+      description: |-
+        ViewSet for Recurring Bookings
+        Regular weekly/monthly bookings
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRecurringBookingList'
+          description: ''
+    post:
+      operationId: bookings_recurring_create
+      description: |-
+        ViewSet for Recurring Bookings
+        Regular weekly/monthly bookings
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBookingCreate'
+          description: ''
+  /api/bookings/recurring/{id}/:
+    get:
+      operationId: bookings_recurring_retrieve
+      description: |-
+        ViewSet for Recurring Bookings
+        Regular weekly/monthly bookings
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBooking'
+          description: ''
+    put:
+      operationId: bookings_recurring_update
+      description: |-
+        ViewSet for Recurring Bookings
+        Regular weekly/monthly bookings
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBooking'
+          description: ''
+    patch:
+      operationId: bookings_recurring_partial_update
+      description: |-
+        ViewSet for Recurring Bookings
+        Regular weekly/monthly bookings
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRecurringBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRecurringBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRecurringBookingRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBooking'
+          description: ''
+    delete:
+      operationId: bookings_recurring_destroy
+      description: |-
+        ViewSet for Recurring Bookings
+        Regular weekly/monthly bookings
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/bookings/recurring/{id}/cancel/:
+    post:
+      operationId: bookings_recurring_cancel_create
+      description: Cancel recurring booking and optionally cancel future bookings
+      summary: Cancel recurring booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBooking'
+          description: ''
+  /api/bookings/recurring/{id}/pause/:
+    post:
+      operationId: bookings_recurring_pause_create
+      description: Temporarily pause a recurring booking
+      summary: Pause recurring booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBooking'
+          description: ''
+  /api/bookings/recurring/{id}/resume/:
+    post:
+      operationId: bookings_recurring_resume_create
+      description: Resume a paused recurring booking
+      summary: Resume recurring booking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring booking.
+        required: true
+      tags:
+      - bookings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringBookingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringBooking'
+          description: ''
   /api/courts/categories/:
     get:
       operationId: courts_categories_list
@@ -4102,6 +4392,16 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
       required:
       - booking_date
       - court
@@ -4132,6 +4432,16 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
       required:
       - booking_date
       - court
@@ -5517,6 +5827,16 @@ components:
         * `ACTIVE` - Active
         * `RETURNED` - Returned
         * `DAMAGED` - Damaged
+    FrequencyEnum:
+      enum:
+      - WEEKLY
+      - BIWEEKLY
+      - MONTHLY
+      type: string
+      description: |-
+        * `WEEKLY` - Weekly
+        * `BIWEEKLY` - Bi-Weekly
+        * `MONTHLY` - Monthly
     Friendship:
       type: object
       description: Serializer for friendships
@@ -6288,6 +6608,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PlayerStats'
+    PaginatedRecurringBookingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecurringBooking'
     PaginatedUserPreferenceList:
       type: object
       required:
@@ -6687,6 +7030,44 @@ components:
           type: boolean
         misconduct_details:
           type: string
+    PatchedRecurringBookingRequest:
+      type: object
+      description: Serializer for recurring bookings
+      properties:
+        court:
+          type: integer
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        day_of_week:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: 0=Monday, 6=Sunday
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        start_date:
+          type: string
+          format: date
+          description: First booking date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Leave blank for indefinite
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        status:
+          $ref: '#/components/schemas/RecurringBookingStatusEnum'
+        notes:
+          type: string
     PatchedUserDetailsRequest:
       type: object
       description: Serializer for user details
@@ -6946,6 +7327,224 @@ components:
         * `3` - 3
         * `4` - 4
         * `5` - 5
+    RecurringBooking:
+      type: object
+      description: Serializer for recurring bookings
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        court:
+          type: integer
+        court_name:
+          type: string
+          readOnly: true
+        player:
+          type: integer
+          readOnly: true
+        player_name:
+          type: string
+          readOnly: true
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        day_of_week:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: 0=Monday, 6=Sunday
+        day_of_week_display:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        start_date:
+          type: string
+          format: date
+          description: First booking date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Leave blank for indefinite
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        status:
+          $ref: '#/components/schemas/RecurringBookingStatusEnum'
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - base_amount
+      - court
+      - court_name
+      - created_at
+      - day_of_week
+      - day_of_week_display
+      - end_time
+      - id
+      - player
+      - player_name
+      - start_date
+      - start_time
+      - updated_at
+    RecurringBookingCreate:
+      type: object
+      description: Serializer for creating recurring bookings
+      properties:
+        court:
+          type: integer
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        day_of_week:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: 0=Monday, 6=Sunday
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        start_date:
+          type: string
+          format: date
+          description: First booking date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Leave blank for indefinite
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        notes:
+          type: string
+      required:
+      - base_amount
+      - court
+      - day_of_week
+      - end_time
+      - start_date
+      - start_time
+    RecurringBookingCreateRequest:
+      type: object
+      description: Serializer for creating recurring bookings
+      properties:
+        court:
+          type: integer
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        day_of_week:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: 0=Monday, 6=Sunday
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        start_date:
+          type: string
+          format: date
+          description: First booking date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Leave blank for indefinite
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        notes:
+          type: string
+      required:
+      - base_amount
+      - court
+      - day_of_week
+      - end_time
+      - start_date
+      - start_time
+    RecurringBookingRequest:
+      type: object
+      description: Serializer for recurring bookings
+      properties:
+        court:
+          type: integer
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        day_of_week:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: 0=Monday, 6=Sunday
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        start_date:
+          type: string
+          format: date
+          description: First booking date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Leave blank for indefinite
+        base_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        status:
+          $ref: '#/components/schemas/RecurringBookingStatusEnum'
+        notes:
+          type: string
+      required:
+      - base_amount
+      - court
+      - day_of_week
+      - end_time
+      - start_date
+      - start_time
+    RecurringBookingStatusEnum:
+      enum:
+      - ACTIVE
+      - PAUSED
+      - CANCELLED
+      - COMPLETED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `PAUSED` - Paused
+        * `CANCELLED` - Cancelled
+        * `COMPLETED` - Completed
     RegisterRequest:
       type: object
       description: Custom registration serializer using phone number

@@ -1,26 +1,5 @@
 <template>
     <div class="min-h-screen bg-gray-50">
-        <nav class="bg-white shadow-sm sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center gap-4">
-                        <button @click="goBack" class="text-gray-600 hover:text-gray-900">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <h1 class="text-2xl font-bold text-blue-600">Friends</h1>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <router-link to="/"
-                            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                            Home
-                        </router-link>
-                    </div>
-                </div>
-            </div>
-        </nav>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Tabs -->
@@ -151,7 +130,113 @@
                     </div>
                 </div>
             </div>
+
+            <div v-else-if="activeTab === 'find'">
+                <!-- Search Bar -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1 relative">
+                            <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input v-model="searchQuery" type="text" placeholder="Search players by name or phone..."
+                                @input="handleSearch"
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <button @click="handleSearch" :disabled="searchLoading"
+                            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium">
+                            {{ searchLoading ? 'Searching...' : 'Search' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div v-if="searchLoading" class="flex justify-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+
+                <div v-else-if="searchResults.length === 0 && searchQuery"
+                    class="text-center py-20 bg-white rounded-xl shadow-md">
+                    <svg class="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p class="text-xl text-gray-600">No players found</p>
+                    <p class="text-gray-500 mt-2">Try searching with a different name or phone number</p>
+                </div>
+
+                <div v-else-if="searchResults.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div v-for="player in searchResults" :key="player.id"
+                        class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                                {{ player.full_name.charAt(0).toUpperCase() }}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">{{ player.full_name }}</h3>
+                                <p class="text-sm text-gray-600">{{ player.phone_number }}</p>
+                                <p v-if="player.city" class="text-xs text-gray-500">{{ player.city }}</p>
+                            </div>
+                        </div>
+
+                        <div v-if="player.player_stats" class="mb-4 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Matches Played:</span>
+                                <span class="font-semibold text-gray-900">{{
+                                    player.player_stats.total_matches_played || 0 }}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm mt-1">
+                                <span class="text-gray-600">Rating:</span>
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                    <span class="font-semibold text-gray-900">{{
+                                        player.player_stats.sportsmanship_rating?.toFixed(1) || '5.0' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button v-if="isFriend(player.id)"
+                            class="w-full py-2 bg-gray-100 text-gray-600 rounded-lg font-medium cursor-default"
+                            disabled>
+                            Already Friends
+                        </button>
+                        <button v-else-if="hasSentRequest(player.id)"
+                            class="w-full py-2 bg-yellow-100 text-yellow-800 rounded-lg font-medium cursor-default"
+                            disabled>
+                            Request Sent
+                        </button>
+                        <button v-else-if="hasPendingRequest(player.id)"
+                            class="w-full py-2 bg-blue-100 text-blue-800 rounded-lg font-medium cursor-default"
+                            disabled>
+                            Request Pending
+                        </button>
+                        <button v-else @click="sendRequest(player.id)" :disabled="sendingRequest === player.id"
+                            class="w-full py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium disabled:bg-gray-400">
+                            {{ sendingRequest === player.id ? 'Sending...' : 'Add Friend' }}
+                        </button>
+                    </div>
+                </div>
+
+                <div v-else class="text-center py-20 bg-white rounded-xl shadow-md">
+                    <svg class="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p class="text-xl text-gray-600">Find New Friends</p>
+                    <p class="text-gray-500 mt-2">Search for players to connect with</p>
+                </div>
+            </div>
+
         </div>
+
     </div>
 </template>
 
@@ -159,6 +244,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFriends } from '@/composables/useFriends'
+import { userService } from '@/services/userService'
 
 const router = useRouter()
 const {
@@ -171,15 +257,26 @@ const {
     loadSentRequests,
     acceptFriendRequest,
     rejectFriendRequest,
-    removeFriend: removeFriendAction
+    removeFriend: removeFriendAction,
+    sendFriendRequest,
+    isFriend,
+    hasPendingRequest,
+    hasSentRequest
 } = useFriends()
+
+// const activeTab = ref('friends')
+const searchQuery = ref('')
+const searchResults = ref([])
+const searchLoading = ref(false)
+const sendingRequest = ref(null)
 
 const activeTab = ref('friends')
 
 const tabs = computed(() => [
     { id: 'friends', label: 'My Friends', count: friends.value.length },
     { id: 'pending', label: 'Requests', count: pendingRequests.value.length },
-    { id: 'sent', label: 'Sent', count: sentRequests.value.length }
+    { id: 'sent', label: 'Sent', count: sentRequests.value.length },
+    { id: 'find', label: 'Find Players', count: 0 }
 ])
 
 const getFriendName = (friendship) => {
