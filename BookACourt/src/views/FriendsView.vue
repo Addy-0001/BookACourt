@@ -183,25 +183,6 @@
                             </div>
                         </div>
 
-                        <div v-if="player.player_stats" class="mb-4 p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Matches Played:</span>
-                                <span class="font-semibold text-gray-900">{{
-                                    player.player_stats.total_matches_played || 0 }}</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm mt-1">
-                                <span class="text-gray-600">Rating:</span>
-                                <div class="flex items-center gap-1">
-                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                    </svg>
-                                    <span class="font-semibold text-gray-900">{{
-                                        player.player_stats.sportsmanship_rating?.toFixed(1) || '5.0' }}</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <button v-if="isFriend(player.id)"
                             class="w-full py-2 bg-gray-100 text-gray-600 rounded-lg font-medium cursor-default"
                             disabled>
@@ -245,6 +226,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFriends } from '@/composables/useFriends'
 import { userService } from '@/services/userService'
+import { debounce } from '@/utils/helpers'
 
 const router = useRouter()
 const {
@@ -264,13 +246,19 @@ const {
     hasSentRequest
 } = useFriends()
 
-// const activeTab = ref('friends')
 const searchQuery = ref('')
 const searchResults = ref([])
 const searchLoading = ref(false)
 const sendingRequest = ref(null)
-
 const activeTab = ref('friends')
+
+// Filter options
+const filters = ref({
+    city: '',
+    sport: '',
+    skill_level: '',
+    min_rating: ''
+})
 
 const tabs = computed(() => [
     { id: 'friends', label: 'My Friends', count: friends.value.length },
@@ -278,6 +266,47 @@ const tabs = computed(() => [
     { id: 'sent', label: 'Sent', count: sentRequests.value.length },
     { id: 'find', label: 'Find Players', count: 0 }
 ])
+
+// Search functionality
+const performSearch = async () => {
+    searchLoading.value = true
+    try {
+        const params = {
+            search: searchQuery.value.trim(),
+            ...filters.value
+        }
+
+        // Remove empty filter values
+        Object.keys(params).forEach(key => {
+            if (!params[key]) delete params[key]
+        })
+
+        const response = await userService.searchPlayers(params)
+        searchResults.value = response.results || response
+    } catch (err) {
+        console.error('Search failed:', err)
+        searchResults.value = []
+    } finally {
+        searchLoading.value = false
+    }
+}
+
+// Debounced search handler
+const handleSearch = debounce(performSearch, 500)
+
+// Send friend request
+const sendRequest = async (userId) => {
+    sendingRequest.value = userId
+    try {
+        await sendFriendRequest(userId)
+        await loadSentRequests()
+    } catch (err) {
+        console.error('Failed to send friend request:', err)
+        alert('Failed to send friend request. Please try again.')
+    } finally {
+        sendingRequest.value = null
+    }
+}
 
 const getFriendName = (friendship) => {
     const authUserId = JSON.parse(localStorage.getItem('user'))?.id
@@ -346,9 +375,21 @@ const loadAllData = async () => {
     ])
 }
 
-const goBack = () => router.go(-1)
+const clearFilters = () => {
+    filters.value = {
+        city: '',
+        sport: '',
+        skill_level: '',
+        min_rating: ''
+    }
+    performSearch()
+}
 
 onMounted(() => {
     loadAllData()
+    // Load initial player list
+    if (activeTab.value === 'find') {
+        performSearch()
+    }
 })
 </script>

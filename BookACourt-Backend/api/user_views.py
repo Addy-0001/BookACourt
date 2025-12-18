@@ -2,12 +2,109 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from user_management.models import PlayerStats, UserPreference, Friendship
 from .user_serializers import (
     PlayerStatsSerializer, UserPreferenceSerializer,
-    FriendshipSerializer, FriendshipCreateSerializer
+    FriendshipSerializer, FriendshipCreateSerializer, UserDetailsSerializer
 )
+from .user_serializers import PlayerSearchSerializer
+
+# Add this import at the top
+from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+# Add this new ViewSet at the end of the file
+
+
+class PlayerSearchViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for searching and listing players
+    Allows players to find others to play with
+    """
+    serializer_class = PlayerSearchSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = [
+        'full_name',
+        'phone_number',
+        'city',
+        'preferences__preferred_sports'
+    ]
+    ordering_fields = [
+        'full_name', 'created_at', 'loyalty_points',
+        'stats__total_matches_played', 'stats__sportsmanship_rating'
+    ]
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        """
+        Return all active players except the current user
+        """
+        from user_management.models import User, UserRole
+
+        queryset = User.objects.filter(
+            role=UserRole.PLAYER,
+            is_active=True
+        ).exclude(
+            id=self.request.user.id
+        ).select_related('stats').prefetch_related('preferences')
+
+        # Filter by city if provided
+        city = self.request.query_params.get('city')
+        if city:
+            queryset = queryset.filter(city__icontains=city)
+
+        # Filter by sport preference
+        sport = self.request.query_params.get('sport')
+        if sport:
+            queryset = queryset.filter(
+                preferences__preferred_sports__icontains=sport
+            )
+
+        # Filter by minimum rating
+        min_rating = self.request.query_params.get('min_rating')
+        if min_rating:
+            queryset = queryset.filter(
+                stats__sportsmanship_rating__gte=min_rating
+            )
+
+        # Filter by skill level (based on matches played)
+        skill_level = self.request.query_params.get('skill_level')
+        if skill_level == 'beginner':
+            queryset = queryset.filter(stats__total_matches_played__lt=10)
+        elif skill_level == 'intermediate':
+            queryset = queryset.filter(
+                stats__total_matches_played__gte=10,
+                stats__total_matches_played__lt=50
+            )
+        elif skill_level == 'advanced':
+            queryset = queryset.filter(stats__total_matches_played__gte=50)
+
+        return queryset.distinct()
+
+    @extend_schema(
+        summary="Search players",
+        description="Search for players to play with. Supports filtering by city, sport, rating, and skill level.",
+        parameters=[
+            OpenApiParameter('city', str, description='Filter by city'),
+            OpenApiParameter(
+                'sport', str, description='Filter by preferred sport'),
+            OpenApiParameter('min_rating', float,
+                             description='Minimum sportsmanship rating'),
+            OpenApiParameter(
+                'skill_level', str, description='Skill level: beginner, intermediate, or advanced'),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Get player details",
+        description="Get detailed information about a specific player"
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class PlayerStatsViewSet(viewsets.ReadOnlyModelViewSet):

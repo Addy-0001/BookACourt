@@ -13,6 +13,17 @@ export const userService = {
         return response.data;
     },
 
+    // ===== PLAYER SEARCH ===== 
+    async searchPlayers(params = {}) {
+        const response = await apiClient.get('/users/players/', { params });
+        return response.data;
+    },
+
+    async getPlayerById(id) {
+        const response = await apiClient.get(`/users/players/${id}/`);
+        return response.data;
+    },
+
     // ===== USER PREFERENCES =====
     async getPreferences() {
         const response = await apiClient.get('/users/preferences/');

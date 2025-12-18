@@ -12,6 +12,7 @@ User = get_user_model()
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     """Serializer for user details"""
+    player_stats = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -19,12 +20,19 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             'id', 'phone_number', 'email', 'full_name', 'role',
             'is_active', 'is_phone_verified', 'profile_picture',
             'date_of_birth', 'address', 'city', 'loyalty_points',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at', 'player_stats'
         )
         read_only_fields = (
             'id', 'is_phone_verified', 'loyalty_points',
             'created_at', 'updated_at'
         )
+
+    def get_player_stats(self, obj):
+        """Include player stats if user is a player"""
+        if obj.role == 'PLAYER' and hasattr(obj, 'stats'):
+            from api.user_serializers import PlayerStatsSerializer
+            return PlayerStatsSerializer(obj.stats).data
+        return None
 
 
 class RegisterSerializer(DefaultRegisterSerializer):

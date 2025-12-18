@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from django.contrib.auth import get_user_model
 
+
 from .serializers import (
     UserDetailsSerializer,
     OTPRequestSerializer,

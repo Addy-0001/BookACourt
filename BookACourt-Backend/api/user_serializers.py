@@ -1,6 +1,13 @@
 from rest_framework import serializers
 from user_management.models import PlayerStats, UserPreference, Friendship
 from .serializers import UserDetailsSerializer
+# import user
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+
+User = get_user_model()
 
 
 class PlayerStatsSerializer(serializers.ModelSerializer):
@@ -91,3 +98,52 @@ class FriendshipCreateSerializer(serializers.ModelSerializer):
         """Create friendship with current user as from_user"""
         validated_data['from_user'] = self.context['request'].user
         return super().create(validated_data)
+
+
+class PlayerSearchSerializer(serializers.ModelSerializer):
+    """Enhanced serializer for player search results"""
+    player_stats = PlayerStatsSerializer(source='stats', read_only=True)
+    preferences = serializers.SerializerMethodField()
+    friendship_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'phone_number', 'full_name', 'city',
+            'profile_picture', 'loyalty_points',
+            'player_stats', 'preferences', 'friendship_status'
+        ]
+
+    def get_preferences(self, obj):
+        """Get user preferences if they exist"""
+        try:
+            return {
+                'preferred_sports': obj.preferences.preferred_sports,
+                'preferred_time_slots': obj.preferences.preferred_time_slots
+            }
+        except:
+            return None
+
+    def get_friendship_status(self, obj):
+        """Check friendship status with current user"""
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+
+        from user_management.models import Friendship
+
+        # Check if already friends
+        friendship = Friendship.objects.filter(
+            Q(from_user=request.user, to_user=obj) |
+            Q(from_user=obj, to_user=request.user)
+        ).first()
+
+        if friendship:
+            if friendship.status == 'ACCEPTED':
+                return 'friends'
+            elif friendship.from_user == request.user:
+                return 'request_sent'
+            else:
+                return 'request_received'
+
+        return 'none'

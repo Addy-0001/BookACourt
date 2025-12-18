@@ -508,12 +508,11 @@ class CourtReviewViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        """Filter reviews by court"""
         queryset = CourtReview.objects.filter(is_visible=True)
-        court_id = self.request.query_params.get('court')
 
-        if court_id:
-            queryset = queryset.filter(court_id=court_id)
+        court_pk = self.kwargs.get('court_pk')
+        if court_pk:
+            queryset = queryset.filter(court_id=court_pk)
 
         return queryset.select_related('player', 'court')
 
@@ -578,6 +577,13 @@ class CourtReviewViewSet(viewsets.ModelViewSet):
         return Response({
             'message': 'Review flagged for moderation'
         })
+
+    # Create queryset
+    def perform_create(self, serializer):
+        serializer.save(
+            player=self.request.user,
+            court_id=self.kwargs.get('court_pk')
+        )
 
 
 class CourtBlockedSlotViewSet(viewsets.ModelViewSet):
