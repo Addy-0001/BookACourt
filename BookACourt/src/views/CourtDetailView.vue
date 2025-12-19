@@ -1,50 +1,43 @@
 <template>
-    <div class="min-h-screen bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="court-detail-page">
+        <div class="container">
             <!-- Back Button -->
-            <button @click="goBack"
-                class="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="goBack" class="back-button">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                <span class="font-medium">Back to Courts</span>
+                <span>Back to Courts</span>
             </button>
 
             <!-- Loading -->
-            <div v-if="loading" class="flex justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div v-if="loading" class="loading-container">
+                <div class="spinner"></div>
             </div>
 
             <!-- Error -->
-            <div v-else-if="error" class="text-center py-20">
-                <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div v-else-if="error" class="error-container">
+                <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-xl text-gray-600">{{ error }}</p>
+                <p>{{ error }}</p>
             </div>
 
             <!-- Court Details -->
-            <div v-else-if="court" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div v-else-if="court" class="detail-grid">
                 <!-- Left Column - Court Info -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="left-column">
                     <!-- Images -->
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div v-if="court.images && court.images.length > 0" class="h-96 relative">
-                            <img :src="court.images[currentImageIndex].image" :alt="court.name"
-                                class="w-full h-full object-cover" />
-                            <div v-if="court.images.length > 1"
-                                class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <div class="image-card">
+                        <div v-if="court.images && court.images.length > 0" class="image-container">
+                            <img :src="court.images[currentImageIndex].image" :alt="court.name" class="court-image" />
+                            <div v-if="court.images.length > 1" class="image-indicators">
                                 <button v-for="(img, idx) in court.images" :key="idx" @click="currentImageIndex = idx"
-                                    :class="[
-                                        'w-3 h-3 rounded-full transition-colors',
-                                        idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                                    ]" />
+                                    :class="['indicator', { active: idx === currentImageIndex }]" />
                             </div>
                         </div>
-                        <div v-else
-                            class="h-96 bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
-                            <svg class="w-32 h-32 text-white opacity-50" fill="currentColor" viewBox="0 0 24 24">
+                        <div v-else class="placeholder-image">
+                            <svg class="placeholder-icon" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
                             </svg>
@@ -52,15 +45,14 @@
                     </div>
 
                     <!-- Basic Info -->
-                    <div class="bg-white rounded-xl shadow-md p-6">
-                        <div class="flex items-start justify-between mb-4">
+                    <div class="info-card">
+                        <div class="header-section">
                             <div>
-                                <h2 class="text-3xl font-bold text-gray-900">{{ court.name }}</h2>
-                                <p class="text-gray-600 mt-1">{{ court.category?.name || court.court_type }}</p>
+                                <h2 class="court-title">{{ court.name }}</h2>
+                                <p class="court-category">{{ court.category?.name || court.court_type }}</p>
                             </div>
-                            <span v-if="court.is_verified"
-                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <span v-if="court.is_verified" class="verified-badge">
+                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                         d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                         clip-rule="evenodd" />
@@ -69,24 +61,26 @@
                             </span>
                         </div>
 
-                        <div class="flex items-center gap-4 text-gray-600 mb-4">
-                            <div class="flex items-center gap-1">
-                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="meta-info">
+                            <div class="rating-section">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                 </svg>
-                                <span class="font-medium">{{ court.average_rating || '0.0' }}</span>
-                                <span>({{ court.total_reviews || 0 }} reviews)</span>
+                                <span class="rating-value">{{ court.average_rating || '0.0' }}</span>
+                                <span class="review-count">({{ court.total_reviews || 0 }} reviews)</span>
                             </div>
-                            <span>•</span>
+                            <span class="separator">•</span>
                             <span>{{ court.is_indoor ? 'Indoor' : 'Outdoor' }}</span>
-                            <span>•</span>
+                            <span class="separator">•</span>
                             <span>Capacity: {{ court.capacity }}</span>
                         </div>
 
-                        <div class="border-t pt-4">
-                            <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="divider"></div>
+
+                        <div class="location-section">
+                            <h3 class="section-title">
+                                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -94,242 +88,236 @@
                                 </svg>
                                 Location
                             </h3>
-                            <p class="text-gray-600">{{ court.address }}</p>
-                            <p class="text-gray-600">{{ court.city }}</p>
+                            <p class="location-text">{{ court.address }}</p>
+                            <p class="location-text">{{ court.city }}</p>
                         </div>
 
-                        <div v-if="court.description" class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-2">Description</h3>
-                            <p class="text-gray-600">{{ court.description }}</p>
+                        <div v-if="court.description" class="description-section">
+                            <div class="divider"></div>
+                            <h3 class="section-title">Description</h3>
+                            <p class="description-text">{{ court.description }}</p>
                         </div>
 
-                        <div v-if="court.amenities_list && court.amenities_list.length" class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-2">Amenities</h3>
-                            <div class="flex flex-wrap gap-2">
-                                <span v-for="amenity in court.amenities_list" :key="amenity"
-                                    class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                        <div v-if="court.amenities_list && court.amenities_list.length" class="amenities-section">
+                            <div class="divider"></div>
+                            <h3 class="section-title">Amenities</h3>
+                            <div class="amenities-list">
+                                <span v-for="amenity in court.amenities_list" :key="amenity" class="amenity-tag">
                                     {{ amenity }}
                                 </span>
                             </div>
                         </div>
 
-                        <div class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="hours-section">
+                            <div class="divider"></div>
+                            <h3 class="section-title">
+                                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Operating Hours
                             </h3>
-                            <p class="text-gray-600">{{ court.opening_time }} - {{ court.closing_time }}</p>
+                            <p class="hours-text">{{ court.opening_time }} - {{ court.closing_time }}</p>
                         </div>
 
                         <!-- Dynamic Pricing -->
-                        <div v-if="court.pricing_rules && court.pricing_rules.length" class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-3">Pricing Schedule</h3>
-                            <div class="space-y-2">
-                                <div v-for="rule in court.pricing_rules" :key="rule.id"
-                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div v-if="court.pricing_rules && court.pricing_rules.length" class="pricing-section">
+                            <div class="divider"></div>
+                            <h3 class="section-title">Pricing Schedule</h3>
+                            <div class="pricing-list">
+                                <div v-for="rule in court.pricing_rules" :key="rule.id" class="pricing-rule">
                                     <div>
-                                        <p class="font-medium text-gray-900">{{ rule.description }}</p>
-                                        <p class="text-sm text-gray-600">{{ rule.start_time }} - {{ rule.end_time }}</p>
-                                        <p class="text-xs text-gray-500">{{ formatDaysOfWeek(rule.days_of_week) }}</p>
+                                        <p class="rule-description">{{ rule.description }}</p>
+                                        <p class="rule-time">{{ rule.start_time }} - {{ rule.end_time }}</p>
+                                        <p class="rule-days">{{ formatDaysOfWeek(rule.days_of_week) }}</p>
                                     </div>
-                                    <span class="text-lg font-bold text-blue-600">Rs {{ rule.hourly_rate }}/hr</span>
+                                    <span class="rule-rate">Rs {{ rule.hourly_rate }}/hr</span>
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-3">Standard Pricing</h3>
-                            <div class="p-3 bg-gray-50 rounded-lg">
-                                <span class="text-lg font-bold text-blue-600">Rs {{ court.base_hourly_rate }}/hr</span>
+                        <div v-else class="pricing-section">
+                            <div class="divider"></div>
+                            <h3 class="section-title">Standard Pricing</h3>
+                            <div class="standard-price">
+                                <span class="price-amount">Rs {{ court.base_hourly_rate }}/hr</span>
                             </div>
                         </div>
 
                         <!-- Equipment -->
-                        <div v-if="court.equipment && court.equipment.length" class="border-t pt-4 mt-4">
-                            <h3 class="font-semibold text-gray-900 mb-3">Available Equipment</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div v-for="item in court.equipment" :key="item.id"
-                                    class="p-3 border border-gray-200 rounded-lg">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <p class="font-medium text-gray-900">{{ item.name }}</p>
-                                        <span :class="item.quantity_available > 0 ? 'text-green-600' : 'text-red-600'"
-                                            class="text-sm font-medium">
+                        <div v-if="court.equipment && court.equipment.length" class="equipment-section">
+                            <div class="divider"></div>
+                            <h3 class="section-title">Available Equipment</h3>
+                            <div class="equipment-grid">
+                                <div v-for="item in court.equipment" :key="item.id" class="equipment-item">
+                                    <div class="equipment-header">
+                                        <p class="equipment-name">{{ item.name }}</p>
+                                        <span
+                                            :class="['equipment-status', item.quantity_available > 0 ? 'available' : 'unavailable']">
                                             {{ item.quantity_available }}/{{ item.quantity_total }} available
                                         </span>
                                     </div>
-                                    <p class="text-sm text-gray-600 mb-2">{{ item.description }}</p>
-                                    <p class="text-sm font-bold text-blue-600">Rs {{ item.rental_rate }}/session</p>
+                                    <p class="equipment-description">{{ item.description }}</p>
+                                    <p class="equipment-price">Rs {{ item.rental_rate }}/session</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Reviews Section -->
-                    <div class="bg-white rounded-xl shadow-md p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xl font-bold text-gray-900">Reviews</h3>
-                            <button v-if="canReview" @click="showReviewModal = true"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <div class="reviews-card">
+                        <div class="reviews-header">
+                            <h3 class="reviews-title">Reviews</h3>
+                            <button v-if="canReview" @click="showReviewModal = true" class="write-review-btn">
                                 {{ userReview ? 'Edit Review' : 'Write Review' }}
                             </button>
                         </div>
 
-                        <div v-if="reviews.length > 0" class="space-y-4">
-                            <div v-for="review in reviews" :key="review.id" class="border-b pb-4 last:border-0">
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                        <div v-if="reviews.length > 0" class="reviews-list">
+                            <div v-for="review in reviews" :key="review.id" class="review-item">
+                                <div class="review-content">
+                                    <div class="reviewer-avatar">
                                         {{ review.player_name.charAt(0).toUpperCase() }}
                                     </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="font-semibold">{{ review.player_name }}</span>
-                                            <div class="flex">
-                                                <svg v-for="i in 5" :key="i" class="w-4 h-4"
-                                                    :class="i <= review.rating ? 'text-yellow-400' : 'text-gray-300'"
-                                                    fill="currentColor" viewBox="0 0 24 24">
+                                    <div class="review-body">
+                                        <div class="review-header-line">
+                                            <span class="reviewer-name">{{ review.player_name }}</span>
+                                            <div class="review-stars">
+                                                <svg v-for="i in 5" :key="i" class="star"
+                                                    :class="i <= review.rating ? 'filled' : 'empty'" fill="currentColor"
+                                                    viewBox="0 0 24 24">
                                                     <path
                                                         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                                 </svg>
                                             </div>
                                             <span v-if="review.player === authStore.user?.id"
-                                                class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">You</span>
+                                                class="you-badge">You</span>
                                         </div>
-                                        <p class="text-gray-600 text-sm">{{ review.review_text }}</p>
-                                        <p class="text-gray-400 text-xs mt-1">{{ formatDate(review.created_at) }}</p>
-                                        <div v-if="review.owner_response" class="mt-2 ml-4 p-3 bg-gray-50 rounded-lg">
-                                            <p class="text-sm font-semibold text-gray-700">Owner's Response</p>
-                                            <p class="text-sm text-gray-600">{{ review.owner_response }}</p>
+                                        <p class="review-text">{{ review.review_text }}</p>
+                                        <p class="review-date">{{ formatDate(review.created_at) }}</p>
+                                        <div v-if="review.owner_response" class="owner-response">
+                                            <p class="response-label">Owner's Response</p>
+                                            <p class="response-text">{{ review.owner_response }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <p v-else class="text-gray-500 text-center py-4">No reviews yet</p>
+                        <p v-else class="no-reviews">No reviews yet</p>
                     </div>
                 </div>
 
                 <!-- Right Column - Booking -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-xl shadow-md p-6 sticky top-24">
-                        <div class="mb-6">
-                            <div class="text-3xl font-bold text-blue-600 mb-1">
-                                Rs {{ displayRate }}<span class="text-lg text-gray-600">/hour</span>
+                <div class="right-column">
+                    <div class="booking-card">
+                        <div class="price-header">
+                            <div class="price-display">
+                                Rs {{ displayRate }}<span class="price-unit">/hour</span>
                             </div>
-                            <p class="text-sm text-gray-500">{{ rateDescription }}</p>
+                            <p class="price-description">{{ rateDescription }}</p>
                         </div>
 
-                        <div v-if="bookingSuccess" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                            <p class="text-green-800 font-medium">Booking created successfully!</p>
+                        <div v-if="bookingSuccess" class="success-alert">
+                            <p>Booking created successfully!</p>
                         </div>
 
-                        <div v-if="bookingError" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <p class="text-red-800">{{ bookingError }}</p>
+                        <div v-if="bookingError" class="error-alert">
+                            <p>{{ bookingError }}</p>
                         </div>
 
-                        <form @submit.prevent="handleBooking" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <form @submit.prevent="handleBooking" class="booking-form">
+                            <div class="form-group">
+                                <label class="form-label">Date</label>
+                                <!-- Set default date to today and added calendar styling -->
                                 <input v-model="bookingForm.date" type="date" :min="minDate" required
-                                    @change="onDateOrTimeChange"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                                    @change="onDateOrTimeChange" class="form-input date-input" />
                             </div>
 
-                            <!-- Available Slots -->
-                            <div v-if="bookingForm.date && availableSlots.length > 0">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Available Time Slots</label>
-                                <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                            <!-- Redesigned slots to show available (green) and unavailable (red), allow multiple selections -->
+                            <div v-if="bookingForm.date && (availableSlots.length > 0 || unavailableSlots.length > 0)">
+                                <label class="form-label">Select Time Slots (Multiple allowed)</label>
+                                <div class="slots-grid">
                                     <button v-for="slot in availableSlots" :key="slot.start_time" type="button"
-                                        @click="selectTimeSlot(slot)" :class="[
-                                            'px-3 py-2 text-sm font-medium rounded-lg border-2 transition-colors',
-                                            isSlotSelected(slot)
-                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                                : 'border-gray-200 hover:border-blue-300'
-                                        ]">
-                                        {{ slot.start_time }} - {{ slot.end_time }}
+                                        @click="toggleTimeSlot(slot)"
+                                        :class="['slot-button', 'available', { selected: isSlotSelected(slot) }]">
+                                        <span class="slot-time">{{ slot.start_time }} - {{ slot.end_time }}</span>
+                                    </button>
+                                    <button v-for="slot in unavailableSlots" :key="'unavail-' + slot.start_time"
+                                        type="button" disabled :class="['slot-button', 'unavailable']">
+                                        <span class="slot-time">{{ slot.start_time }} - {{ slot.end_time }}</span>
+                                        <span class="unavailable-label">Booked</span>
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Manual Time Selection -->
-                            <div v-else class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                            <div v-else-if="bookingForm.date" class="time-inputs">
+                                <div class="form-group">
+                                    <label class="form-label">Start Time</label>
                                     <input v-model="bookingForm.start_time" type="time" required
-                                        @change="onDateOrTimeChange"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                                        @change="onDateOrTimeChange" class="form-input" />
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                <div class="form-group">
+                                    <label class="form-label">End Time</label>
                                     <input v-model="bookingForm.end_time" type="time" required
-                                        @change="onDateOrTimeChange"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                                        @change="onDateOrTimeChange" class="form-input" />
                                 </div>
                             </div>
 
                             <!-- Equipment Selection -->
-                            <div v-if="court.equipment && court.equipment.length > 0">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Rent Equipment
-                                    (Optional)</label>
-                                <div class="space-y-2 max-h-32 overflow-y-auto">
+                            <div v-if="court.equipment && court.equipment.length > 0" class="form-group">
+                                <label class="form-label">Rent Equipment (Optional)</label>
+                                <div class="equipment-options">
                                     <label v-for="item in court.equipment.filter(e => e.quantity_available > 0)"
-                                        :key="item.id" class="flex items-center gap-2 p-2 border rounded-lg">
-                                        <input type="checkbox" :value="item.id" v-model="bookingForm.equipment_rentals"
-                                            class="rounded text-blue-600" />
-                                        <span class="flex-1 text-sm">{{ item.name }} (Rs {{ item.rental_rate
-                                        }})</span>
+                                        :key="item.id" class="equipment-checkbox">
+                                        <input type="checkbox" :value="item.id"
+                                            v-model="bookingForm.equipment_rentals" />
+                                        <span class="equipment-label">{{ item.name }} (Rs {{ item.rental_rate }})</span>
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Notes -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                            <div class="form-group">
+                                <label class="form-label">Notes (Optional)</label>
                                 <textarea v-model="bookingForm.notes" rows="2"
-                                    placeholder="Any special requests or notes..."
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                                    placeholder="Any special requests or notes..." class="form-textarea"></textarea>
                             </div>
 
-                            <div v-if="bookingForm.date && bookingForm.start_time && bookingForm.end_time">
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <p class="text-sm text-blue-800 font-medium">Booking Summary</p>
-                                    <div class="mt-2 space-y-1 text-sm text-blue-900">
-                                        <div class="flex justify-between">
-                                            <span>Court Fee ({{ duration.toFixed(1) }} hrs @ Rs {{ currentRate
-                                            }}/hr)</span>
-                                            <span class="font-medium">Rs {{ courtFeeDisplay }}</span>
-                                        </div>
-                                        <div v-if="equipmentFee > 0" class="flex justify-between">
-                                            <span>Equipment Rental</span>
-                                            <span class="font-medium">Rs {{ equipmentFeeDisplay }}</span>
-                                        </div>
-                                        <div class="flex justify-between pt-2 border-t border-blue-200 font-bold">
-                                            <span>Total</span>
-                                            <span>Rs {{ estimatedTotalDisplay }}</span>
-                                        </div>
+                            <div v-if="bookingForm.date && selectedSlots.length > 0" class="booking-summary">
+                                <p class="summary-title">Booking Summary</p>
+                                <div class="summary-details">
+                                    <div class="summary-row">
+                                        <span>Court Fee ({{ totalDuration.toFixed(1) }} hrs @ Rs {{ currentRate
+                                        }}/hr)</span>
+                                        <span class="summary-amount">Rs {{ courtFeeDisplay }}</span>
+                                    </div>
+                                    <div v-if="equipmentFee > 0" class="summary-row">
+                                        <span>Equipment Rental</span>
+                                        <span class="summary-amount">Rs {{ equipmentFeeDisplay }}</span>
+                                    </div>
+                                    <div class="summary-divider"></div>
+                                    <div class="summary-row total">
+                                        <span>Total</span>
+                                        <span>Rs {{ estimatedTotalDisplay }}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <button type="submit" :disabled="bookingLoading || !canBook"
-                                class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors">
+                            <button type="submit" :disabled="bookingLoading || !canBook" class="book-button">
                                 <span v-if="bookingLoading">Processing...</span>
                                 <span v-else>Book Now</span>
                             </button>
 
-                            <button v-if="bookingForm.date && bookingForm.start_time && bookingForm.end_time"
-                                type="button" @click="checkAvailability" :disabled="availabilityLoading"
-                                class="w-full py-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition-colors">
+                            <button v-if="bookingForm.date && selectedSlots.length > 0" type="button"
+                                @click="checkAvailability" :disabled="availabilityLoading" class="check-button">
                                 <span v-if="availabilityLoading">Checking...</span>
                                 <span v-else>Check Availability</span>
                             </button>
                         </form>
 
-                        <div v-if="availabilityMessage" class="mt-4 p-3 rounded-lg"
-                            :class="isAvailable ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'">
-                            <p class="text-sm font-medium">{{ availabilityMessage }}</p>
+                        <div v-if="availabilityMessage"
+                            :class="['availability-message', isAvailable ? 'available-msg' : 'unavailable-msg']">
+                            <p>{{ availabilityMessage }}</p>
                         </div>
                     </div>
                 </div>
@@ -337,20 +325,17 @@
         </div>
 
         <!-- Review Modal -->
-        <div v-if="showReviewModal"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ userReview ? 'Edit Your Review' : 'Write a Review'
-                    }}</h3>
+        <div v-if="showReviewModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3 class="modal-title">{{ userReview ? 'Edit Your Review' : 'Write a Review' }}</h3>
 
-                <form @submit.prevent="submitReview" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                        <div class="flex gap-2">
+                <form @submit.prevent="submitReview" class="review-form">
+                    <div class="form-group">
+                        <label class="form-label">Rating</label>
+                        <div class="rating-buttons">
                             <button v-for="i in 5" :key="i" type="button" @click="reviewForm.rating = i"
-                                class="w-10 h-10 transition-transform hover:scale-110">
-                                <svg class="w-full h-full"
-                                    :class="i <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'"
+                                class="rating-star-button">
+                                <svg class="rating-star" :class="i <= reviewForm.rating ? 'filled' : 'empty'"
                                     fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -359,20 +344,18 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                    <div class="form-group">
+                        <label class="form-label">Your Review</label>
                         <textarea v-model="reviewForm.review_text" rows="4" placeholder="Share your experience..."
-                            required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            required class="form-textarea"></textarea>
                     </div>
 
-                    <div class="flex gap-3">
-                        <button type="button" @click="closeReviewModal"
-                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    <div class="modal-actions">
+                        <button type="button" @click="closeReviewModal" class="cancel-button">
                             Cancel
                         </button>
                         <button type="submit" :disabled="submittingReview || reviewForm.rating === 0"
-                            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                            class="submit-button">
                             {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
                         </button>
                     </div>
@@ -398,10 +381,12 @@ const error = ref(null)
 const court = ref(null)
 const reviews = ref([])
 const availableSlots = ref([])
+const unavailableSlots = ref([])
+const selectedSlots = ref([])
 const currentImageIndex = ref(0)
 
 const bookingForm = ref({
-    date: '',
+    date: new Date().toISOString().split('T')[0],
     start_time: '',
     end_time: '',
     notes: '',
@@ -427,8 +412,22 @@ const minDate = computed(() => {
     return today.toISOString().split('T')[0]
 })
 
-// Calculate duration in hours
+const totalDuration = computed(() => {
+    if (selectedSlots.value.length === 0) return 0
+
+    return selectedSlots.value.reduce((total, slot) => {
+        const start = new Date(`2000-01-01 ${slot.start_time}`)
+        const end = new Date(`2000-01-01 ${slot.end_time}`)
+        const hours = Math.max(0, (end - start) / (1000 * 60 * 60))
+        return total + hours
+    }, 0)
+})
+
+// Calculate duration in hours (for backwards compatibility)
 const duration = computed(() => {
+    if (selectedSlots.value.length > 0) {
+        return totalDuration.value
+    }
     if (!bookingForm.value.start_time || !bookingForm.value.end_time) return 0
     const start = new Date(`2000-01-01 ${bookingForm.value.start_time}`)
     const end = new Date(`2000-01-01 ${bookingForm.value.end_time}`)
@@ -438,12 +437,14 @@ const duration = computed(() => {
 
 // Find applicable pricing rule based on date and time
 const applicablePricingRule = computed(() => {
-    if (!court.value || !bookingForm.value.start_time || !bookingForm.value.date) {
+    if (!court.value || !bookingForm.value.date) {
         return null
     }
 
     const dayOfWeek = new Date(bookingForm.value.date).getDay()
-    const startTime = bookingForm.value.start_time
+    const startTime = selectedSlots.value.length > 0 ? selectedSlots.value[0].start_time : bookingForm.value.start_time
+
+    if (!startTime) return null
 
     // Find matching pricing rule
     const matchingRule = court.value.pricing_rules?.find(rule => {
@@ -487,7 +488,7 @@ const rateDescription = computed(() => {
 
 // Calculate court fee based on duration and current rate
 const courtFee = computed(() => {
-    const fee = duration.value * currentRate.value
+    const fee = totalDuration.value * currentRate.value
     return fee
 })
 
@@ -514,10 +515,7 @@ const estimatedTotalDisplay = computed(() => estimatedTotal.value.toFixed(2))
 
 // Check if booking form is valid
 const canBook = computed(() => {
-    return bookingForm.value.date &&
-        bookingForm.value.start_time &&
-        bookingForm.value.end_time &&
-        duration.value > 0
+    return bookingForm.value.date && selectedSlots.value.length > 0 && totalDuration.value > 0
 })
 
 // Find user's existing review
@@ -548,6 +546,7 @@ const onDateOrTimeChange = () => {
     // Clear availability message when inputs change
     availabilityMessage.value = null
     isAvailable.value = false
+    selectedSlots.value = []
 
     // Load available slots if date is selected
     if (bookingForm.value.date) {
@@ -562,6 +561,9 @@ const loadCourtDetails = async () => {
     try {
         court.value = await courtService.getCourtById(route.params.id)
         await loadReviews()
+        if (bookingForm.value.date) {
+            await loadAvailableSlots()
+        }
     } catch (err) {
         console.error('Failed to load court:', err)
         error.value = 'Failed to load court details'
@@ -580,45 +582,68 @@ const loadReviews = async () => {
     }
 }
 
-// Load available time slots for selected date
 const loadAvailableSlots = async () => {
     if (!bookingForm.value.date) return
 
     try {
         const response = await courtService.getAvailableSlots(route.params.id, bookingForm.value.date)
         availableSlots.value = response.available_slots || []
+        unavailableSlots.value = response.unavailable_slots || []
     } catch (err) {
         console.error('Failed to load available slots:', err)
         availableSlots.value = []
+        unavailableSlots.value = []
     }
 }
 
-// Select a time slot
-const selectTimeSlot = (slot) => {
-    bookingForm.value.start_time = slot.start_time
-    bookingForm.value.end_time = slot.end_time
+const toggleTimeSlot = (slot) => {
+    const index = selectedSlots.value.findIndex(s =>
+        s.start_time === slot.start_time && s.end_time === slot.end_time
+    )
+
+    if (index > -1) {
+        selectedSlots.value.splice(index, 1)
+    } else {
+        selectedSlots.value.push(slot)
+        // Sort by start time
+        selectedSlots.value.sort((a, b) => a.start_time.localeCompare(b.start_time))
+    }
+
     availabilityMessage.value = null
     isAvailable.value = false
 }
 
 // Check if a slot is currently selected
 const isSlotSelected = (slot) => {
-    return bookingForm.value.start_time === slot.start_time &&
-        bookingForm.value.end_time === slot.end_time
+    return selectedSlots.value.some(s =>
+        s.start_time === slot.start_time && s.end_time === slot.end_time
+    )
 }
 
 // Check court availability
 const checkAvailability = async () => {
+    if (selectedSlots.value.length === 0) return
+
     availabilityLoading.value = true
     availabilityMessage.value = null
     try {
-        const response = await courtService.checkAvailability(route.params.id, {
-            date: bookingForm.value.date,
-            start_time: bookingForm.value.start_time,
-            end_time: bookingForm.value.end_time
-        })
-        isAvailable.value = response.available
-        availabilityMessage.value = response.message || (response.available ? 'Court is available!' : response.reason)
+        // Check all selected slots
+        for (const slot of selectedSlots.value) {
+            const response = await courtService.checkAvailability(route.params.id, {
+                date: bookingForm.value.date,
+                start_time: slot.start_time,
+                end_time: slot.end_time
+            })
+
+            if (!response.available) {
+                isAvailable.value = false
+                availabilityMessage.value = `Slot ${slot.start_time}-${slot.end_time} is not available: ${response.reason || response.message}`
+                return
+            }
+        }
+
+        isAvailable.value = true
+        availabilityMessage.value = 'All selected slots are available!'
     } catch (err) {
         availabilityMessage.value = 'Failed to check availability'
         isAvailable.value = false
@@ -627,33 +652,46 @@ const checkAvailability = async () => {
     }
 }
 
-// Handle booking submission
 const handleBooking = async () => {
+    if (selectedSlots.value.length === 0) {
+        bookingError.value = 'Please select at least one time slot'
+        return
+    }
+
     bookingLoading.value = true
     bookingError.value = null
     bookingSuccess.value = false
 
     try {
-        // Ensure amounts are sent as numeric values (not strings with toFixed)
-        const bookingData = {
-            court: parseInt(route.params.id),
-            booking_date: bookingForm.value.date,
-            start_time: bookingForm.value.start_time,
-            end_time: bookingForm.value.end_time,
-            payment_method: 'ONLINE',
-            base_amount: courtFee.value.toFixed(2),
-            total_amount: estimatedTotal.value.toFixed(2),
-            notes: bookingForm.value.notes || ''
-        }
+        // Create bookings for each selected slot
+        for (const slot of selectedSlots.value) {
+            const slotDuration = (() => {
+                const start = new Date(`2000-01-01 ${slot.start_time}`)
+                const end = new Date(`2000-01-01 ${slot.end_time}`)
+                return (end - start) / (1000 * 60 * 60)
+            })()
 
-        console.log('Booking data being sent:', bookingData)
+            const slotCourtFee = slotDuration * currentRate.value
+            const slotTotal = slotCourtFee + equipmentFee.value
 
-        const booking = await bookingService.createBooking(bookingData)
+            const bookingData = {
+                court: parseInt(route.params.id),
+                booking_date: bookingForm.value.date,
+                start_time: slot.start_time,
+                end_time: slot.end_time,
+                payment_method: 'ONLINE',
+                base_amount: slotCourtFee.toFixed(2),
+                total_amount: slotTotal.toFixed(2),
+                notes: bookingForm.value.notes || ''
+            }
 
-        // Handle equipment rentals
-        if (bookingForm.value.equipment_rentals.length > 0) {
-            for (const equipId of bookingForm.value.equipment_rentals) {
-                await bookingService.rentEquipment(booking.id, equipId, 1)
+            const booking = await bookingService.createBooking(bookingData)
+
+            // Handle equipment rentals for first booking only
+            if (bookingForm.value.equipment_rentals.length > 0 && selectedSlots.value[0] === slot) {
+                for (const equipId of bookingForm.value.equipment_rentals) {
+                    await bookingService.rentEquipment(booking.id, equipId, 1)
+                }
             }
         }
 
@@ -724,3 +762,1012 @@ onMounted(() => {
     loadCourtDetails()
 })
 </script>
+
+<style scoped>
+/* Color Variables */
+:root {
+    --primary-blue: #0056B3;
+    --red-cta: #EF4444;
+    --purple-accent: #7C3AED;
+    --success-green: #10B981;
+    --warning-orange: #F59E0B;
+    --charcoal: #1F2937;
+    --muted: #9CA3AF;
+    --orange: #FF6B35;
+}
+
+/* Base Styles */
+.court-detail-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem 0;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Back Button */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.625rem 1rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    color: var(--charcoal);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    transform: translateX(-4px);
+}
+
+.back-button .icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 5rem 0;
+}
+
+.spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 3px solid #e5e7eb;
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error */
+.error-container {
+    text-align: center;
+    padding: 5rem 0;
+}
+
+.error-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    color: var(--red-cta);
+}
+
+.error-container p {
+    font-size: 1.25rem;
+    color: var(--muted);
+}
+
+/* Grid Layout */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .detail-grid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+/* Left Column */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Cards */
+.image-card,
+.info-card,
+.reviews-card,
+.booking-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+/* Image Section */
+.image-container {
+    position: relative;
+    height: 24rem;
+}
+
+.court-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-indicators {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background: white;
+    transform: scale(1.2);
+}
+
+.placeholder-image {
+    height: 24rem;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-icon {
+    width: 8rem;
+    height: 8rem;
+    color: white;
+    opacity: 0.5;
+}
+
+/* Info Card */
+.info-card {
+    padding: 2rem;
+}
+
+.header-section {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.court-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.court-category {
+    color: var(--muted);
+    margin-top: 0.25rem;
+}
+
+.verified-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: #d1fae5;
+    color: var(--success-green);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.meta-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+.rating-section {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.star-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--warning-orange);
+}
+
+.rating-value {
+    font-weight: 500;
+    color: var(--charcoal);
+}
+
+.review-count {
+    color: var(--muted);
+}
+
+.separator {
+    color: #d1d5db;
+}
+
+.divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 1.5rem 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+}
+
+.section-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--primary-blue);
+}
+
+.location-text,
+.description-text,
+.hours-text {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.location-text {
+    margin-bottom: 0.25rem;
+}
+
+.description-text {
+    margin-top: 0.5rem;
+}
+
+.description-section,
+.amenities-section,
+.hours-section,
+.pricing-section,
+.equipment-section {
+    margin-top: 1.5rem;
+}
+
+.amenities-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.amenity-tag {
+    padding: 0.5rem 0.75rem;
+    background: #eff6ff;
+    color: var(--primary-blue);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.pricing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pricing-rule {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+}
+
+.rule-description {
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 0.25rem;
+}
+
+.rule-time {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+}
+
+.rule-days {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.rule-rate {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.standard-price {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+}
+
+.price-amount {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.equipment-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .equipment-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.equipment-item {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+}
+
+.equipment-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.equipment-name {
+    font-weight: 500;
+    color: var(--charcoal);
+}
+
+.equipment-status {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.equipment-status.available {
+    color: var(--success-green);
+}
+
+.equipment-status.unavailable {
+    color: var(--red-cta);
+}
+
+.equipment-description {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+}
+
+.equipment-price {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+/* Reviews */
+.reviews-card {
+    padding: 2rem;
+}
+
+.reviews-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.reviews-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--charcoal);
+}
+
+.write-review-btn {
+    padding: 0.625rem 1rem;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--red-cta) 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.write-review-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.review-item {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-content {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.reviewer-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.review-body {
+    flex: 1;
+}
+
+.review-header-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.reviewer-name {
+    font-weight: 600;
+    color: var(--charcoal);
+}
+
+.review-stars {
+    display: flex;
+}
+
+.review-stars .star {
+    width: 1rem;
+    height: 1rem;
+}
+
+.review-stars .star.filled {
+    color: var(--warning-orange);
+}
+
+.review-stars .star.empty {
+    color: #d1d5db;
+}
+
+.you-badge {
+    padding: 0.25rem 0.5rem;
+    background: #eff6ff;
+    color: var(--primary-blue);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.review-text {
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+.review-date {
+    color: #d1d5db;
+    font-size: 0.75rem;
+}
+
+.owner-response {
+    margin-top: 0.75rem;
+    margin-left: 1rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+}
+
+.response-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 0.25rem;
+}
+
+.response-text {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+.no-reviews {
+    text-align: center;
+    color: var(--muted);
+    padding: 1rem 0;
+}
+
+/* Right Column - Booking */
+.right-column {
+    position: relative;
+}
+
+.booking-card {
+    padding: 1.5rem;
+    position: sticky;
+    top: 6rem;
+}
+
+.price-header {
+    margin-bottom: 1.5rem;
+}
+
+.price-display {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.25rem;
+}
+
+.price-unit {
+    font-size: 1.125rem;
+    color: var(--muted);
+}
+
+.price-description {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+/* Alerts */
+.success-alert,
+.error-alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.success-alert {
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+}
+
+.success-alert p {
+    color: #065f46;
+    font-weight: 500;
+}
+
+.error-alert {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+}
+
+.error-alert p {
+    color: #991b1b;
+}
+
+/* Form */
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--charcoal);
+}
+
+.form-input,
+.form-textarea {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+}
+
+.date-input {
+    cursor: pointer;
+}
+
+.time-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* Slots Grid */
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    max-height: 16rem;
+    overflow-y: auto;
+    padding: 0.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+}
+
+.slot-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    border: 2px solid;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.slot-button.available {
+    border-color: var(--success-green);
+    color: var(--success-green);
+    background: #d1fae5;
+}
+
+.slot-button.available:hover {
+    background: var(--success-green);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.slot-button.available.selected {
+    background: var(--success-green);
+    color: white;
+    border-color: var(--success-green);
+}
+
+.slot-button.unavailable {
+    border-color: var(--red-cta);
+    color: var(--red-cta);
+    background: #fee2e2;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.slot-time {
+    font-weight: 600;
+}
+
+.unavailable-label {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
+}
+
+/* Equipment Options */
+.equipment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 8rem;
+    overflow-y: auto;
+    padding: 0.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+}
+
+.equipment-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.equipment-checkbox:hover {
+    background: #f9fafb;
+}
+
+.equipment-checkbox input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--primary-blue);
+    cursor: pointer;
+}
+
+.equipment-label {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--charcoal);
+}
+
+/* Booking Summary */
+.booking-summary {
+    padding: 1rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #bfdbfe;
+    border-radius: 0.5rem;
+}
+
+.summary-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--primary-blue);
+    margin-bottom: 0.75rem;
+}
+
+.summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #1e3a8a;
+}
+
+.summary-amount {
+    font-weight: 500;
+}
+
+.summary-divider {
+    height: 1px;
+    background: #bfdbfe;
+    margin: 0.5rem 0;
+}
+
+.summary-row.total {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* Buttons */
+.book-button,
+.check-button {
+    width: 100%;
+    padding: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.book-button {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--red-cta) 100%);
+    color: white;
+}
+
+.book-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+}
+
+.book-button:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.check-button {
+    background: white;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+}
+
+.check-button:hover:not(:disabled) {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.check-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Availability Message */
+.availability-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.available-msg {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.unavailable-msg {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.availability-message p {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 1rem;
+    max-width: 28rem;
+    width: 100%;
+    padding: 1.5rem;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: 1.5rem;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rating-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rating-star-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.rating-star-button:hover {
+    transform: scale(1.1);
+}
+
+.rating-star {
+    width: 100%;
+    height: 100%;
+}
+
+.rating-star.filled {
+    color: var(--warning-orange);
+}
+
+.rating-star.empty {
+    color: #d1d5db;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.cancel-button,
+.submit-button {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-button {
+    background: white;
+    border: 2px solid #e5e7eb;
+    color: var(--charcoal);
+}
+
+.cancel-button:hover {
+    background: #f9fafb;
+}
+
+.submit-button {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
+    color: white;
+    border: none;
+}
+
+.submit-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 86, 179, 0.3);
+}
+
+.submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-section {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .meta-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .slots-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

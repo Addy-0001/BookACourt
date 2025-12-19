@@ -18,19 +18,37 @@
                                     class="w-full h-full object-cover" />
                                 <span v-else>{{ user.full_name?.charAt(0).toUpperCase() }}</span>
                             </div>
-                            <button @click="editMode = true"
-                                class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg transition-colors">
+                            <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*"
+                                class="hidden" />
+                            <button @click="$refs.fileInput.click()" :disabled="uploadingImage"
+                                class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-2 rounded-full shadow-lg transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </button>
                         </div>
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-900">{{ user.full_name }}</h2>
-                            <span :class="['inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium', roleClass]">
-                                {{ roleDisplay }}
-                            </span>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-3xl font-bold text-slate-900">{{ user.full_name }}</h2>
+                                    <span
+                                        :class="['inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium', roleClass]">
+                                        {{ roleDisplay }}
+                                    </span>
+                                </div>
+                                <button v-if="user.profile_picture" @click="handleRemoveProfilePicture"
+                                    :disabled="uploadingImage"
+                                    class="px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors font-medium flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Remove Photo
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -86,7 +104,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-600">
+                    <!-- <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-600">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-slate-600 text-sm font-medium">Rating</p>
@@ -100,7 +118,7 @@
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Personal Information Section -->
@@ -136,6 +154,12 @@
                                 clip-rule="evenodd" />
                         </svg>
                         <p class="text-red-800 font-medium">{{ errorMessage }}</p>
+                    </div>
+
+                    <div v-if="uploadingImage"
+                        class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 flex-shrink-0"></div>
+                        <p class="text-blue-800 font-medium">Uploading image...</p>
                     </div>
 
                     <form @submit.prevent="handleUpdateProfile" class="space-y-6">
@@ -264,6 +288,8 @@ const loading = ref(false)
 const pageLoading = ref(true)
 const successMessage = ref('')
 const errorMessage = ref('')
+const fileInput = ref(null)
+const uploadingImage = ref(false)
 
 const profileForm = ref({
     full_name: '',
@@ -333,12 +359,10 @@ const loadProfile = async () => {
 
 const loadPlayerStats = async () => {
     try {
-        // Assuming there's an endpoint for player stats
-        const response = await apiClient.get(`/user/profile/stats/`)
+        const response = await apiClient.get(`/users/player-stats/me/`)
         stats.value = response.data
     } catch (error) {
         console.error('Failed to load stats:', error)
-        // Stats are optional, so we don't show an error
     }
 }
 
@@ -364,6 +388,96 @@ const handleUpdateProfile = async () => {
         }, 5000)
     } finally {
         loading.value = false
+    }
+}
+
+const handleFileSelect = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+        errorMessage.value = 'Please select a valid image file (JPEG, PNG, or WebP)'
+        setTimeout(() => {
+            errorMessage.value = ''
+        }, 5000)
+        return
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        errorMessage.value = 'Image size must be less than 5MB'
+        setTimeout(() => {
+            errorMessage.value = ''
+        }, 5000)
+        return
+    }
+
+    uploadingImage.value = true
+    successMessage.value = ''
+    errorMessage.value = ''
+
+    try {
+        const formData = new FormData()
+        formData.append('profile_picture', file)
+
+        const response = await apiClient.patch('/user/profile/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+
+        user.value = response.data
+        authStore.user = response.data
+        successMessage.value = 'Profile picture updated successfully!'
+
+        setTimeout(() => {
+            successMessage.value = ''
+        }, 3000)
+    } catch (error) {
+        console.error('Upload error:', error)
+        errorMessage.value = error.response?.data?.detail || 'Failed to upload profile picture'
+        setTimeout(() => {
+            errorMessage.value = ''
+        }, 5000)
+    } finally {
+        uploadingImage.value = false
+        if (fileInput.value) {
+            fileInput.value.value = ''
+        }
+    }
+}
+
+const handleRemoveProfilePicture = async () => {
+    if (!confirm('Are you sure you want to remove your profile picture?')) {
+        return
+    }
+
+    uploadingImage.value = true
+    successMessage.value = ''
+    errorMessage.value = ''
+
+    try {
+        const response = await apiClient.patch('/user/profile/', {
+            profile_picture: null
+        })
+
+        user.value = response.data
+        authStore.user = response.data
+        successMessage.value = 'Profile picture removed successfully!'
+
+        setTimeout(() => {
+            successMessage.value = ''
+        }, 3000)
+    } catch (error) {
+        console.error('Remove error:', error)
+        errorMessage.value = error.response?.data?.detail || 'Failed to remove profile picture'
+        setTimeout(() => {
+            errorMessage.value = ''
+        }, 5000)
+    } finally {
+        uploadingImage.value = false
     }
 }
 
