@@ -8,102 +8,102 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('../views/HomeView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: false }
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue'),
+      component: () => import('../views/auth/LoginView.vue'),
       meta: { guest: true }
     },
     {
       path: '/signup',
       name: 'signup',
-      component: () => import('../views/SignupView.vue'),
+      component: () => import('../views/auth/SignupView.vue'),
       meta: { guest: true }
     },
     {
       path: '/profile',
       name: 'profile',
-      component: () => import('../views/ProfileView.vue'),
+      component: () => import('../views/profile/ProfileView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/courts',
       name: 'courts',
-      component: () => import('../views/CourtsView.vue'),
-      meta: { requiresAuth: true }
+      component: () => import('../views/court/CourtsView.vue'),
+      meta: { requiresAuth: false }
     },
     {
       path: '/courts/:id',
       name: 'court-detail',
-      component: () => import('../views/CourtDetailView.vue'),
+      component: () => import('../views/court/CourtDetailView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/bookings',
       name: 'bookings',
-      component: () => import('../views/BookingsView.vue'),
+      component: () => import('../views/profile/BookingsView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/bookings/:id',
       name: 'booking-detail',
-      component: () => import('../views/BookingDetailView.vue'),
+      component: () => import('../views/booking/BookingDetailView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/bookings/join/:token',
       name: 'booking-join',
-      component: () => import('../views/BookingJoinView.vue'),
+      component: () => import('../views/booking/BookingJoinView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/matches',
       name: 'matches',
-      component: () => import('../views/MatchesView.vue'),
+      component: () => import('../views/profile/MatchesView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/matches/:id',
       name: 'match-detail',
-      component: () => import('../views/MatchDetailView.vue'),
+      component: () => import('../views/booking/MatchDetailView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/friends',
       name: 'friends',
-      component: () => import('../views/FriendsView.vue'),
+      component: () => import('../views/profile/FriendsView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/notifications',
       name: 'notifications',
-      component: () => import('../views/NotificationsView.vue'),
+      component: () => import('../views/profile/NotificationsView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/leaderboard',
       name: 'leaderboard',
-      component: () => import('../views/LeaderboardView.vue'),
+      component: () => import('../views/profile/LeaderboardView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/preferences',
       name: 'preferences',
-      component: () => import('../views/PreferencesView.vue'),
+      component: () => import('../views/profile/PreferencesView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/court-registration',
       name: 'court-registration',
-      component: () => import('../views/CourtRegistrationView.vue'),
+      component: () => import('../views/court/CourtRegistrationView.vue'),
       meta: { requiresAuth: true, requiresRole: ['COURT_OWNER'] }
     },
     {
       path: '/about',
       name: 'about',
-      component: () => import('../views/AboutView.vue'),
+      component: () => import('../views/general/AboutView.vue'),
       meta: { requiresAuth: true }
     },
     {
