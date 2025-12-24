@@ -229,7 +229,9 @@ REST_AUTH = {
 # CORS Settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vue.js development server
+    "http://localhost:5174",  # Vue.js development server
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
