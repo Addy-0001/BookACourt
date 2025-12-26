@@ -42,12 +42,12 @@ const router = createRouter({
     //   component: () => import('../views/Courts/CourtDetailView.vue'),
     //   meta: { requiresAuth: true },
     // },
-    // {
-    //   path: '/admin/bookings',
-    //   name: 'bookings',
-    //   component: () => import('../views/Bookings/BookingsView.vue'),
-    //   meta: { requiresAuth: true },
-    // },
+    {
+      path: '/admin/bookings',
+      name: 'bookings',
+      component: () => import('../views/admin/BookingsView.vue'),
+      meta: { requiresAuth: true },
+    },
     // {
     //   path: '/admin/registrations',
     //   name: 'registrations',
