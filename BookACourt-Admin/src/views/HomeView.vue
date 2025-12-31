@@ -1,10 +1,10 @@
 <template>
   <div class="admin-homepage">
-    <!-- Header Section -->
+    <!-- Page Header -->
     <div class="page-header">
       <div class="header-content">
         <h1>{{ dashboardTitle }}</h1>
-        <p class="subtitle">Welcome back, {{ currentUser?.full_name || 'Admin' }}</p>
+        <p class="subtitle">{{ greetingMessage }}</p>
       </div>
       <div class="header-actions">
         <button v-if="isCourtOwnerOrManager" class="btn btn-primary" @click="navigateToCreateCourt">
@@ -38,71 +38,121 @@
       <section class="stats-section">
         <h2 class="section-title">Overview</h2>
         <div class="stats-grid">
+          <!-- Super User Stats -->
           <div class="stat-card" v-if="isSuperUser">
             <div class="stat-header">
               <span class="stat-icon">👥</span>
               <span class="stat-label">Total Users</span>
             </div>
             <div class="stat-body">
-              <h3 class="stat-number">{{ dashboardStats.totalUsers }}</h3>
+              <h3 class="stat-number">{{ formatNumber(adminStore.dashboardStats.totalUsers) }}</h3>
               <p class="stat-change positive">
-                <span>↑</span>
-                <span>+12% from last month</span>
+                <span>Platform wide</span>
               </p>
             </div>
           </div>
 
-          <div class="stat-card">
+          <!-- My Courts -->
+          <div class="stat-card highlight">
             <div class="stat-header">
               <span class="stat-icon">🏟️</span>
               <span class="stat-label">{{ isCourtOwnerOrManager ? 'My Courts' : 'Total Courts' }}</span>
             </div>
             <div class="stat-body">
-              <h3 class="stat-number">{{ courtStats.total }}</h3>
+              <h3 class="stat-number">{{ adminStore.courts.length }}</h3>
               <p class="stat-change" :class="courtStats.activePercentage >= 80 ? 'positive' : 'neutral'">
                 <span>{{ courtStats.active }} active</span>
               </p>
             </div>
           </div>
 
+          <!-- Total Bookings -->
           <div class="stat-card">
             <div class="stat-header">
               <span class="stat-icon">📅</span>
-              <span class="stat-label">{{ isCourtOwnerOrManager ? 'My Bookings' : 'Total Bookings' }}</span>
+              <span class="stat-label">Total Bookings</span>
             </div>
             <div class="stat-body">
-              <h3 class="stat-number">{{ dashboardStats.totalBookings }}</h3>
+              <h3 class="stat-number">{{ formatNumber(adminStore.bookings.length) }}</h3>
               <p class="stat-change positive">
-                <span>↑</span>
-                <span>+18% from last month</span>
+                <span>{{ adminStore.todayBookings.length }} today</span>
               </p>
             </div>
           </div>
 
+          <!-- Pending Approvals (Super User) -->
           <div class="stat-card highlight" v-if="isSuperUser">
             <div class="stat-header">
               <span class="stat-icon">⏳</span>
               <span class="stat-label">Pending Approvals</span>
             </div>
             <div class="stat-body">
-              <h3 class="stat-number">{{ dashboardStats.pendingRegistrations }}</h3>
+              <h3 class="stat-number">{{ adminStore.dashboardStats.pendingRegistrations }}</h3>
               <p class="stat-description">Requires attention</p>
             </div>
           </div>
 
+          <!-- Week Revenue -->
           <div class="stat-card" v-if="isCourtOwnerOrManager">
             <div class="stat-header">
               <span class="stat-icon">💰</span>
-              <span class="stat-label">Total Revenue</span>
+              <span class="stat-label">This Week</span>
             </div>
             <div class="stat-body">
-              <h3 class="stat-number">NPR {{ formatCurrency(revenueStats.total) }}</h3>
+              <h3 class="stat-number">NPR {{ formatCurrency(adminStore.weekRevenue) }}</h3>
               <p class="stat-change positive">
-                <span>↑</span>
-                <span>This month</span>
+                <span>Revenue</span>
               </p>
             </div>
           </div>
+
+          <!-- Month Revenue -->
+          <div class="stat-card" v-if="isCourtOwnerOrManager">
+            <div class="stat-header">
+              <span class="stat-icon">📊</span>
+              <span class="stat-label">This Month</span>
+            </div>
+            <div class="stat-body">
+              <h3 class="stat-number">NPR {{ formatCurrency(adminStore.monthRevenue) }}</h3>
+              <p class="stat-change positive">
+                <span>Revenue</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Occupancy Rate -->
+          <div class="stat-card" v-if="isCourtOwnerOrManager">
+            <div class="stat-header">
+              <span class="stat-icon">📈</span>
+              <span class="stat-label">Occupancy Rate</span>
+            </div>
+            <div class="stat-body">
+              <h3 class="stat-number">{{ adminStore.dashboardStats.occupancyRate }}%</h3>
+              <p class="stat-change" :class="adminStore.dashboardStats.occupancyRate >= 70 ? 'positive' : 'neutral'">
+                <span>Average</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions for All Users -->
+      <section class="quick-actions-section" v-if="quickActions.length > 0">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="actions-grid">
+          <component
+            v-for="action in quickActions"
+            :key="action.route"
+            :is="action.route ? 'router-link' : 'button'"
+            :to="action.route"
+            @click="action.onClick"
+            class="action-card"
+          >
+            <div class="action-icon">{{ action.icon }}</div>
+            <h3>{{ action.title }}</h3>
+            <p>{{ action.description }}</p>
+            <span v-if="action.badge" class="badge">{{ action.badge }}</span>
+          </component>
         </div>
       </section>
 
@@ -110,22 +160,35 @@
       <section v-if="isCourtOwnerOrManager" class="courts-section">
         <div class="section-header">
           <h2 class="section-title">My Courts</h2>
-          <div class="filter-tabs">
-            <button v-for="filter in courtFilters" :key="filter.value"
-              :class="['tab', { active: activeCourtFilter === filter.value }]"
-              @click="activeCourtFilter = filter.value">
-              {{ filter.label }}
-              <span v-if="filter.count" class="tab-badge">{{ filter.count }}</span>
-            </button>
+          <div class="section-actions">
+            <div class="filter-tabs">
+              <button
+                v-for="filter in courtFilters"
+                :key="filter.value"
+                :class="['tab', { active: activeCourtFilter === filter.value }]"
+                @click="activeCourtFilter = filter.value"
+              >
+                {{ filter.label }}
+                <span v-if="filter.count > 0" class="tab-badge">{{ filter.count }}</span>
+              </button>
+            </div>
+            <router-link to="/admin/my-courts" class="link-view-all">
+              View All Courts →
+            </router-link>
           </div>
         </div>
 
         <!-- Courts Grid -->
-        <div v-if="filteredCourts.length > 0" class="courts-grid">
-          <div v-for="court in filteredCourts" :key="court.id" class="court-card">
+        <div v-if="displayedCourts.length > 0" class="courts-grid">
+          <div v-for="court in displayedCourts" :key="court.id" class="court-card">
             <div class="court-image">
-              <span>🏟️</span>
+              <img v-if="court.primary_image" :src="court.primary_image" :alt="court.name" />
+              <span v-else class="court-placeholder">🏟️</span>
+              <span :class="['court-status-badge', court.is_active ? 'status-active' : 'status-inactive']">
+                {{ court.is_active ? 'Active' : 'Inactive' }}
+              </span>
             </div>
+            
             <div class="court-content">
               <div class="court-header">
                 <div>
@@ -135,9 +198,6 @@
                     <span>{{ court.city }}</span>
                   </p>
                 </div>
-                <span :class="['court-status', court.is_active ? 'status-active' : 'status-inactive']">
-                  {{ court.is_active ? 'Active' : 'Inactive' }}
-                </span>
               </div>
 
               <div class="court-details">
@@ -161,32 +221,32 @@
 
               <div class="court-stats">
                 <div class="stat-item">
-                  <span class="stat-value">{{ court.today_bookings || 0 }}</span>
+                  <span class="stat-value">{{ getCourtBookingCount(court.id, 'today') }}</span>
                   <span class="stat-text">Today</span>
                 </div>
                 <div class="stat-item">
-                  <span class="stat-value">{{ court.week_bookings || 0 }}</span>
+                  <span class="stat-value">{{ getCourtBookingCount(court.id, 'week') }}</span>
                   <span class="stat-text">This Week</span>
                 </div>
                 <div class="stat-item">
-                  <span class="stat-value">{{ court.occupancy_rate || 0 }}%</span>
+                  <span class="stat-value">{{ getCourtOccupancy(court.id) }}%</span>
                   <span class="stat-text">Occupancy</span>
                 </div>
               </div>
 
               <div class="court-actions">
-                <button class="btn-action btn-view" @click="viewCourt(court.id)">
+                <router-link :to="`/admin/courts/${court.id}`" class="btn-action btn-view">
                   <span>👁️</span>
                   <span>View</span>
-                </button>
-                <button class="btn-action btn-edit" @click="editCourt(court.id)">
+                </router-link>
+                <router-link :to="`/admin/courts/${court.id}/edit`" class="btn-action btn-edit">
                   <span>✏️</span>
                   <span>Edit</span>
-                </button>
-                <button class="btn-action btn-settings" @click="openCourtSettings(court.id)">
+                </router-link>
+                <router-link :to="`/admin/courts/${court.id}/settings`" class="btn-action btn-settings">
                   <span>⚙️</span>
                   <span>Settings</span>
-                </button>
+                </router-link>
               </div>
             </div>
           </div>
@@ -204,55 +264,10 @@
         </div>
       </section>
 
-      <!-- Quick Actions Grid (For Super Users) -->
-      <section v-if="isSuperUser" class="quick-actions-section">
-        <h2 class="section-title">Quick Actions</h2>
-        <div class="actions-grid">
-          <router-link to="/admin/users" class="action-card">
-            <div class="action-icon">👥</div>
-            <h3>Manage Users</h3>
-            <p>View and manage all users</p>
-          </router-link>
-
-          <router-link to="/admin/courts" class="action-card">
-            <div class="action-icon">🏟️</div>
-            <h3>All Courts</h3>
-            <p>View and manage all courts</p>
-          </router-link>
-
-          <router-link to="/admin/bookings" class="action-card">
-            <div class="action-icon">📅</div>
-            <h3>All Bookings</h3>
-            <p>View all bookings</p>
-          </router-link>
-
-          <router-link to="/admin/registrations" class="action-card">
-            <div class="action-icon">📝</div>
-            <h3>Review Registrations</h3>
-            <p>Approve or reject court registrations</p>
-            <span v-if="dashboardStats.pendingRegistrations > 0" class="badge">
-              {{ dashboardStats.pendingRegistrations }}
-            </span>
-          </router-link>
-
-          <router-link to="/admin/categories" class="action-card">
-            <div class="action-icon">📂</div>
-            <h3>Manage Categories</h3>
-            <p>Court categories</p>
-          </router-link>
-
-          <router-link to="/admin/reports" class="action-card">
-            <div class="action-icon">📊</div>
-            <h3>View Reports</h3>
-            <p>Analytics and insights</p>
-          </router-link>
-        </div>
-      </section>
-
       <!-- Two Column Layout -->
       <div class="two-column-section">
-        <!-- Pending Items -->
-        <section v-if="isSuperUser" class="pending-section">
+        <!-- Pending Items (Super User) -->
+        <section v-if="isSuperUser && adminStore.pendingRegistrations.length > 0" class="pending-section">
           <div class="section-header">
             <h2 class="section-title">Pending Registrations</h2>
             <router-link to="/admin/registrations" class="link-view-all">
@@ -260,13 +275,12 @@
             </router-link>
           </div>
 
-          <div v-if="pendingRegistrations.length === 0" class="empty-state-small">
-            <p>✅ No pending registrations</p>
-          </div>
-
-          <div v-else class="registration-list">
-            <div v-for="registration in pendingRegistrations.slice(0, 5)" :key="registration.id"
-              class="registration-item">
+          <div class="registration-list">
+            <div
+              v-for="registration in adminStore.pendingRegistrations.slice(0, 5)"
+              :key="registration.id"
+              class="registration-item"
+            >
               <div class="registration-info">
                 <h4>{{ registration.court_name }}</h4>
                 <p class="registration-meta">
@@ -279,12 +293,20 @@
                 </p>
               </div>
               <div class="registration-actions">
-                <button class="btn-icon btn-approve" @click="handleApprove(registration.id)" :disabled="processing"
-                  title="Approve">
+                <button
+                  class="btn-icon btn-approve"
+                  @click="handleApprove(registration.id)"
+                  :disabled="processing"
+                  title="Approve"
+                >
                   ✓
                 </button>
-                <button class="btn-icon btn-reject" @click="handleReject(registration.id)" :disabled="processing"
-                  title="Reject">
+                <button
+                  class="btn-icon btn-reject"
+                  @click="handleReject(registration.id)"
+                  :disabled="processing"
+                  title="Reject"
+                >
                   ✕
                 </button>
               </div>
@@ -292,10 +314,10 @@
           </div>
         </section>
 
-        <!-- Recent Activity -->
+        <!-- Recent Bookings -->
         <section class="activity-section">
           <div class="section-header">
-            <h2 class="section-title">Recent {{ isCourtOwnerOrManager ? 'Bookings' : 'Activity' }}</h2>
+            <h2 class="section-title">Recent Bookings</h2>
             <router-link to="/admin/bookings" class="link-view-all">
               View All
             </router-link>
@@ -313,7 +335,7 @@
               <div class="activity-info">
                 <h4>{{ booking.court_name }}</h4>
                 <p class="activity-meta">
-                  {{ booking.player_name }} • {{ formatDate(booking.booking_date) }}
+                  {{ booking.player_name }} • {{ formatDate(booking.booking_date) }} • {{ formatTime(booking.start_time) }}
                 </p>
               </div>
               <div class="activity-status">
@@ -336,12 +358,20 @@
         </div>
         <div class="modal-body">
           <label for="reject-reason">Reason for rejection:</label>
-          <textarea id="reject-reason" v-model="rejectReason" placeholder="Please provide a reason..."
-            rows="4"></textarea>
+          <textarea
+            id="reject-reason"
+            v-model="rejectReason"
+            placeholder="Please provide a reason..."
+            rows="4"
+          ></textarea>
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" @click="closeRejectModal">Cancel</button>
-          <button class="btn-danger" @click="confirmReject" :disabled="!rejectReason.trim() || processing">
+          <button
+            class="btn-danger"
+            @click="confirmReject"
+            :disabled="!rejectReason.trim() || processing"
+          >
             Confirm Rejection
           </button>
         </div>
@@ -366,18 +396,13 @@ const showRejectModal = ref(false);
 const rejectReason = ref('');
 const selectedRegistrationId = ref(null);
 const activeCourtFilter = ref('all');
-const myCourts = ref([]);
 
 // Computed
-const currentUser = computed(() => {
-  const userStr = localStorage.getItem('user');
-  return userStr ? JSON.parse(userStr) : null;
-});
-
-const isSuperUser = computed(() => currentUser.value?.role === 'SUPER_USER');
-const isCourtOwner = computed(() => currentUser.value?.role === 'COURT_OWNER');
-const isCourtManager = computed(() => currentUser.value?.role === 'COURT_MANAGER');
-const isCourtOwnerOrManager = computed(() => isCourtOwner.value || isCourtManager.value);
+const currentUser = computed(() => adminStore.currentUser);
+const isSuperUser = computed(() => adminStore.isSuperUser);
+const isCourtOwner = computed(() => adminStore.isCourtOwner);
+const isCourtManager = computed(() => adminStore.isCourtManager);
+const isCourtOwnerOrManager = computed(() => adminStore.isCourtOwnerOrManager);
 
 const dashboardTitle = computed(() => {
   if (isSuperUser.value) return 'Admin Dashboard';
@@ -386,36 +411,70 @@ const dashboardTitle = computed(() => {
   return 'Dashboard';
 });
 
-const dashboardStats = computed(() => adminStore.dashboardStats);
-const pendingRegistrations = computed(() => adminStore.pendingRegistrations);
-const recentBookings = computed(() => adminStore.bookings.slice(0, 5));
+const greetingMessage = computed(() => {
+  const hour = new Date().getHours();
+  let greeting = 'Good morning';
+  if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+  else if (hour >= 17) greeting = 'Good evening';
+  
+  return `${greeting}, ${currentUser.value?.full_name || 'Admin'}! Welcome back.`;
+});
 
 const courtStats = computed(() => {
-  const total = myCourts.value.length;
-  const active = myCourts.value.filter(c => c.is_active).length;
+  const total = adminStore.courts.length;
+  const active = adminStore.activeCourts.length;
   const activePercentage = total > 0 ? Math.round((active / total) * 100) : 0;
   return { total, active, activePercentage };
 });
 
-const revenueStats = computed(() => {
-  // Calculate from bookings
-  const total = recentBookings.value
-    .filter(b => b.payment_status === 'COMPLETED')
-    .reduce((sum, b) => sum + parseFloat(b.total_amount || 0), 0);
-  return { total };
-});
-
 const courtFilters = computed(() => [
-  { label: 'All Courts', value: 'all', count: myCourts.value.length },
-  { label: 'Active', value: 'active', count: myCourts.value.filter(c => c.is_active).length },
-  { label: 'Inactive', value: 'inactive', count: myCourts.value.filter(c => !c.is_active).length },
+  { label: 'All Courts', value: 'all', count: adminStore.courts.length },
+  { label: 'Active', value: 'active', count: adminStore.activeCourts.length },
+  { label: 'Inactive', value: 'inactive', count: adminStore.inactiveCourts.length },
 ]);
 
-const filteredCourts = computed(() => {
-  if (activeCourtFilter.value === 'all') return myCourts.value;
-  if (activeCourtFilter.value === 'active') return myCourts.value.filter(c => c.is_active);
-  if (activeCourtFilter.value === 'inactive') return myCourts.value.filter(c => !c.is_active);
-  return myCourts.value;
+const displayedCourts = computed(() => {
+  let courts = adminStore.courts;
+  
+  if (activeCourtFilter.value === 'active') {
+    courts = adminStore.activeCourts;
+  } else if (activeCourtFilter.value === 'inactive') {
+    courts = adminStore.inactiveCourts;
+  }
+  
+  // Show only first 6 courts
+  return courts.slice(0, 6);
+});
+
+const recentBookings = computed(() => adminStore.bookings.slice(0, 5));
+
+const quickActions = computed(() => {
+  const actions = [];
+  
+  if (isSuperUser.value) {
+    actions.push(
+      { route: '/admin/users', icon: '👥', title: 'Manage Users', description: 'View and manage all users' },
+      { route: '/admin/courts', icon: '🏟️', title: 'All Courts', description: 'View and manage all courts' },
+      { route: '/admin/registrations', icon: '📝', title: 'Review Registrations', description: 'Approve or reject court registrations', badge: adminStore.dashboardStats.pendingRegistrations || null },
+      { route: '/admin/categories', icon: '📂', title: 'Manage Categories', description: 'Court categories' }
+    );
+  }
+  
+  if (isCourtOwnerOrManager.value) {
+    actions.push(
+      { route: '/admin/my-courts', icon: '🏟️', title: 'My Courts', description: 'Manage your courts' },
+      { route: '/admin/bookings', icon: '📅', title: 'Bookings', description: 'View and manage bookings' },
+      { route: '/admin/reviews', icon: '⭐', title: 'Reviews', description: 'View and respond to reviews' },
+      { route: '/admin/equipment', icon: '🎾', title: 'Equipment', description: 'Manage court equipment' }
+    );
+  }
+  
+  // Common actions
+  actions.push(
+    { route: '/admin/reports', icon: '📊', title: 'Reports', description: 'Analytics and insights' }
+  );
+  
+  return actions;
 });
 
 // Lifecycle
@@ -429,52 +488,18 @@ async function loadDashboard() {
   error.value = null;
 
   try {
-    // Load dashboard stats
-    await adminStore.fetchDashboardStats();
+    // Initialize admin store
+    await adminStore.initialize();
 
     // Load user-specific data
     if (isSuperUser.value) {
-      await Promise.all([
-        adminStore.fetchRegistrations({ status: 'PENDING' }),
-        adminStore.fetchBookings({ ordering: '-created_at', page_size: 5 }),
-      ]);
-    }
-
-    if (isCourtOwnerOrManager.value) {
-      await loadMyCourts();
-      await adminStore.fetchBookings({
-        ordering: '-created_at',
-        page_size: 5,
-        // Filter by user's courts if needed
-      });
+      await adminStore.fetchRegistrations({ status: 'PENDING' });
     }
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load dashboard data';
     console.error('Dashboard error:', err);
   } finally {
     loading.value = false;
-  }
-}
-
-async function loadMyCourts() {
-  try {
-    // Fetch courts owned or managed by current user
-    const params = isCourtOwner.value
-      ? { owner: currentUser.value.id }
-      : { manager: currentUser.value.id };
-
-    await adminStore.fetchCourts(params);
-    myCourts.value = adminStore.courts;
-
-    // Add mock statistics for each court (replace with actual API calls)
-    myCourts.value = myCourts.value.map(court => ({
-      ...court,
-      today_bookings: Math.floor(Math.random() * 10),
-      week_bookings: Math.floor(Math.random() * 50),
-      occupancy_rate: Math.floor(Math.random() * 40 + 60),
-    }));
-  } catch (err) {
-    console.error('Error loading courts:', err);
   }
 }
 
@@ -486,16 +511,29 @@ function navigateToCreateCourt() {
   router.push('/admin/my-courts/create');
 }
 
-function viewCourt(courtId) {
-  router.push(`/admin/courts/${courtId}`);
+function getCourtBookingCount(courtId, period) {
+  const bookings = adminStore.bookings.filter(b => b.court === courtId);
+  
+  if (period === 'today') {
+    const today = new Date().toISOString().split('T')[0];
+    return bookings.filter(b => b.booking_date === today).length;
+  } else if (period === 'week') {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return bookings.filter(b => new Date(b.booking_date) >= weekAgo).length;
+  }
+  
+  return bookings.length;
 }
 
-function editCourt(courtId) {
-  router.push(`/admin/courts/${courtId}/edit`);
-}
-
-function openCourtSettings(courtId) {
-  router.push(`/admin/courts/${courtId}/settings`);
+function getCourtOccupancy(courtId) {
+  const courtBookings = adminStore.bookings.filter(
+    b => b.court === courtId && (b.status === 'CONFIRMED' || b.status === 'COMPLETED')
+  );
+  // Simple calculation: assume 10 hours per day, 30 days
+  const totalSlots = 10 * 30;
+  const occupiedSlots = courtBookings.length;
+  return Math.round((occupiedSlots / totalSlots) * 100);
 }
 
 async function handleApprove(registrationId) {
@@ -507,7 +545,6 @@ async function handleApprove(registrationId) {
     alert('✅ Registration approved successfully!');
   } catch (err) {
     alert('❌ Failed to approve registration');
-    console.error('Approve error:', err);
   } finally {
     processing.value = false;
   }
@@ -530,20 +567,27 @@ async function confirmReject() {
 
   processing.value = true;
   try {
-    await adminStore.rejectRegistration(
-      selectedRegistrationId.value,
-      rejectReason.value
-    );
+    await adminStore.rejectRegistration(selectedRegistrationId.value, rejectReason.value);
     alert('✅ Registration rejected');
     closeRejectModal();
   } catch (err) {
     alert('❌ Failed to reject registration');
-    console.error('Reject error:', err);
   } finally {
     processing.value = false;
   }
 }
 
+function getEmptyStateMessage() {
+  if (activeCourtFilter.value === 'active') {
+    return 'No active courts. Activate your courts to start receiving bookings.';
+  }
+  if (activeCourtFilter.value === 'inactive') {
+    return 'No inactive courts found.';
+  }
+  return 'Start by adding your first court to begin receiving bookings.';
+}
+
+// Utility Functions
 function formatDate(dateString) {
   const date = new Date(dateString);
   const now = new Date();
@@ -561,8 +605,20 @@ function formatDate(dateString) {
   });
 }
 
+function formatTime(timeString) {
+  const [hours, minutes] = timeString.split(':');
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
+}
+
 function formatCurrency(amount) {
   return new Intl.NumberFormat('en-NP').format(amount);
+}
+
+function formatNumber(num) {
+  return new Intl.NumberFormat('en-US').format(num);
 }
 
 function getStatusClass(status) {
@@ -575,19 +631,48 @@ function getStatusClass(status) {
   };
   return statusMap[status] || 'pending';
 }
-
-function getEmptyStateMessage() {
-  if (activeCourtFilter.value === 'active') {
-    return 'No active courts. Activate your courts to start receiving bookings.';
-  }
-  if (activeCourtFilter.value === 'inactive') {
-    return 'No inactive courts found.';
-  }
-  return 'Start by adding your first court to begin receiving bookings.';
-}
 </script>
 
 <style scoped>
+/* Keep all existing styles from the original HomeView.vue */
+/* This is just showing the structure - use the original styles */
+
+.admin-homepage {
+  padding: 2rem;
+  background: #f5f6fa;
+  min-height: 100vh;
+}
+
+/* Add new styles for enhanced features */
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.court-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.court-placeholder {
+  font-size: 4rem;
+}
+
+.court-status-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
 .admin-homepage {
   padding: 2rem;
   background: #f5f6fa;

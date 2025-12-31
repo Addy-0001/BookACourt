@@ -13,6 +13,7 @@ User = get_user_model()
 class UserDetailsSerializer(serializers.ModelSerializer):
     """Serializer for user details"""
     player_stats = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -27,11 +28,17 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         )
 
+    def get_profile_picture(self, obj):
+        request = self.context.get('request')
+        if obj.profile_picture and request:
+            return request.build_absolute_uri(obj.profile_picture.url)
+        return None
+
     def get_player_stats(self, obj):
         """Include player stats if user is a player"""
         if obj.role == 'PLAYER' and hasattr(obj, 'stats'):
             from api.user_serializers import PlayerStatsSerializer
-            return PlayerStatsSerializer(obj.stats).data
+            return PlayerStatsSerializer(obj.stats, context=self.context).data
         return None
 
 

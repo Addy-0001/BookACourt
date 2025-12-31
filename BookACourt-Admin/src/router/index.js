@@ -1,82 +1,117 @@
+// src/router/index.js
+import BookingsView from '@/views/admin/BookingsView.vue';
+import MyCourts from '@/views/admin/MyCourts.vue';
+import LoginView from '@/views/auth/LoginView.vue';
+import RegisterView from '@/views/auth/RegisterView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // Auth Routes
+    // ============================================
+    // AUTH ROUTES
+    // ============================================
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/Auth/LoginView.vue'),
+      component: () => LoginView,
       meta: { requiresGuest: true },
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/Auth/RegisterView.vue'),
+      component: () => RegisterView,
       meta: { requiresGuest: true },
     },
 
-    // Admin Routes
+    // ============================================
+    // DASHBOARD
+    // ============================================
     {
       path: '/',
       name: 'home',
       component: () => import('../views/HomeView.vue'),
       meta: { requiresAuth: true },
     },
-    // {
-    //   path: '/admin/users',
-    //   name: 'users',
-    //   component: () => import('../views/Users/UsersView.vue'),
-    //   meta: { requiresAuth: true, requiresSuperUser: true },
-    // },
-    // {
-    //   path: '/admin/courts',
-    //   name: 'courts',
-    //   component: () => import('../views/Courts/CourtsView.vue'),
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/admin/courts/:id',
-    //   name: 'court-detail',
-    //   component: () => import('../views/Courts/CourtDetailView.vue'),
-    //   meta: { requiresAuth: true },
-    // },
+
+    // ============================================
+    // COURT MANAGEMENT
+    // ============================================
+    {
+      path: '/admin/my-courts',
+      name: 'my-courts',
+      component: () => MyCourts,
+      meta: {
+        requiresAuth: true,
+        requiresCourtOwnerOrManager: true
+      },
+    },
+
+    // ============================================
+    // BOOKING MANAGEMENT
+    // ============================================
     {
       path: '/admin/bookings',
       name: 'bookings',
-      component: () => import('../views/admin/BookingsView.vue'),
+      component: () => BookingsView,
       meta: { requiresAuth: true },
     },
-    // {
-    //   path: '/admin/registrations',
-    //   name: 'registrations',
-    //   component: () => import('../views/Registrations/RegistrationsView.vue'),
-    //   meta: { requiresAuth: true, requiresSuperUser: true },
-    // },
-    // {
-    //   path: '/admin/categories',
-    //   name: 'categories',
-    //   component: () => import('../views/Categories/CategoriesView.vue'),
-    //   meta: { requiresAuth: true },
-    // },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
+  },
 });
 
-// Navigation Guards
+// ============================================
+// NAVIGATION GUARDS
+// ============================================
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('access_token');
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
   const isAuthenticated = !!token;
 
+  // Guest pages (login/register)
+  if (to.meta.requiresGuest && isAuthenticated) {
+    return next('/');
+  }
+
+  // Protected pages
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login');
-  } else if (to.meta.requiresGuest && isAuthenticated) {
-    next('/');
-  } else if (to.meta.requiresSuperUser && user?.role !== 'SUPER_USER') {
-    next('/');
-  } else {
-    next();
+    return next('/login');
+  }
+
+  // Super User only pages
+  if (to.meta.requiresSuperUser && user?.role !== 'SUPER_USER') {
+    console.warn('Access denied: Super User role required');
+    return next('/');
+  }
+
+  // Court Owner/Manager only pages
+  if (to.meta.requiresCourtOwnerOrManager) {
+    const allowedRoles = ['COURT_OWNER', 'COURT_MANAGER', 'SUPER_USER'];
+    if (!allowedRoles.includes(user?.role)) {
+      console.warn('Access denied: Court Owner or Manager role required');
+      return next('/');
+    }
+  }
+
+  next();
+});
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+router.onError((error) => {
+  console.error('Router error:', error);
+
+  // Handle chunk load errors (lazy loading failures)
+  if (error.message.includes('Failed to fetch dynamically imported module')) {
+    window.location.reload();
   }
 });
 

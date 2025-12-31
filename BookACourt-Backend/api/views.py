@@ -1,3 +1,4 @@
+from requests import request
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -43,7 +44,10 @@ class LoginView(APIView):
         refresh = RefreshToken.for_user(user)
 
         return Response({
-            'user': UserDetailsSerializer(user).data,
+            'user': UserDetailsSerializer(
+                user,
+                context={'request': request}
+            ).data,
             'access': str(refresh.access_token),
             'refresh': str(refresh),
         }, status=status.HTTP_200_OK)
@@ -103,7 +107,10 @@ class OTPVerifyView(APIView):
 
         return Response({
             'message': 'Phone verified successfully',
-            'user': UserDetailsSerializer(user).data,
+            'user': UserDetailsSerializer(
+                user,
+                context={'request': request}
+            ).data,
             'tokens': {
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
@@ -171,7 +178,10 @@ class UserProfileView(APIView):
         description='Get current user profile'
     )
     def get(self, request):
-        serializer = UserDetailsSerializer(request.user)
+        serializer = UserDetailsSerializer(
+            request.user,
+            context={'request': request}
+        )
         return Response(serializer.data)
 
     @extend_schema(
@@ -183,11 +193,11 @@ class UserProfileView(APIView):
         serializer = UserDetailsSerializer(
             request.user,
             data=request.data,
-            partial=True
+            partial=True,
+            context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
         return Response(serializer.data)
 
 
@@ -226,5 +236,8 @@ def check_auth_status(request):
     """
     return Response({
         'authenticated': True,
-        'user': UserDetailsSerializer(request.user).data
+        'user': UserDetailsSerializer(
+            request.user,
+            context={'request': request}
+        ).data
     })

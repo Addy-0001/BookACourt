@@ -142,6 +142,7 @@ TIME_ZONE = 'Asia/Kathmandu'  # Updated to Nepal timezone
 USE_I18N = True
 
 USE_TZ = True
+TIME_ZONE = "Asia/Kathmandu"
 
 
 # Static files (CSS, JavaScript, Images)
