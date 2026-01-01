@@ -33,7 +33,7 @@ const showFooter = computed(() => {
 })
 </script>
 
-<style scoped>
+<style>
 /* Import base styles */
 @import './assets/base.css';
 

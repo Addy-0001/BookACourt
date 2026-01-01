@@ -1,299 +1,211 @@
 <template>
     <div class="court-detail-page">
+        <!-- Back Button -->
         <div class="container">
-            <!-- Back Button -->
             <button @click="goBack" class="back-button">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                <span>Back to Courts</span>
+                <span>Back</span>
             </button>
+        </div>
 
-            <!-- Loading -->
-            <div v-if="loading" class="loading-container">
-                <div class="spinner"></div>
-            </div>
+        <!-- Loading -->
+        <div v-if="loading" class="loading-container">
+            <div class="spinner"></div>
+        </div>
 
-            <!-- Error -->
-            <div v-else-if="error" class="error-container">
-                <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p>{{ error }}</p>
-            </div>
+        <!-- Error -->
+        <div v-else-if="error" class="error-container">
+            <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>{{ error }}</p>
+        </div>
 
-            <!-- Court Details -->
-            <div v-else-if="court" class="detail-grid">
-                <!-- Left Column - Court Info -->
-                <div class="left-column">
-                    <!-- Images -->
-                    <div class="image-card">
-                        <div v-if="court.images && court.images.length > 0" class="image-container">
-                            <img :src="court.images[currentImageIndex].image" :alt="court.name" class="court-image" />
-                            <div v-if="court.images.length > 1" class="image-indicators">
-                                <button v-for="(img, idx) in court.images" :key="idx" @click="currentImageIndex = idx"
-                                    :class="['indicator', { active: idx === currentImageIndex }]" />
-                            </div>
-                        </div>
-                        <div v-else class="placeholder-image">
-                            <svg class="placeholder-icon" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+        <!-- Court Details -->
+        <div v-else-if="court">
+            <!-- Hero Image with Overlay -->
+            <div class="hero-section">
+                <div v-if="court.images && court.images.length > 0" class="hero-image-container">
+                    <img :src="court.images[currentImageIndex].image" :alt="court.name" class="hero-image" />
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <h1 class="hero-title">{{ court.name }}</h1>
+                        <p class="hero-location">
+                            <svg class="location-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                    clip-rule="evenodd" />
                             </svg>
-                        </div>
+                            {{ court.city }}
+                        </p>
                     </div>
-
-                    <!-- Basic Info -->
-                    <div class="info-card">
-                        <div class="header-section">
-                            <div>
-                                <h2 class="court-title">{{ court.name }}</h2>
-                                <p class="court-category">{{ court.category?.name || court.court_type }}</p>
-                            </div>
-                            <span v-if="court.is_verified" class="verified-badge">
-                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Verified
-                            </span>
-                        </div>
-
-                        <div class="meta-info">
-                            <div class="rating-section">
-                                <svg class="star-icon" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                                <span class="rating-value">{{ court.average_rating || '0.0' }}</span>
-                                <span class="review-count">({{ court.total_reviews || 0 }} reviews)</span>
-                            </div>
-                            <span class="separator">•</span>
-                            <span>{{ court.is_indoor ? 'Indoor' : 'Outdoor' }}</span>
-                            <span class="separator">•</span>
-                            <span>Capacity: {{ court.capacity }}</span>
-                        </div>
-
-                        <div class="divider"></div>
-
-                        <div class="location-section">
-                            <h3 class="section-title">
-                                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Location
-                            </h3>
-                            <p class="location-text">{{ court.address }}</p>
-                            <p class="location-text">{{ court.city }}</p>
-                        </div>
-
-                        <div v-if="court.description" class="description-section">
-                            <div class="divider"></div>
-                            <h3 class="section-title">Description</h3>
-                            <p class="description-text">{{ court.description }}</p>
-                        </div>
-
-                        <div v-if="court.amenities_list && court.amenities_list.length" class="amenities-section">
-                            <div class="divider"></div>
-                            <h3 class="section-title">Amenities</h3>
-                            <div class="amenities-list">
-                                <span v-for="amenity in court.amenities_list" :key="amenity" class="amenity-tag">
-                                    {{ amenity }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="hours-section">
-                            <div class="divider"></div>
-                            <h3 class="section-title">
-                                <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Operating Hours
-                            </h3>
-                            <p class="hours-text">{{ court.opening_time }} - {{ court.closing_time }}</p>
-                        </div>
-
-                        <!-- Dynamic Pricing -->
-                        <div v-if="court.pricing_rules && court.pricing_rules.length" class="pricing-section">
-                            <div class="divider"></div>
-                            <h3 class="section-title">Pricing Schedule</h3>
-                            <div class="pricing-list">
-                                <div v-for="rule in court.pricing_rules" :key="rule.id" class="pricing-rule">
-                                    <div>
-                                        <p class="rule-description">{{ rule.description }}</p>
-                                        <p class="rule-time">{{ rule.start_time }} - {{ rule.end_time }}</p>
-                                        <p class="rule-days">{{ formatDaysOfWeek(rule.days_of_week) }}</p>
-                                    </div>
-                                    <span class="rule-rate">Rs {{ rule.hourly_rate }}/hr</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="pricing-section">
-                            <div class="divider"></div>
-                            <h3 class="section-title">Standard Pricing</h3>
-                            <div class="standard-price">
-                                <span class="price-amount">Rs {{ court.base_hourly_rate }}/hr</span>
-                            </div>
-                        </div>
-
-                        <!-- Equipment -->
-                        <div v-if="court.equipment && court.equipment.length" class="equipment-section">
-                            <div class="divider"></div>
-                            <h3 class="section-title">Available Equipment</h3>
-                            <div class="equipment-grid">
-                                <div v-for="item in court.equipment" :key="item.id" class="equipment-item">
-                                    <div class="equipment-header">
-                                        <p class="equipment-name">{{ item.name }}</p>
-                                        <span
-                                            :class="['equipment-status', item.quantity_available > 0 ? 'available' : 'unavailable']">
-                                            {{ item.quantity_available }}/{{ item.quantity_total }} available
-                                        </span>
-                                    </div>
-                                    <p class="equipment-description">{{ item.description }}</p>
-                                    <p class="equipment-price">Rs {{ item.rental_rate }}/session</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Reviews Section -->
-                    <div class="reviews-card">
-                        <div class="reviews-header">
-                            <h3 class="reviews-title">Reviews</h3>
-                            <button v-if="canReview" @click="showReviewModal = true" class="write-review-btn">
-                                {{ userReview ? 'Edit Review' : 'Write Review' }}
-                            </button>
-                        </div>
-
-                        <div v-if="reviews.length > 0" class="reviews-list">
-                            <div v-for="review in reviews" :key="review.id" class="review-item">
-                                <div class="review-content">
-                                    <div class="reviewer-avatar">
-                                        {{ review.player_name.charAt(0).toUpperCase() }}
-                                    </div>
-                                    <div class="review-body">
-                                        <div class="review-header-line">
-                                            <span class="reviewer-name">{{ review.player_name }}</span>
-                                            <div class="review-stars">
-                                                <svg v-for="i in 5" :key="i" class="star"
-                                                    :class="i <= review.rating ? 'filled' : 'empty'" fill="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                </svg>
-                                            </div>
-                                            <span v-if="review.player === authStore.user?.id"
-                                                class="you-badge">You</span>
-                                        </div>
-                                        <p class="review-text">{{ review.review_text }}</p>
-                                        <p class="review-date">{{ formatDate(review.created_at) }}</p>
-                                        <div v-if="review.owner_response" class="owner-response">
-                                            <p class="response-label">Owner's Response</p>
-                                            <p class="response-text">{{ review.owner_response }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <p v-else class="no-reviews">No reviews yet</p>
+                    <!-- Image indicators for multiple images -->
+                    <div v-if="court.images.length > 1" class="image-indicators">
+                        <button v-for="(img, idx) in court.images" :key="idx" @click="currentImageIndex = idx"
+                            :class="['indicator', { active: idx === currentImageIndex }]" />
                     </div>
                 </div>
+            </div>
 
-                <!-- Right Column - Booking -->
-                <div class="right-column">
-                    <div class="booking-card">
-                        <div class="price-header">
-                            <div class="price-display">
-                                Rs {{ displayRate }}<span class="price-unit">/hour</span>
-                            </div>
-                            <p class="price-description">{{ rateDescription }}</p>
-                        </div>
+            <div class="container">
+                <!-- Main Content Grid -->
+                <div class="content-grid">
+                    <!-- Left Column -->
+                    <div class="left-column">
+                        <!-- About Section -->
+                        <div class="card about-card">
+                            <h2 class="section-heading">About This {{ court.category?.name || court.court_type }} Court
+                            </h2>
+                            <p class="description-text">{{ court.description }}</p>
 
-                        <div v-if="bookingSuccess" class="success-alert">
-                            <p>Booking created successfully!</p>
-                        </div>
-
-                        <div v-if="bookingError" class="error-alert">
-                            <p>{{ bookingError }}</p>
-                        </div>
-
-                        <form @submit.prevent="handleBooking" class="booking-form">
-                            <div class="form-group">
-                                <label class="form-label">Date</label>
-                                <!-- Set default date to today and added calendar styling -->
-                                <input v-model="bookingForm.date" type="date" :min="minDate" required
-                                    @change="onDateOrTimeChange" class="form-input date-input" />
-                            </div>
-
-                            <!-- Redesigned slots to show available (green) and unavailable (red), allow multiple selections -->
-                            <div v-if="bookingForm.date && (availableSlots.length > 0 || unavailableSlots.length > 0)">
-                                <label class="form-label">Select Time Slots (Multiple allowed)</label>
-                                <div class="slots-grid">
-                                    <button v-for="slot in availableSlots" :key="slot.start_time" type="button"
-                                        @click="toggleTimeSlot(slot)"
-                                        :class="['slot-button', 'available', { selected: isSlotSelected(slot) }]">
-                                        <span class="slot-time">{{ slot.start_time }} - {{ slot.end_time }}</span>
-                                    </button>
-                                    <button v-for="slot in unavailableSlots" :key="'unavail-' + slot.start_time"
-                                        type="button" disabled :class="['slot-button', 'unavailable']">
-                                        <span class="slot-time">{{ slot.start_time }} - {{ slot.end_time }}</span>
-                                        <span class="unavailable-label">Booked</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Manual Time Selection -->
-                            <div v-else-if="bookingForm.date" class="time-inputs">
-                                <div class="form-group">
-                                    <label class="form-label">Start Time</label>
-                                    <input v-model="bookingForm.start_time" type="time" required
-                                        @change="onDateOrTimeChange" class="form-input" />
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">End Time</label>
-                                    <input v-model="bookingForm.end_time" type="time" required
-                                        @change="onDateOrTimeChange" class="form-input" />
-                                </div>
-                            </div>
-
-                            <!-- Equipment Selection -->
-                            <div v-if="court.equipment && court.equipment.length > 0" class="form-group">
-                                <label class="form-label">Rent Equipment (Optional)</label>
-                                <div class="equipment-options">
-                                    <label v-for="item in court.equipment.filter(e => e.quantity_available > 0)"
-                                        :key="item.id" class="equipment-checkbox">
-                                        <input type="checkbox" :value="item.id"
-                                            v-model="bookingForm.equipment_rentals" />
-                                        <span class="equipment-label">{{ item.name }} (Rs {{ item.rental_rate }})</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Notes -->
-                            <div class="form-group">
-                                <label class="form-label">Notes (Optional)</label>
-                                <textarea v-model="bookingForm.notes" rows="2"
-                                    placeholder="Any special requests or notes..." class="form-textarea"></textarea>
-                            </div>
-
-                            <div v-if="bookingForm.date && selectedSlots.length > 0" class="booking-summary">
-                                <p class="summary-title">Booking Summary</p>
-                                <div class="summary-details">
-                                    <div class="summary-row">
-                                        <span>Court Fee ({{ totalDuration.toFixed(1) }} hrs @ Rs {{ currentRate
-                                        }}/hr)</span>
-                                        <span class="summary-amount">Rs {{ courtFeeDisplay }}</span>
+                            <!-- Features & Amenities in grid layout -->
+                            <div v-if="court.amenities_list && court.amenities_list.length" class="features-section">
+                                <h3 class="subsection-heading">Features & Amenities</h3>
+                                <div class="features-grid">
+                                    <div v-for="amenity in court.amenities_list.slice(0, 4)" :key="amenity"
+                                        class="feature-item">
+                                        <div class="feature-icon">
+                                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <span class="feature-name">{{ amenity }}</span>
                                     </div>
-                                    <div v-if="equipmentFee > 0" class="summary-row">
-                                        <span>Equipment Rental</span>
-                                        <span class="summary-amount">Rs {{ equipmentFeeDisplay }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Meta Info -->
+                            <div class="meta-info-section">
+                                <div class="meta-item">
+                                    <span class="meta-label">Type</span>
+                                    <span class="meta-value">{{ court.is_indoor ? 'Indoor' : 'Outdoor' }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Capacity</span>
+                                    <span class="meta-value">{{ court.capacity }} players</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Hours</span>
+                                    <span class="meta-value">{{ court.opening_time }} - {{ court.closing_time }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Rating -->
+                            <div v-if="court.average_rating" class="rating-section">
+                                <div class="stars">
+                                    <svg v-for="i in 5" :key="i" class="star"
+                                        :class="i <= Math.round(court.average_rating) ? 'filled' : 'empty'"
+                                        fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                </div>
+                                <span class="rating-value">{{ court.average_rating }} ({{ court.total_reviews || 0 }}
+                                    reviews)</span>
+                            </div>
+                        </div>
+
+                        <!-- Reviews Section -->
+                        <div class="card reviews-card">
+                            <div class="reviews-header">
+                                <h3 class="section-heading">Reviews</h3>
+                                <button v-if="canReview" @click="showReviewModal = true" class="write-review-btn">
+                                    {{ userReview ? 'Edit' : 'Write Review' }}
+                                </button>
+                            </div>
+
+                            <div v-if="reviews.length > 0" class="reviews-list">
+                                <div v-for="review in reviews.slice(0, 3)" :key="review.id" class="review-item">
+                                    <div class="review-header">
+                                        <div class="reviewer-info">
+                                            <div class="reviewer-avatar">{{ review.player_name.charAt(0).toUpperCase()
+                                                }}</div>
+                                            <div>
+                                                <p class="reviewer-name">{{ review.player_name }}</p>
+                                                <p class="review-date">{{ formatDate(review.created_at) }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="review-rating">
+                                            <svg v-for="i in 5" :key="i" class="star-small"
+                                                :class="i <= review.rating ? 'filled' : 'empty'" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path
+                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="review-text">{{ review.review_text }}</p>
+                                </div>
+                            </div>
+                            <p v-else class="no-reviews">No reviews yet. Be the first to review!</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Booking -->
+                    <div class="right-column">
+                        <div class="card booking-card">
+                            <div class="price-display">
+                                <span class="price-amount">NRs. {{ displayRate }}</span>
+                                <span class="price-period">/hour</span>
+                            </div>
+
+                            <div v-if="bookingSuccess" class="success-alert">
+                                <p>Booking created successfully!</p>
+                            </div>
+
+                            <div v-if="bookingError" class="error-alert">
+                                <p>{{ bookingError }}</p>
+                            </div>
+
+                            <form @submit.prevent="handleBooking" class="booking-form">
+                                <!-- Date Selection -->
+                                <div class="form-group">
+                                    <label class="form-label">Select Date:</label>
+                                    <input v-model="bookingForm.date" type="date" :min="minDate" required
+                                        @change="onDateOrTimeChange" class="form-input date-input" />
+                                </div>
+
+                                <!-- Time Slots -->
+                                <div
+                                    v-if="bookingForm.date && (availableSlots.length > 0 || unavailableSlots.length > 0)">
+                                    <label class="form-label">Select Time Slots:</label>
+                                    <div class="slots-grid">
+                                        <button v-for="slot in availableSlots" :key="slot.start_time" type="button"
+                                            @click="toggleTimeSlot(slot)"
+                                            :class="['slot-button', { selected: isSlotSelected(slot) }]">
+                                            {{ slot.start_time }} - {{ slot.end_time }}
+                                        </button>
+                                        <button v-for="slot in unavailableSlots" :key="'unavail-' + slot.start_time"
+                                            type="button" disabled class="slot-button booked">
+                                            {{ slot.start_time }}<br><span class="booked-label">Booked</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Manual Time Selection -->
+                                <div v-else-if="bookingForm.date" class="time-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label">Start Time</label>
+                                        <input v-model="bookingForm.start_time" type="time" required
+                                            @change="onDateOrTimeChange" class="form-input" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">End Time</label>
+                                        <input v-model="bookingForm.end_time" type="time" required
+                                            @change="onDateOrTimeChange" class="form-input" />
+                                    </div>
+                                </div>
+
+                                <!-- Booking Summary -->
+                                <div v-if="bookingForm.date && selectedSlots.length > 0" class="booking-summary">
+                                    <div class="summary-row">
+                                        <span>Court Fee ({{ totalDuration.toFixed(1) }} hrs)</span>
+                                        <span>Rs {{ courtFeeDisplay }}</span>
                                     </div>
                                     <div class="summary-divider"></div>
                                     <div class="summary-row total">
@@ -301,69 +213,21 @@
                                         <span>Rs {{ estimatedTotalDisplay }}</span>
                                     </div>
                                 </div>
-                            </div>
 
-                            <button type="submit" :disabled="bookingLoading || !canBook" class="book-button">
-                                <span v-if="bookingLoading">Processing...</span>
-                                <span v-else>Book Now</span>
-                            </button>
-
-                            <button v-if="bookingForm.date && selectedSlots.length > 0" type="button"
-                                @click="checkAvailability" :disabled="availabilityLoading" class="check-button">
-                                <span v-if="availabilityLoading">Checking...</span>
-                                <span v-else>Check Availability</span>
-                            </button>
-                        </form>
-
-                        <div v-if="availabilityMessage"
-                            :class="['availability-message', isAvailable ? 'available-msg' : 'unavailable-msg']">
-                            <p>{{ availabilityMessage }}</p>
+                                <!-- Submit Button -->
+                                <button type="submit" :disabled="bookingLoading || !canBook" class="book-button">
+                                    <span v-if="bookingLoading">Processing...</span>
+                                    <span v-else>Book Now</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Review Modal -->
-        <div v-if="showReviewModal" class="modal-overlay">
-            <div class="modal-content">
-                <h3 class="modal-title">{{ userReview ? 'Edit Your Review' : 'Write a Review' }}</h3>
-
-                <form @submit.prevent="submitReview" class="review-form">
-                    <div class="form-group">
-                        <label class="form-label">Rating</label>
-                        <div class="rating-buttons">
-                            <button v-for="i in 5" :key="i" type="button" @click="reviewForm.rating = i"
-                                class="rating-star-button">
-                                <svg class="rating-star" :class="i <= reviewForm.rating ? 'filled' : 'empty'"
-                                    fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Your Review</label>
-                        <textarea v-model="reviewForm.review_text" rows="4" placeholder="Share your experience..."
-                            required class="form-textarea"></textarea>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" @click="closeReviewModal" class="cancel-button">
-                            Cancel
-                        </button>
-                        <button type="submit" :disabled="submittingReview || reviewForm.rating === 0"
-                            class="submit-button">
-                            {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
@@ -764,50 +628,44 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Color Variables */
+/* Updated color scheme to green/sporty theme */
 :root {
-    --primary-blue: #0056B3;
-    --red-cta: #EF4444;
-    --purple-accent: #7C3AED;
-    --success-green: #10B981;
-    --warning-orange: #F59E0B;
+    --primary-green: #10B981;
+    --dark-green: #059669;
+    --light-green: #D1FAE5;
     --charcoal: #1F2937;
-    --muted: #9CA3AF;
-    --orange: #FF6B35;
+    --muted: #6B7280;
+    --light-gray: #F3F4F6;
 }
 
-/* Base Styles */
 .court-detail-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 2rem 0;
+    background: #FFFFFF;
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
 }
 
-/* Back Button */
+/* Back button styling */
 .back-button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    padding: 0.625rem 1rem;
-    background: white;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
     color: var(--charcoal);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-top: 1rem;
 }
 
 .back-button:hover {
-    border-color: var(--primary-blue);
-    color: var(--primary-blue);
+    color: var(--primary-green);
     transform: translateX(-4px);
 }
 
@@ -816,7 +674,7 @@ onMounted(() => {
     height: 1.25rem;
 }
 
-/* Loading */
+/* Loading & Error */
 .loading-container {
     display: flex;
     justify-content: center;
@@ -827,7 +685,7 @@ onMounted(() => {
     width: 3rem;
     height: 3rem;
     border: 3px solid #e5e7eb;
-    border-top-color: var(--primary-blue);
+    border-top-color: var(--primary-green);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -838,7 +696,6 @@ onMounted(() => {
     }
 }
 
-/* Error */
 .error-container {
     text-align: center;
     padding: 5rem 0;
@@ -848,55 +705,61 @@ onMounted(() => {
     width: 4rem;
     height: 4rem;
     margin: 0 auto 1rem;
-    color: var(--red-cta);
+    color: #EF4444;
 }
 
-.error-container p {
-    font-size: 1.25rem;
-    color: var(--muted);
-}
-
-/* Grid Layout */
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-}
-
-@media (min-width: 1024px) {
-    .detail-grid {
-        grid-template-columns: 2fr 1fr;
-    }
-}
-
-/* Left Column */
-.left-column {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-/* Cards */
-.image-card,
-.info-card,
-.reviews-card,
-.booking-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-}
-
-/* Image Section */
-.image-container {
+.hero-section {
+    height: 28rem;
     position: relative;
-    height: 24rem;
+    overflow: hidden;
+    margin-bottom: 2rem;
 }
 
-.court-image {
+.hero-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.1));
+}
+
+.hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    color: white;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.location-icon {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .image-indicators {
@@ -912,8 +775,8 @@ onMounted(() => {
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 50%;
-    border: none;
     background: rgba(255, 255, 255, 0.5);
+    border: none;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -923,296 +786,194 @@ onMounted(() => {
     transform: scale(1.2);
 }
 
-.placeholder-image {
-    height: 24rem;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.placeholder-icon {
-    width: 8rem;
-    height: 8rem;
-    color: white;
-    opacity: 0.5;
-}
-
-/* Info Card */
-.info-card {
-    padding: 2rem;
-}
-
-.header-section {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
-
-.court-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--charcoal);
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.court-category {
-    color: var(--muted);
-    margin-top: 0.25rem;
-}
-
-.verified-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 0.75rem;
-    background: #d1fae5;
-    color: var(--success-green);
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.badge-icon {
-    width: 1rem;
-    height: 1rem;
-}
-
-.meta-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    color: var(--muted);
-    margin-bottom: 1rem;
-}
-
-.rating-section {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.star-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--warning-orange);
-}
-
-.rating-value {
-    font-weight: 500;
-    color: var(--charcoal);
-}
-
-.review-count {
-    color: var(--muted);
-}
-
-.separator {
-    color: #d1d5db;
-}
-
-.divider {
-    height: 1px;
-    background: #e5e7eb;
-    margin: 1.5rem 0;
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--charcoal);
-    margin-bottom: 0.75rem;
-}
-
-.section-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--primary-blue);
-}
-
-.location-text,
-.description-text,
-.hours-text {
-    color: var(--muted);
-    line-height: 1.6;
-}
-
-.location-text {
-    margin-bottom: 0.25rem;
-}
-
-.description-text {
-    margin-top: 0.5rem;
-}
-
-.description-section,
-.amenities-section,
-.hours-section,
-.pricing-section,
-.equipment-section {
-    margin-top: 1.5rem;
-}
-
-.amenities-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.amenity-tag {
-    padding: 0.5rem 0.75rem;
-    background: #eff6ff;
-    color: var(--primary-blue);
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.pricing-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.pricing-rule {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 0.5rem;
-}
-
-.rule-description {
-    font-weight: 500;
-    color: var(--charcoal);
-    margin-bottom: 0.25rem;
-}
-
-.rule-time {
-    font-size: 0.875rem;
-    color: var(--muted);
-    margin-bottom: 0.25rem;
-}
-
-.rule-days {
-    font-size: 0.75rem;
-    color: var(--muted);
-}
-
-.rule-rate {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--primary-blue);
-}
-
-.standard-price {
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 0.5rem;
-}
-
-.price-amount {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--primary-blue);
-}
-
-.equipment-grid {
+.content-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
 }
 
-@media (min-width: 768px) {
-    .equipment-grid {
-        grid-template-columns: repeat(2, 1fr);
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
     }
 }
 
-.equipment-item {
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
+/* Cards */
+.card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #E5E7EB;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.right-column {
+    position: relative;
+}
+
+@media (max-width: 1024px) {
+    .right-column {
+        position: static;
+    }
+}
+
+.booking-card {
+    position: sticky;
+    top: 2rem;
+    background: white;
+    border: 2px solid var(--primary-green);
+}
+
+
+.section-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid var(--primary-green);
+    display: inline-block;
+}
+
+.subsection-heading {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin: 1.5rem 0 1rem 0;
+}
+
+.description-text {
+    color: var(--muted);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* Features Grid */
+.features-section {
+    margin-top: 1.5rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--light-green);
     border-radius: 0.5rem;
 }
 
-.equipment-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
+.feature-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--primary-green);
+    flex-shrink: 0;
 }
 
-.equipment-name {
+.feature-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.feature-name {
+    font-size: 0.875rem;
     font-weight: 500;
+    color: var(--dark-green);
+}
+
+/* Meta Info */
+.meta-info-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem 0;
+    border-top: 1px solid #E5E7EB;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.meta-value {
+    font-size: 0.95rem;
+    font-weight: 600;
     color: var(--charcoal);
 }
 
-.equipment-status {
+/* Rating */
+.rating-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stars {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.star {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #FCD34D;
+}
+
+.star.empty {
+    color: #E5E7EB;
+}
+
+.rating-value {
     font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.equipment-status.available {
-    color: var(--success-green);
-}
-
-.equipment-status.unavailable {
-    color: var(--red-cta);
-}
-
-.equipment-description {
-    font-size: 0.875rem;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
-}
-
-.equipment-price {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--primary-blue);
+    font-weight: 600;
+    color: var(--charcoal);
 }
 
 /* Reviews */
-.reviews-card {
-    padding: 2rem;
-}
-
 .reviews-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
 }
 
-.reviews-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--charcoal);
-}
-
 .write-review-btn {
-    padding: 0.625rem 1rem;
-    background: linear-gradient(135deg, var(--orange) 0%, var(--red-cta) 100%);
+    padding: 0.5rem 1rem;
+    background: var(--primary-green);
     color: white;
     border: none;
     border-radius: 0.5rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 0.875rem;
 }
 
 .write-review-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+    background: var(--dark-green);
 }
 
 .reviews-list {
@@ -1223,104 +984,69 @@ onMounted(() => {
 
 .review-item {
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #E5E7EB;
 }
 
 .review-item:last-child {
     border-bottom: none;
 }
 
-.review-content {
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.reviewer-info {
     display: flex;
     gap: 0.75rem;
 }
 
 .reviewer-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
+    background: var(--primary-green);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
     font-weight: 700;
+    font-size: 0.875rem;
     flex-shrink: 0;
-}
-
-.review-body {
-    flex: 1;
-}
-
-.review-header-line {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    flex-wrap: wrap;
 }
 
 .reviewer-name {
     font-weight: 600;
     color: var(--charcoal);
+    margin-bottom: 0.25rem;
 }
 
-.review-stars {
+.review-date {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.review-rating {
     display: flex;
+    gap: 0.125rem;
 }
 
-.review-stars .star {
+.star-small {
     width: 1rem;
     height: 1rem;
+    color: #FCD34D;
 }
 
-.review-stars .star.filled {
-    color: var(--warning-orange);
-}
-
-.review-stars .star.empty {
-    color: #d1d5db;
-}
-
-.you-badge {
-    padding: 0.25rem 0.5rem;
-    background: #eff6ff;
-    color: var(--primary-blue);
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
+.star-small.empty {
+    color: #E5E7EB;
 }
 
 .review-text {
     color: var(--muted);
     font-size: 0.875rem;
     line-height: 1.5;
-    margin-bottom: 0.5rem;
-}
-
-.review-date {
-    color: #d1d5db;
-    font-size: 0.75rem;
-}
-
-.owner-response {
-    margin-top: 0.75rem;
-    margin-left: 1rem;
-    padding: 0.75rem;
-    background: #f9fafb;
-    border-radius: 0.5rem;
-}
-
-.response-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--charcoal);
-    margin-bottom: 0.25rem;
-}
-
-.response-text {
-    font-size: 0.875rem;
-    color: var(--muted);
 }
 
 .no-reviews {
@@ -1329,69 +1055,27 @@ onMounted(() => {
     padding: 1rem 0;
 }
 
-/* Right Column - Booking */
-.right-column {
-    position: relative;
-}
-
-.booking-card {
-    padding: 1.5rem;
-    position: sticky;
-    top: 6rem;
-}
-
-.price-header {
-    margin-bottom: 1.5rem;
-}
-
+/* Booking Card */
 .price-display {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--light-green);
+}
+
+.price-amount {
+    display: block;
     font-size: 2rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.25rem;
+    color: var(--primary-green);
 }
 
-.price-unit {
-    font-size: 1.125rem;
-    color: var(--muted);
-}
-
-.price-description {
+.price-period {
     font-size: 0.875rem;
     color: var(--muted);
 }
 
-/* Alerts */
-.success-alert,
-.error-alert {
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.success-alert {
-    background: #d1fae5;
-    border: 1px solid #a7f3d0;
-}
-
-.success-alert p {
-    color: #065f46;
-    font-weight: 500;
-}
-
-.error-alert {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-}
-
-.error-alert p {
-    color: #991b1b;
-}
-
-/* Form */
+/* Forms */
 .booking-form {
     display: flex;
     flex-direction: column;
@@ -1406,368 +1090,155 @@ onMounted(() => {
 
 .form-label {
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--charcoal);
 }
 
-.form-input,
-.form-textarea {
-    padding: 0.75rem 1rem;
-    border: 2px solid #e5e7eb;
+.form-input {
+    padding: 0.75rem;
+    border: 2px solid #E5E7EB;
     border-radius: 0.5rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
 }
 
-.form-input:focus,
-.form-textarea:focus {
+.form-input:focus {
     outline: none;
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-.date-input {
-    cursor: pointer;
-}
-
-.time-inputs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-/* Slots Grid */
 .slots-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    max-height: 16rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    max-height: 12rem;
     overflow-y: auto;
     padding: 0.5rem;
-    border: 2px solid #e5e7eb;
+    border: 1px solid #E5E7EB;
     border-radius: 0.5rem;
+    background: var(--light-gray);
 }
 
 .slot-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     padding: 0.75rem 0.5rem;
-    border: 2px solid;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    border: 2px solid #E5E7EB;
     background: white;
-}
-
-.slot-button.available {
-    border-color: var(--success-green);
-    color: var(--success-green);
-    background: #d1fae5;
-}
-
-.slot-button.available:hover {
-    background: var(--success-green);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
-
-.slot-button.available.selected {
-    background: var(--success-green);
-    color: white;
-    border-color: var(--success-green);
-}
-
-.slot-button.unavailable {
-    border-color: var(--red-cta);
-    color: var(--red-cta);
-    background: #fee2e2;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.slot-time {
-    font-weight: 600;
-}
-
-.unavailable-label {
+    border-radius: 0.5rem;
     font-size: 0.75rem;
-    margin-top: 0.25rem;
-    opacity: 0.8;
-}
-
-/* Equipment Options */
-.equipment-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-height: 8rem;
-    overflow-y: auto;
-    padding: 0.5rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.5rem;
-}
-
-.equipment-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-.equipment-checkbox:hover {
-    background: #f9fafb;
-}
-
-.equipment-checkbox input[type="checkbox"] {
-    width: 1.25rem;
-    height: 1.25rem;
-    accent-color: var(--primary-blue);
-    cursor: pointer;
-}
-
-.equipment-label {
-    flex: 1;
-    font-size: 0.875rem;
     color: var(--charcoal);
+}
+
+.slot-button:not(.booked):hover {
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+.slot-button.selected {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+.slot-button.booked {
+    background: #F3F4F6;
+    border-color: #D1D5DB;
+    color: var(--muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.booked-label {
+    display: block;
+    font-size: 0.65rem;
+    margin-top: 0.25rem;
 }
 
 /* Booking Summary */
 .booking-summary {
     padding: 1rem;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border: 2px solid #bfdbfe;
+    background: var(--light-green);
     border-radius: 0.5rem;
-}
-
-.summary-title {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--primary-blue);
-    margin-bottom: 0.75rem;
-}
-
-.summary-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin: 1rem 0;
 }
 
 .summary-row {
     display: flex;
     justify-content: space-between;
     font-size: 0.875rem;
-    color: #1e3a8a;
-}
-
-.summary-amount {
-    font-weight: 500;
-}
-
-.summary-divider {
-    height: 1px;
-    background: #bfdbfe;
-    margin: 0.5rem 0;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
 }
 
 .summary-row.total {
     font-weight: 700;
     font-size: 1rem;
+    color: var(--primary-green);
 }
 
-/* Buttons */
-.book-button,
-.check-button {
-    width: 100%;
-    padding: 0.875rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
+.summary-divider {
+    height: 1px;
+    background: var(--primary-green);
+    margin: 0.5rem 0;
+    opacity: 0.3;
 }
+
 
 .book-button {
-    background: linear-gradient(135deg, var(--orange) 0%, var(--red-cta) 100%);
+    width: 100%;
+    padding: 0.875rem;
+    background: var(--primary-green);
     color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
 }
 
 .book-button:hover:not(:disabled) {
+    background: var(--dark-green);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
 }
 
 .book-button:disabled {
-    background: #d1d5db;
+    background: #D1D5DB;
     cursor: not-allowed;
     opacity: 0.6;
 }
 
-.check-button {
-    background: white;
-    color: var(--primary-blue);
-    border: 2px solid var(--primary-blue);
-}
-
-.check-button:hover:not(:disabled) {
-    background: var(--primary-blue);
-    color: white;
-}
-
-.check-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Availability Message */
-.availability-message {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-}
-
-.available-msg {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.unavailable-msg {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.availability-message p {
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-/* Modal */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 1rem;
-    max-width: 28rem;
-    width: 100%;
-    padding: 1.5rem;
-}
-
-.modal-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--charcoal);
-    margin-bottom: 1.5rem;
-}
-
-.review-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.rating-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.rating-star-button {
-    width: 2.5rem;
-    height: 2.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.rating-star-button:hover {
-    transform: scale(1.1);
-}
-
-.rating-star {
-    width: 100%;
-    height: 100%;
-}
-
-.rating-star.filled {
-    color: var(--warning-orange);
-}
-
-.rating-star.empty {
-    color: #d1d5db;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.cancel-button,
-.submit-button {
-    flex: 1;
+/* Alerts */
+.success-alert {
     padding: 0.75rem 1rem;
+    background: #D1FAE5;
+    border: 1px solid #A7F3D0;
     border-radius: 0.5rem;
+    color: #065F46;
     font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
 }
 
-.cancel-button {
-    background: white;
-    border: 2px solid #e5e7eb;
-    color: var(--charcoal);
+.error-alert {
+    padding: 0.75rem 1rem;
+    background: #FEE2E2;
+    border: 1px solid #FECACA;
+    border-radius: 0.5rem;
+    color: #991B1B;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
 }
 
-.cancel-button:hover {
-    background: #f9fafb;
-}
-
-.submit-button {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple-accent) 100%);
-    color: white;
-    border: none;
-}
-
-.submit-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 86, 179, 0.3);
-}
-
-.submit-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .header-section {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .meta-info {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .slots-grid {
-        grid-template-columns: 1fr;
-    }
+.time-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
 }
 </style>

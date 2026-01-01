@@ -9,42 +9,45 @@
 
       <!-- Search and Filters Card -->
       <div class="filters-card">
-        <!-- Search -->
         <div class="search-section">
-          <label class="input-label">Search Courts</label>
-          <input v-model="searchQuery" type="text" placeholder="Search by court name, location, or sport type..."
-            class="search-input" />
+          <label for="search-input" class="input-label">Search Courts</label>
+          <input id="search-input" v-model="searchQuery" type="search" placeholder="Court name, location, sport..."
+            class="search-input" autocomplete="off" />
         </div>
 
         <div class="filters-grid">
-          <!-- Sport Filter -->
           <div class="filter-group">
-            <label class="input-label">Sport Type</label>
-            <select v-model="filterCategory" class="filter-select">
+            <label for="sport-filter" class="input-label">Sport Type</label>
+            <select id="sport-filter" v-model="filterCategory" class="filter-select">
               <option value="">All Sports</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                {{ cat.name }}
+              </option>
             </select>
           </div>
 
-          <!-- Location Filter -->
           <div class="filter-group">
-            <label class="input-label">Location</label>
-            <select v-model="filterCity" class="filter-select">
+            <label for="city-filter" class="input-label">Location</label>
+            <select id="city-filter" v-model="filterCity" class="filter-select">
               <option value="">All Locations</option>
-              <option v-for="city in uniqueCities" :key="city" :value="city">{{ city }}</option>
+              <option v-for="city in uniqueCities" :key="city" :value="city">
+                {{ city }}
+              </option>
             </select>
           </div>
 
-          <!-- Price Range -->
           <div class="filter-group">
-            <label class="input-label">Max Price: <span class="price-value">Rs {{ maxPrice || 'Any' }}</span></label>
-            <input v-model.number="maxPrice" type="range" min="0" max="5000" step="100" class="price-slider" />
+            <label for="price-range" class="input-label">
+              Max Price: <span class="price-value">Rs {{ maxPrice || 'Any' }}</span>
+            </label>
+            <input id="price-range" v-model.number="maxPrice" type="range" min="0" :max="maxPossiblePrice" step="100"
+              class="price-slider" aria-valuemin="0" :aria-valuemax="maxPossiblePrice" :aria-valuenow="maxPrice"
+              :aria-valuetext="`Rs ${maxPrice || 'Any'}`" />
           </div>
 
-          <!-- Sort By -->
           <div class="filter-group">
-            <label class="input-label">Sort By</label>
-            <select v-model="sortBy" class="filter-select">
+            <label for="sort-select" class="input-label">Sort By</label>
+            <select id="sort-select" v-model="sortBy" class="filter-select">
               <option value="rating">Highest Rated</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
@@ -52,7 +55,6 @@
             </select>
           </div>
 
-          <!-- Results Count -->
           <div class="filter-group results-count">
             <span class="count-number">{{ sortedCourts.length }}</span>
             <span class="count-text">courts found</span>
@@ -60,15 +62,15 @@
         </div>
       </div>
 
-      <!-- Loading State -->
+      <!-- Loading -->
       <div v-if="loading" class="loading-container">
-        <div class="spinner"></div>
+        <div class="spinner" aria-label="Loading courts"></div>
         <p class="loading-text">Loading courts...</p>
       </div>
 
-      <!-- Error State -->
+      <!-- Error -->
       <div v-else-if="error" class="error-container">
-        <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -80,40 +82,40 @@
 
       <!-- Courts Grid -->
       <div v-else-if="sortedCourts.length > 0" class="courts-grid">
-        <div v-for="court in sortedCourts" :key="court.id" class="court-card" @click="viewCourtDetail(court.id)">
-          <!-- Court Image -->
+        <article v-for="court in sortedCourts" :key="court.id" class="court-card" tabindex="0" role="button"
+          @click="viewCourtDetail(court.id)" @keydown.enter.space.prevent="viewCourtDetail(court.id)"
+          :aria-label="`View details for ${court.name} - ${court.city} - ${court.category_name || court.court_type}`">
           <div class="court-image-container">
-            <img v-if="court.primary_image" :src="court.primary_image" :alt="court.name" class="court-image" />
+            <img v-if="court.primary_image" :src="court.primary_image" :alt="`${court.name} court in ${court.city}`"
+              class="court-image" loading="lazy" />
             <div v-else class="court-image-placeholder">
-              <svg class="placeholder-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="placeholder-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
 
-            <!-- Favorite Button -->
-            <button @click.stop="toggleFavorite(court.id)" class="favorite-button">
+            <button @click.stop="toggleFavorite(court.id)" class="favorite-button"
+              :aria-label="favorites.includes(court.id) ? 'Remove from favorites' : 'Add to favorites'"
+              :aria-pressed="favorites.includes(court.id)">
               <svg :class="['heart-icon', favorites.includes(court.id) ? 'favorited' : '']" fill="currentColor"
-                viewBox="0 0 24 24">
+                viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </button>
 
-            <!-- Available Badge -->
             <div class="available-badge">Available</div>
           </div>
 
-          <!-- Court Info -->
           <div class="court-info">
             <h3 class="court-name">{{ court.name }}</h3>
             <p class="court-description">
               {{ court.description || 'Professional sports facility with premium amenities' }}
             </p>
 
-            <!-- Location -->
             <div class="court-location">
-              <svg class="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -122,11 +124,10 @@
               <span>{{ court.city }}</span>
             </div>
 
-            <!-- Rating and Price -->
             <div class="court-meta">
               <div class="rating-container">
                 <div class="rating-stars">
-                  <svg class="star-icon" viewBox="0 0 24 24">
+                  <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
@@ -137,7 +138,6 @@
               <span class="court-price">Rs {{ court.base_hourly_rate }}/hr</span>
             </div>
 
-            <!-- Amenities -->
             <div class="amenities-section">
               <p class="amenities-label">Amenities:</p>
               <div class="amenities-tags">
@@ -148,27 +148,26 @@
                   Verified
                 </span>
                 <span class="amenity-tag amenity-primary">
-                  {{ court.category_name || court.court_type }}
+                  {{ court.category_name || court.court_type || 'Court' }}
                 </span>
               </div>
             </div>
 
-            <!-- Book Button -->
             <button @click.stop="viewCourtDetail(court.id)" class="book-button">
               Book Now
             </button>
           </div>
-        </div>
+        </article>
       </div>
 
       <!-- Empty State -->
       <div v-else class="empty-container">
-        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
-        <p class="empty-title">No courts found matching your criteria</p>
-        <p class="empty-subtitle">Try adjusting your filters to see more results</p>
+        <p class="empty-title">No courts found</p>
+        <p class="empty-subtitle">Try changing or removing some filters</p>
         <button @click="clearFilters" class="clear-filters-button">
           Clear All Filters
         </button>
@@ -195,6 +194,11 @@ const filterCity = ref('')
 const filterCategory = ref('')
 const maxPrice = ref(5000)
 const sortBy = ref('rating')
+
+const maxPossiblePrice = computed(() => {
+  if (!courts.value.length) return 5000
+  return Math.max(...courts.value.map(c => parseFloat(c.base_hourly_rate) || 0)) + 500
+})
 
 const uniqueCities = computed(() => {
   const cities = [...new Set(courts.value.map(c => c.city))].filter(Boolean)
@@ -365,22 +369,209 @@ const updateURLQuery = () => {
 </script>
 
 <style scoped>
-/* Color Variables */
 :root {
-  --primary-blue: #0056B3;
-  --red-cta: #EF4444;
-  --purple-accent: #7C3AED;
-  --success-green: #10B981;
-  --warning-orange: #F59E0B;
+  --primary: #10b981;
+  --primary-dark: #059669;
+  --primary-light: #d1fae5;
+  --primary-glow: rgba(16, 185, 129, 0.25);
+  --text: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --danger: #ef4444;
+}
+
+.courts-view {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  padding: 2.5rem 1rem;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+/* Focus management - only show on keyboard navigation */
+:focus-visible {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+article[role="button"]:focus-visible {
+  box-shadow: 0 0 0 3px white, 0 0 0 6px var(--primary-glow);
+  border-radius: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Filters ── */
+.filters-card {
+  background: var(--bg-card);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.search-input,
+.filter-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus,
+.filter-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+  outline: none;
+}
+
+/* Better range slider */
+.price-slider {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--primary-light) 0%, var(--primary) 100%);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  border: 4px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.price-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* ── Court Card ── */
+.court-card {
+  background: var(--bg-card);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.court-card:hover,
+.court-card:focus-visible {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.25);
+  border-color: var(--primary);
+}
+
+.court-image {
+  transition: transform 0.4s ease;
+}
+
+.court-card:hover .court-image {
+  transform: scale(1.08);
+}
+
+.favorite-button {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.favorite-button:hover {
+  transform: scale(1.15);
+  background: white;
+}
+
+.book-button {
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+  min-height: 52px;
+  /* better touch target */
+}
+
+.book-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* ── Text contrast improvements ── */
+.court-description,
+.court-location span,
+.amenities-label,
+.empty-subtitle,
+.reviews-count,
+.count-text {
+  color: var(--text-muted);
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 640px) {
+  .filters-grid {
+    flex-direction: column;
+  }
+
+  .court-card {
+    min-height: 420px;
+    /* prevent layout shift */
+  }
+}
+
+/* Updated color scheme to green/sporty theme */
+:root {
+  --primary-green: #10B981;
+  --dark-green: #059669;
+  --light-green: #D1FAE5;
+  --accent-lime: #84CC16;
+  --red-accent: #EF4444;
   --charcoal-text: #1F2937;
   --muted-text: #9CA3AF;
-  --orange: #FF6B35;
 }
 
 /* Main Container */
 .courts-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   padding: 40px 0;
 }
 
@@ -399,7 +590,7 @@ const updateURLQuery = () => {
 .page-title {
   font-size: 40px;
   font-weight: 800;
-  color: var(--charcoal-text);
+  color: var(--dark-green);
   margin: 0 0 8px 0;
   letter-spacing: -0.5px;
 }
@@ -417,7 +608,7 @@ const updateURLQuery = () => {
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 32px;
-  border: 1px solid #e5e7eb;
+  border: 2px solid var(--light-green);
 }
 
 .search-section {
@@ -446,8 +637,8 @@ const updateURLQuery = () => {
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .search-input::placeholder {
@@ -480,20 +671,20 @@ const updateURLQuery = () => {
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .price-value {
   font-weight: 700;
-  color: var(--primary-blue);
+  color: var(--primary-green);
 }
 
 .price-slider {
   width: 100%;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(to right, #bfdbfe 0%, var(--primary-blue) 100%);
+  background: linear-gradient(to right, #a7f3d0 0%, var(--primary-green) 100%);
   outline: none;
   cursor: pointer;
   appearance: none;
@@ -504,32 +695,32 @@ const updateURLQuery = () => {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--primary-blue);
+  background: var(--primary-green);
   cursor: pointer;
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 86, 179, 0.3);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
   transition: all 0.2s ease;
 }
 
 .price-slider::-webkit-slider-thumb:hover {
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.4);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .price-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--primary-blue);
+  background: var(--primary-green);
   cursor: pointer;
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 86, 179, 0.3);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
   transition: all 0.2s ease;
 }
 
 .price-slider::-moz-range-thumb:hover {
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.4);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .results-count {
@@ -542,7 +733,7 @@ const updateURLQuery = () => {
 .count-number {
   font-size: 24px;
   font-weight: 700;
-  color: var(--primary-blue);
+  color: var(--primary-green);
   line-height: 1;
 }
 
@@ -565,7 +756,7 @@ const updateURLQuery = () => {
   width: 50px;
   height: 50px;
   border: 4px solid #e5e7eb;
-  border-top-color: var(--primary-blue);
+  border-top-color: var(--primary-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -592,7 +783,7 @@ const updateURLQuery = () => {
 .error-icon {
   width: 64px;
   height: 64px;
-  color: var(--red-cta);
+  color: var(--red-accent);
   margin: 0 auto 16px;
 }
 
@@ -604,7 +795,7 @@ const updateURLQuery = () => {
 
 .retry-button {
   padding: 14px 32px;
-  background: var(--primary-blue);
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 12px;
@@ -615,9 +806,9 @@ const updateURLQuery = () => {
 }
 
 .retry-button:hover {
-  background: #003d82;
+  background: var(--dark-green);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Courts Grid */
@@ -639,7 +830,8 @@ const updateURLQuery = () => {
 
 .court-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2), 0 4px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-green);
 }
 
 /* Court Image */
@@ -663,7 +855,7 @@ const updateURLQuery = () => {
 .court-image-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -672,7 +864,7 @@ const updateURLQuery = () => {
 .placeholder-icon {
   width: 80px;
   height: 80px;
-  color: var(--muted-text);
+  color: var(--dark-green);
   opacity: 0.5;
 }
 
@@ -707,7 +899,7 @@ const updateURLQuery = () => {
 }
 
 .heart-icon.favorited {
-  color: var(--red-cta);
+  color: var(--red-accent);
 }
 
 .available-badge {
@@ -715,7 +907,7 @@ const updateURLQuery = () => {
   top: 12px;
   left: 12px;
   padding: 6px 14px;
-  background: var(--success-green);
+  background: var(--primary-green);
   color: white;
   border-radius: 20px;
   font-size: 12px;
@@ -760,6 +952,7 @@ const updateURLQuery = () => {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  color: var(--primary-green);
 }
 
 /* Court Meta */
@@ -803,7 +996,7 @@ const updateURLQuery = () => {
 .court-price {
   font-size: 20px;
   font-weight: 700;
-  color: var(--primary-blue);
+  color: var(--primary-green);
 }
 
 /* Amenities */
@@ -834,20 +1027,20 @@ const updateURLQuery = () => {
 }
 
 .amenity-primary {
-  background: #dbeafe;
-  color: var(--primary-blue);
+  background: var(--light-green);
+  color: var(--dark-green);
 }
 
 .amenity-success {
-  background: #d1fae5;
-  color: var(--success-green);
+  background: var(--accent-lime);
+  color: white;
 }
 
 /* Book Button */
 .book-button {
   width: 100%;
   padding: 14px;
-  background: var(--primary-blue);
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 12px;
@@ -858,9 +1051,9 @@ const updateURLQuery = () => {
 }
 
 .book-button:hover {
-  background: #e55a2b;
+  background: var(--dark-green);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Empty State */
@@ -892,7 +1085,7 @@ const updateURLQuery = () => {
 
 .clear-filters-button {
   padding: 14px 32px;
-  background: var(--primary-blue);
+  background: var(--primary-green);
   color: white;
   border: none;
   border-radius: 12px;
@@ -903,9 +1096,9 @@ const updateURLQuery = () => {
 }
 
 .clear-filters-button:hover {
-  background: #003d82;
+  background: var(--dark-green);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Responsive Design */
