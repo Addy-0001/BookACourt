@@ -1,69 +1,82 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <!-- Loading State -->
-            <div v-if="pageLoading" class="flex items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div v-if="pageLoading" class="flex items-center justify-center py-32">
+                <div class="w-14 h-14 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
             </div>
 
             <template v-else>
-                <!-- Profile Hero Section -->
-                <div class="bg-white rounded-xl shadow-md p-8 mb-8">
-                    <div class="flex items-start gap-6">
-                        <div class="relative">
-                            <div
-                                class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
-                                <img v-if="user.profile_picture" :src="user.profile_picture" alt="Profile"
-                                    class="w-full h-full object-cover" />
-                                <span v-else>{{ user.full_name?.charAt(0).toUpperCase() }}</span>
-                            </div>
-                            <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*"
-                                class="hidden" />
-                            <button @click="$refs.fileInput.click()" :disabled="uploadingImage"
-                                class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-2 rounded-full shadow-lg transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h2 class="text-3xl font-bold text-slate-900">{{ user.full_name }}</h2>
-                                    <span
-                                        :class="['inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium', roleClass]">
-                                        {{ roleDisplay }}
-                                    </span>
+                <!-- Profile Hero Card -->
+                <div class="bg-white rounded-2xl shadow-xl border border-emerald-100 overflow-hidden mb-10">
+                    <div class="p-8 md:p-10">
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+                            <!-- Avatar -->
+                            <div class="relative group">
+                                <div
+                                    class="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-4xl font-bold overflow-hidden shadow-lg ring-4 ring-emerald-100">
+                                    <img v-if="user.profile_picture" :src="user.profile_picture" alt="Profile Picture"
+                                        class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" />
+                                    <span v-else>{{ user.full_name?.charAt(0).toUpperCase() || '?' }}</span>
                                 </div>
-                                <button v-if="user.profile_picture" @click="handleRemoveProfilePicture"
-                                    :disabled="uploadingImage"
-                                    class="px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors font-medium flex items-center gap-2">
+
+                                <!-- Edit photo button -->
+                                <button @click="$refs.fileInput.click()" :disabled="uploadingImage"
+                                    class="absolute bottom-2 right-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white p-3 rounded-full shadow-lg transition-all transform hover:scale-110">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
-                                    Remove Photo
                                 </button>
+
+                                <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*"
+                                    class="hidden" />
+                            </div>
+
+                            <!-- Info -->
+                            <div class="flex-1">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div>
+                                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900">{{ user.full_name ||
+                                            'User' }}</h2>
+                                        <span :class="[
+                                            'inline-block mt-3 px-4 py-1.5 rounded-full text-sm font-semibold',
+                                            roleClass
+                                        ]">
+                                            {{ roleDisplay }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Remove photo button (only if exists) -->
+                                    <button v-if="user.profile_picture" @click="handleRemoveProfilePicture"
+                                        :disabled="uploadingImage"
+                                        class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Remove Photo
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Player Stats (if applicable) -->
+                <!-- Player Stats Cards (for players) -->
                 <div v-if="user.role === 'PLAYER' && stats"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-600">
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <div
+                        class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-emerald-600 hover:shadow-lg transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-slate-600 text-sm font-medium">Total Bookings</p>
-                                <p class="text-3xl font-bold text-slate-900 mt-1">{{ stats.total_bookings || 0 }}</p>
+                                <p class="text-sm font-medium text-gray-600">Total Bookings</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total_bookings || 0 }}</p>
                             </div>
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
+                            <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -72,14 +85,15 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-amber-600">
+                    <div
+                        class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-amber-600 hover:shadow-lg transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-slate-600 text-sm font-medium">Loyalty Points</p>
-                                <p class="text-3xl font-bold text-slate-900 mt-1">{{ user.loyalty_points || 0 }}</p>
+                                <p class="text-sm font-medium text-gray-600">Loyalty Points</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ user.loyalty_points || 0 }}</p>
                             </div>
-                            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                            <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-7 h-7 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                 </svg>
@@ -87,15 +101,16 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-600">
+                    <div
+                        class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-teal-600 hover:shadow-lg transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-slate-600 text-sm font-medium">Matches Played</p>
-                                <p class="text-3xl font-bold text-slate-900 mt-1">{{ stats.total_matches_played || 0 }}
+                                <p class="text-sm font-medium text-gray-600">Matches Played</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats.total_matches_played || 0 }}
                                 </p>
                             </div>
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                            <div class="w-14 h-14 bg-teal-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-7 h-7 text-teal-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -103,136 +118,137 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-600">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-slate-600 text-sm font-medium">Rating</p>
-                                <p class="text-3xl font-bold text-slate-900 mt-1">{{
-                                    stats.sportsmanship_rating?.toFixed(1) || '5.0' }}/5.0</p>
-                            </div>
-                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
 
-                <!-- Personal Information Section -->
-                <div class="bg-white rounded-xl shadow-md p-8 mb-8">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-bold text-slate-900">Personal Information</h3>
+                <!-- Personal Information -->
+                <div class="bg-white rounded-2xl shadow-xl border border-emerald-100 p-8 md:p-10 mb-10">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900">Personal Information</h3>
+
                         <button v-if="!editMode" @click="editMode = true"
-                            class="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                            Edit
+                            Edit Profile
                         </button>
                     </div>
 
+                    <!-- Success / Error Messages -->
                     <div v-if="successMessage"
-                        class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-                        <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor"
-                            viewBox="0 0 20 20">
+                        class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 font-medium flex items-center gap-3">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                 clip-rule="evenodd" />
                         </svg>
-                        <p class="text-green-800 font-medium">{{ successMessage }}</p>
+                        {{ successMessage }}
                     </div>
 
                     <div v-if="errorMessage"
-                        class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                        <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 font-medium flex items-center gap-3">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 001.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                                 clip-rule="evenodd" />
                         </svg>
-                        <p class="text-red-800 font-medium">{{ errorMessage }}</p>
+                        {{ errorMessage }}
                     </div>
 
-                    <div v-if="uploadingImage"
-                        class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 flex-shrink-0"></div>
-                        <p class="text-blue-800 font-medium">Uploading image...</p>
-                    </div>
-
-                    <form @submit.prevent="handleUpdateProfile" class="space-y-6">
+                    <!-- Form -->
+                    <form v-if="editMode" @submit.prevent="handleUpdateProfile" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                                <input v-model="profileForm.full_name" type="text" :disabled="!editMode" required
-                                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors" />
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Full Name</label>
+                                <input v-model="profileForm.full_name" type="text" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
                             </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
-                                <input v-model="user.phone_number" type="tel" disabled
-                                    class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500" />
-                                <p class="text-xs text-slate-500 mt-1">Phone number cannot be changed</p>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Email</label>
+                                <input v-model="profileForm.email" type="email" disabled
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed" />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Date of Birth</label>
+                                <input v-model="profileForm.date_of_birth" type="date"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">City</label>
+                                <input v-model="profileForm.city" type="text"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                            </div>
+
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Address</label>
+                                <textarea v-model="profileForm.address" rows="3"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                                <input v-model="profileForm.email" type="email" :disabled="!editMode"
-                                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors" />
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Date of Birth</label>
-                                <input v-model="profileForm.date_of_birth" type="date" :disabled="!editMode"
-                                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">City</label>
-                            <input v-model="profileForm.city" type="text" :disabled="!editMode" placeholder="Your city"
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors" />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Address</label>
-                            <textarea v-model="profileForm.address" :disabled="!editMode" rows="3"
-                                placeholder="Your full address"
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500 transition-colors resize-none" />
-                        </div>
-
-                        <div v-if="editMode" class="flex items-center justify-end gap-3 pt-4">
-                            <button type="button" @click="cancelEdit"
-                                class="px-6 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors font-medium">
-                                Cancel
-                            </button>
+                        <div class="flex flex-col sm:flex-row gap-4 pt-4">
                             <button type="submit" :disabled="loading"
-                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
-                                <span v-if="loading">Saving...</span>
-                                <span v-else>Save Changes</span>
+                                class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50">
+                                {{ loading ? 'Saving...' : 'Save Changes' }}
+                            </button>
+
+                            <button type="button" @click="cancelEdit"
+                                class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-medium transition-colors">
+                                Cancel
                             </button>
                         </div>
                     </form>
+
+                    <!-- Display mode -->
+                    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Full Name</p>
+                            <p class="mt-2 text-lg font-medium text-gray-900">{{ user.full_name || '—' }}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Email</p>
+                            <p class="mt-2 text-lg font-medium text-gray-900">{{ user.email || '—' }}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">Date of Birth</p>
+                            <p class="mt-2 text-lg font-medium text-gray-900">{{ user.date_of_birth ?
+                                formatDate(user.date_of_birth) : '—' }}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-gray-600">City</p>
+                            <p class="mt-2 text-lg font-medium text-gray-900">{{ user.city || '—' }}</p>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <p class="text-sm font-semibold text-gray-600">Address</p>
+                            <p class="mt-2 text-lg font-medium text-gray-900">{{ user.address || '—' }}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Account Status Section -->
-                <div class="bg-white rounded-xl shadow-md p-8">
-                    <h3 class="text-xl font-bold text-slate-900 mb-6">Account Status</h3>
+                <!-- Account Status -->
+                <div class="bg-white rounded-2xl shadow-xl border border-emerald-100 p-8 md:p-10">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-8">Account Status</h3>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="border border-slate-200 rounded-lg p-4">
-                            <p class="text-sm font-medium text-slate-600">Account Created</p>
-                            <p class="text-lg font-bold text-slate-900 mt-1">{{ formatDate(user.created_at) }}</p>
+                        <div class="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                            <p class="text-sm font-medium text-gray-600">Account Created</p>
+                            <p class="mt-3 text-xl font-bold text-gray-900">{{ formatDate(user.created_at) }}</p>
                         </div>
-                        <div class="border border-slate-200 rounded-lg p-4">
-                            <p class="text-sm font-medium text-slate-600">Phone Verified</p>
-                            <div class="mt-1">
+
+                        <div class="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                            <p class="text-sm font-medium text-gray-600">Phone Verified</p>
+                            <div class="mt-3">
                                 <span v-if="user.is_phone_verified"
-                                    class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-800 font-medium rounded-full">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                             clip-rule="evenodd" />
@@ -240,17 +256,18 @@
                                     Verified
                                 </span>
                                 <span v-else
-                                    class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
+                                    class="inline-flex items-center gap-2 px-4 py-1.5 bg-yellow-100 text-yellow-800 font-medium rounded-full">
                                     Not Verified
                                 </span>
                             </div>
                         </div>
-                        <div class="border border-slate-200 rounded-lg p-4">
-                            <p class="text-sm font-medium text-slate-600">Account Status</p>
-                            <div class="mt-1">
+
+                        <div class="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                            <p class="text-sm font-medium text-gray-600">Account Status</p>
+                            <div class="mt-3">
                                 <span v-if="user.is_active"
-                                    class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-800 font-medium rounded-full">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                             clip-rule="evenodd" />
@@ -258,7 +275,7 @@
                                     Active
                                 </span>
                                 <span v-else
-                                    class="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
+                                    class="inline-flex items-center gap-2 px-4 py-1.5 bg-red-100 text-red-800 font-medium rounded-full">
                                     Inactive
                                 </span>
                             </div>
@@ -269,7 +286,6 @@
         </main>
     </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'

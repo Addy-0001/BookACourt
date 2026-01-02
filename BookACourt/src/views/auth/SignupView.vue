@@ -1,143 +1,199 @@
+<!-- views/auth/SignupView.vue -->
 <template>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h1>Create Account</h1>
-                <p>Join BookACourt today</p>
+    <div
+        class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <!-- Brand / Logo -->
+            <div class="text-center mb-10">
+                <div class="inline-block">
+                    <span
+                        class="text-4xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                        BookACourt
+                    </span>
+                </div>
+                <p class="mt-2 text-gray-600 font-medium">Reserve your court in seconds</p>
             </div>
 
-            <form @submit.prevent="handleSignup" class="auth-form">
-                <div v-if="error" class="alert alert-error">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    {{ error }}
-                </div>
-
-                <div v-if="success" class="alert alert-success">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                    Registration successful! Redirecting to login...
-                </div>
-
-                <div class="form-group">
-                    <label for="fullname">Full Name</label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        <input id="fullname" v-model="signupForm.full_name" type="text" placeholder="John Doe"
-                            required />
+            <!-- Signup Card -->
+            <div class="bg-white rounded-2xl shadow-2xl border border-emerald-100 overflow-hidden">
+                <div class="p-8 md:p-10">
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+                        <p class="text-gray-600">Join BookACourt and start booking courts today</p>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                            </path>
+                    <!-- Success Message -->
+                    <div v-if="success"
+                        class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 flex items-center gap-3">
+                        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <input id="phone" v-model="signupForm.phone_number" type="tel" placeholder="+977 9800000000"
-                            required />
+                        <span>Registration successful! Redirecting to login...</span>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="email">Email (Optional)</label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
-                            </path>
-                            <polyline points="22,6 12,13 2,6"></polyline>
+                    <!-- Error Message -->
+                    <div v-if="error"
+                        class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-3">
+                        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <input id="email" v-model="signupForm.email" type="email" placeholder="john@example.com" />
+                        <span>{{ error }}</span>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="role">I am a</label>
-                    <div class="input-wrapper">
-                        <select id="role" v-model="signupForm.role" required>
-                            <option value="PLAYER">Player</option>
-                            <option value="COURT_OWNER">Court Owner</option>
-                        </select>
-                    </div>
-                </div>
+                    <form @submit.prevent="handleSignup" class="space-y-6">
+                        <!-- Full Name -->
+                        <div class="space-y-2">
+                            <label for="fullname" class="block text-sm font-semibold text-gray-700">Full Name</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                                <input id="fullname" v-model="signupForm.full_name" type="text" placeholder="John Doe"
+                                    required
+                                    class="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" />
+                            </div>
+                        </div>
 
-                <div class="form-group">
-                    <label for="password1">Password</label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                        <input id="password1" v-model="signupForm.password1" :type="showPassword ? 'text' : 'password'"
-                            placeholder="Create a password" required />
-                        <button type="button" class="toggle-password" @click="showPassword = !showPassword">
-                            <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-                                </path>
-                                <line x1="1" y1="1" x2="23" y2="23"></line>
-                            </svg>
+                        <!-- Phone Number -->
+                        <div class="space-y-2">
+                            <label for="phone" class="block text-sm font-semibold text-gray-700">Phone Number</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                </div>
+                                <input id="phone" v-model="signupForm.phone_number" type="tel"
+                                    placeholder="+977 9800000000" required
+                                    class="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Email (Optional) -->
+                        <div class="space-y-2">
+                            <label for="email" class="block text-sm font-semibold text-gray-700">Email
+                                (Optional)</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                        <polyline points="22,6 12,13 2,6" />
+                                    </svg>
+                                </div>
+                                <input id="email" v-model="signupForm.email" type="email" placeholder="john@example.com"
+                                    class="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="space-y-2">
+                            <label for="role" class="block text-sm font-semibold text-gray-700">I am a</label>
+                            <div class="relative">
+                                <select id="role" v-model="signupForm.role" required
+                                    class="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all appearance-none bg-white">
+                                    <option value="PLAYER">Player</option>
+                                    <option value="COURT_OWNER">Court Owner</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="space-y-2">
+                            <label for="password1" class="block text-sm font-semibold text-gray-700">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                        <path d="M7 11V7a5 5 0 0110 0v4" />
+                                    </svg>
+                                </div>
+                                <input id="password1" v-model="signupForm.password1"
+                                    :type="showPassword ? 'text' : 'password'" placeholder="Create a strong password"
+                                    required
+                                    class="w-full pl-12 pr-12 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" />
+                                <button type="button"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-emerald-600 transition-colors"
+                                    @click="showPassword = !showPassword">
+                                    <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                        <line x1="1" y1="1" x2="23" y2="23" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="space-y-2">
+                            <label for="password2" class="block text-sm font-semibold text-gray-700">Confirm
+                                Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                        <path d="M7 11V7a5 5 0 0110 0v4" />
+                                    </svg>
+                                </div>
+                                <input id="password2" v-model="signupForm.password2"
+                                    :type="showPassword ? 'text' : 'password'" placeholder="Confirm your password"
+                                    required
+                                    class="w-full pl-12 pr-12 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" :disabled="loading"
+                            class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-4">
+                            {{ loading ? 'Creating account...' : 'Sign Up' }}
                         </button>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="password2">Confirm Password</label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                        <input id="password2" v-model="signupForm.password2" :type="showPassword ? 'text' : 'password'"
-                            placeholder="Confirm your password" required />
-                    </div>
+                        <!-- Footer Link -->
+                        <div class="text-center mt-6 text-gray-600">
+                            <p>
+                                Already have an account?
+                                <router-link to="/login"
+                                    class="text-emerald-700 font-semibold hover:text-emerald-800 transition-colors">
+                                    Login here
+                                </router-link>
+                            </p>
+                        </div>
+                    </form>
                 </div>
-
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                    <span v-if="loading">Creating account...</span>
-                    <span v-else>Sign Up</span>
-                </button>
-
-                <div class="auth-footer">
-                    <p>Already have an account? <router-link to="/login">Login</router-link></p>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter();
-const authStore = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
 const signupForm = ref({
     phone_number: '',
@@ -146,222 +202,45 @@ const signupForm = ref({
     password1: '',
     password2: '',
     role: 'PLAYER',
-});
+})
 
-const showPassword = ref(false);
-const loading = ref(false);
-const error = ref('');
-const success = ref(false);
+const showPassword = ref(false)
+const loading = ref(false)
+const error = ref('')
+const success = ref(false)
 
 const handleSignup = async () => {
-    loading.value = true;
-    error.value = '';
-    success.value = false;
+    loading.value = true
+    error.value = ''
+    success.value = false
 
     // Validate passwords match
     if (signupForm.value.password1 !== signupForm.value.password2) {
-        error.value = 'Passwords do not match';
-        loading.value = false;
-        return;
+        error.value = 'Passwords do not match'
+        loading.value = false
+        return
     }
 
     try {
-        await authStore.register(signupForm.value);
-        success.value = true;
+        await authStore.register(signupForm.value)
+        success.value = true
 
         setTimeout(() => {
-            router.push('/login');
-        }, 2000);
+            router.push('/login')
+        }, 2000)
     } catch (err) {
-        const errorData = err.response?.data;
+        const errorData = err.response?.data
         if (errorData) {
             if (typeof errorData === 'object') {
-                error.value = Object.values(errorData).flat().join(' ');
+                error.value = Object.values(errorData).flat().join(' ')
             } else {
-                error.value = errorData;
+                error.value = errorData
             }
         } else {
-            error.value = 'Registration failed. Please try again.';
+            error.value = 'Registration failed. Please try again.'
         }
     } finally {
-        loading.value = false;
+        loading.value = false
     }
-};
+}
 </script>
-
-<style scoped>
-.auth-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-}
-
-.auth-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    padding: 40px;
-    width: 100%;
-    max-width: 440px;
-}
-
-.auth-header {
-    text-align: center;
-    margin-bottom: 32px;
-}
-
-.auth-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 8px;
-}
-
-.auth-header p {
-    font-size: 16px;
-    color: #718096;
-}
-
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.alert {
-    padding: 12px 16px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-}
-
-.alert-error {
-    background: #fee;
-    color: #c53030;
-    border: 1px solid #fc8181;
-}
-
-.alert-success {
-    background: #e6fffa;
-    color: #047857;
-    border: 1px solid #6ee7b7;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-wrapper svg {
-    position: absolute;
-    left: 12px;
-    color: #a0aec0;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.input-wrapper input,
-.input-wrapper select {
-    width: 100%;
-    padding: 12px 12px 12px 44px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: all 0.2s;
-}
-
-.input-wrapper select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 40px;
-}
-
-.input-wrapper input:focus,
-.input-wrapper select:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.toggle-password {
-    position: absolute;
-    right: 12px;
-    background: none;
-    border: none;
-    color: #a0aec0;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    z-index: 1;
-}
-
-.toggle-password:hover {
-    color: #667eea;
-}
-
-.btn {
-    padding: 14px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.auth-footer {
-    text-align: center;
-    margin-top: 8px;
-}
-
-.auth-footer p {
-    font-size: 14px;
-    color: #718096;
-}
-
-.auth-footer a {
-    color: #667eea;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.auth-footer a:hover {
-    text-decoration: underline;
-}
-</style>

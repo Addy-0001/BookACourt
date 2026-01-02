@@ -1,223 +1,236 @@
 <template>
-    <div class="court-detail-page">
+    <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
         <!-- Back Button -->
-        <div class="container">
-            <button @click="goBack" class="back-button">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+            <button @click="goBack"
+                class="inline-flex items-center gap-2 text-gray-600 hover:text-emerald-700 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                <span>Back</span>
+                Back
             </button>
         </div>
 
         <!-- Loading -->
-        <div v-if="loading" class="loading-container">
-            <div class="spinner"></div>
+        <div v-if="loading" class="flex justify-center py-20">
+            <div class="w-14 h-14 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
         </div>
 
         <!-- Error -->
-        <div v-else-if="error" class="error-container">
-            <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+            <svg class="w-16 h-16 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p>{{ error }}</p>
+            <p class="mt-4 text-xl text-gray-600">{{ error }}</p>
         </div>
 
         <!-- Court Details -->
         <div v-else-if="court">
             <!-- Hero Image with Overlay -->
-            <div class="hero-section">
-                <div v-if="court.images && court.images.length > 0" class="hero-image-container">
-                    <img :src="court.images[currentImageIndex].image" :alt="court.name" class="hero-image" />
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <h1 class="hero-title">{{ court.name }}</h1>
-                        <p class="hero-location">
-                            <svg class="location-icon" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            {{ court.city }}
-                        </p>
-                    </div>
-                    <!-- Image indicators for multiple images -->
-                    <div v-if="court.images.length > 1" class="image-indicators">
-                        <button v-for="(img, idx) in court.images" :key="idx" @click="currentImageIndex = idx"
-                            :class="['indicator', { active: idx === currentImageIndex }]" />
-                    </div>
+            <div class="relative h-96 overflow-hidden">
+                <img v-if="court.images && court.images.length > 0" :src="court.images[currentImageIndex].image"
+                    :alt="court.name" class="w-full h-full object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <h1 class="text-4xl font-bold mb-2">{{ court.name }}</h1>
+                    <p class="flex items-center gap-2 text-lg">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        {{ court.city }}
+                    </p>
+                </div>
+
+                <!-- Image indicators -->
+                <div v-if="court.images?.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    <button v-for="(img, idx) in court.images" :key="idx" @click="currentImageIndex = idx"
+                        class="w-3 h-3 rounded-full bg-white/50 transition-all hover:bg-white"
+                        :class="{ 'bg-white scale-110': idx === currentImageIndex }" />
                 </div>
             </div>
 
-            <div class="container">
-                <!-- Main Content Grid -->
-                <div class="content-grid">
-                    <!-- Left Column -->
-                    <div class="left-column">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Main Content -->
+                    <div class="lg:col-span-2 space-y-8">
                         <!-- About Section -->
-                        <div class="card about-card">
-                            <h2 class="section-heading">About This {{ court.category?.name || court.court_type }} Court
+                        <div class="bg-white rounded-2xl shadow-md p-8 border border-emerald-100">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                                About This {{ court.category?.name || court.court_type }} Court
                             </h2>
-                            <p class="description-text">{{ court.description }}</p>
+                            <p class="text-gray-600 mb-8 leading-relaxed">{{ court.description }}</p>
 
-                            <!-- Features & Amenities in grid layout -->
-                            <div v-if="court.amenities_list && court.amenities_list.length" class="features-section">
-                                <h3 class="subsection-heading">Features & Amenities</h3>
-                                <div class="features-grid">
-                                    <div v-for="amenity in court.amenities_list.slice(0, 4)" :key="amenity"
-                                        class="feature-item">
-                                        <div class="feature-icon">
-                                            <svg fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        <span class="feature-name">{{ amenity }}</span>
+                            <!-- Amenities -->
+                            <div v-if="court.amenities_list?.length" class="mb-8">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Features & Amenities</h3>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div v-for="amenity in court.amenities_list.slice(0, 6)" :key="amenity"
+                                        class="flex items-center gap-3 bg-emerald-50 p-4 rounded-xl">
+                                        <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="font-medium text-gray-800">{{ amenity }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Meta Info -->
-                            <div class="meta-info-section">
-                                <div class="meta-item">
-                                    <span class="meta-label">Type</span>
-                                    <span class="meta-value">{{ court.is_indoor ? 'Indoor' : 'Outdoor' }}</span>
+                            <div class="grid grid-cols-3 gap-6 text-center">
+                                <div class="p-4 bg-gray-50 rounded-xl">
+                                    <p class="text-sm font-semibold text-gray-600">Type</p>
+                                    <p class="mt-1 font-bold text-gray-900">{{ court.is_indoor ? 'Indoor' : 'Outdoor' }}
+                                    </p>
                                 </div>
-                                <div class="meta-item">
-                                    <span class="meta-label">Capacity</span>
-                                    <span class="meta-value">{{ court.capacity }} players</span>
+                                <div class="p-4 bg-gray-50 rounded-xl">
+                                    <p class="text-sm font-semibold text-gray-600">Capacity</p>
+                                    <p class="mt-1 font-bold text-gray-900">{{ court.capacity }} players</p>
                                 </div>
-                                <div class="meta-item">
-                                    <span class="meta-label">Hours</span>
-                                    <span class="meta-value">{{ court.opening_time }} - {{ court.closing_time }}</span>
+                                <div class="p-4 bg-gray-50 rounded-xl">
+                                    <p class="text-sm font-semibold text-gray-600">Hours</p>
+                                    <p class="mt-1 font-bold text-gray-900">
+                                        {{ court.opening_time }} - {{ court.closing_time }}
+                                    </p>
                                 </div>
                             </div>
 
                             <!-- Rating -->
-                            <div v-if="court.average_rating" class="rating-section">
-                                <div class="stars">
-                                    <svg v-for="i in 5" :key="i" class="star"
-                                        :class="i <= Math.round(court.average_rating) ? 'filled' : 'empty'"
-                                        fill="currentColor" viewBox="0 0 20 20">
+                            <div v-if="court.average_rating" class="mt-8 flex items-center gap-3">
+                                <div class="flex">
+                                    <svg v-for="i in 5" :key="i" class="w-6 h-6"
+                                        :class="i <= Math.round(court.average_rating) ? 'text-amber-400 fill-current' : 'text-gray-300 fill-current'"
+                                        viewBox="0 0 24 24">
                                         <path
-                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                     </svg>
                                 </div>
-                                <span class="rating-value">{{ court.average_rating }} ({{ court.total_reviews || 0 }}
-                                    reviews)</span>
+                                <span class="font-bold text-xl text-gray-900">{{ court.average_rating }}</span>
+                                <span class="text-gray-600">({{ court.total_reviews || 0 }} reviews)</span>
                             </div>
                         </div>
 
                         <!-- Reviews Section -->
-                        <div class="card reviews-card">
-                            <div class="reviews-header">
-                                <h3 class="section-heading">Reviews</h3>
-                                <button v-if="canReview" @click="showReviewModal = true" class="write-review-btn">
-                                    {{ userReview ? 'Edit' : 'Write Review' }}
+                        <div class="bg-white rounded-2xl shadow-md p-8 border border-emerald-100">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-2xl font-bold text-gray-900">Reviews</h2>
+                                <button v-if="canReview" @click="showReviewModal = true"
+                                    class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
+                                    {{ userReview ? 'Edit Review' : 'Write Review' }}
                                 </button>
                             </div>
 
-                            <div v-if="reviews.length > 0" class="reviews-list">
-                                <div v-for="review in reviews.slice(0, 3)" :key="review.id" class="review-item">
-                                    <div class="review-header">
-                                        <div class="reviewer-info">
-                                            <div class="reviewer-avatar">{{ review.player_name.charAt(0).toUpperCase()
-                                                }}</div>
+                            <div v-if="reviews.length > 0" class="space-y-8">
+                                <div v-for="review in reviews.slice(0, 3)" :key="review.id"
+                                    class="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="flex gap-4">
+                                            <div
+                                                class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0">
+                                                {{ review.player_name.charAt(0).toUpperCase() }}
+                                            </div>
                                             <div>
-                                                <p class="reviewer-name">{{ review.player_name }}</p>
-                                                <p class="review-date">{{ formatDate(review.created_at) }}</p>
+                                                <p class="font-bold text-gray-900">{{ review.player_name }}</p>
+                                                <p class="text-sm text-gray-500 mt-1">{{ formatDate(review.created_at)
+                                                }}</p>
                                             </div>
                                         </div>
-                                        <div class="review-rating">
-                                            <svg v-for="i in 5" :key="i" class="star-small"
-                                                :class="i <= review.rating ? 'filled' : 'empty'" fill="currentColor"
-                                                viewBox="0 0 20 20">
+                                        <div class="flex">
+                                            <svg v-for="i in 5" :key="i" class="w-5 h-5"
+                                                :class="i <= review.rating ? 'text-amber-400 fill-current' : 'text-gray-300 fill-current'"
+                                                viewBox="0 0 24 24">
                                                 <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                             </svg>
                                         </div>
                                     </div>
-                                    <p class="review-text">{{ review.review_text }}</p>
+                                    <p class="text-gray-700 italic leading-relaxed">“{{ review.review_text }}”</p>
                                 </div>
                             </div>
-                            <p v-else class="no-reviews">No reviews yet. Be the first to review!</p>
+
+                            <p v-else class="text-center text-gray-600 py-8">
+                                No reviews yet. Be the first to share your experience!
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Right Column - Booking -->
-                    <div class="right-column">
-                        <div class="card booking-card">
-                            <div class="price-display">
-                                <span class="price-amount">NRs. {{ displayRate }}</span>
-                                <span class="price-period">/hour</span>
+                    <!-- Booking Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="sticky top-24 bg-white rounded-2xl shadow-xl p-8 border border-emerald-100">
+                            <div class="text-center mb-8">
+                                <p class="text-4xl font-bold text-emerald-700">
+                                    ${{ displayRate }}
+                                    <span class="text-xl font-normal text-gray-500">/hr</span>
+                                </p>
                             </div>
 
-                            <div v-if="bookingSuccess" class="success-alert">
-                                <p>Booking created successfully!</p>
+                            <div v-if="bookingSuccess"
+                                class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-medium mb-6">
+                                Booking created successfully! Redirecting...
                             </div>
 
-                            <div v-if="bookingError" class="error-alert">
-                                <p>{{ bookingError }}</p>
+                            <div v-if="bookingError"
+                                class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium mb-6">
+                                {{ bookingError }}
                             </div>
 
-                            <form @submit.prevent="handleBooking" class="booking-form">
-                                <!-- Date Selection -->
-                                <div class="form-group">
-                                    <label class="form-label">Select Date:</label>
+                            <form @submit.prevent="handleBooking" class="space-y-6">
+                                <!-- Date -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700">Select Date</label>
                                     <input v-model="bookingForm.date" type="date" :min="minDate" required
-                                        @change="onDateOrTimeChange" class="form-input date-input" />
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        @change="onDateOrTimeChange" />
                                 </div>
 
-                                <!-- Time Slots -->
-                                <div
-                                    v-if="bookingForm.date && (availableSlots.length > 0 || unavailableSlots.length > 0)">
-                                    <label class="form-label">Select Time Slots:</label>
-                                    <div class="slots-grid">
+                                <!-- Time Slots or Manual Input -->
+                                <div v-if="bookingForm.date" class="space-y-4">
+                                    <label class="block text-sm font-semibold text-gray-700">Time Slots</label>
+
+                                    <div v-if="availableSlots.length || unavailableSlots.length"
+                                        class="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto p-4 bg-gray-50 rounded-xl border border-gray-200">
                                         <button v-for="slot in availableSlots" :key="slot.start_time" type="button"
-                                            @click="toggleTimeSlot(slot)"
-                                            :class="['slot-button', { selected: isSlotSelected(slot) }]">
-                                            {{ slot.start_time }} - {{ slot.end_time }}
+                                            @click="toggleTimeSlot(slot)" :class="[
+                                                'py-3 px-4 rounded-lg text-sm font-medium transition-all',
+                                                isSlotSelected(slot)
+                                                    ? 'bg-emerald-600 text-white shadow-md'
+                                                    : 'bg-white border border-gray-300 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700'
+                                            ]">
+                                            {{ slot.start_time }} – {{ slot.end_time }}
                                         </button>
+
                                         <button v-for="slot in unavailableSlots" :key="'unavail-' + slot.start_time"
-                                            type="button" disabled class="slot-button booked">
-                                            {{ slot.start_time }}<br><span class="booked-label">Booked</span>
+                                            type="button" disabled
+                                            class="py-3 px-4 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium cursor-not-allowed opacity-70">
+                                            {{ slot.start_time }} – {{ slot.end_time }}
+                                            <span class="block text-xs text-gray-400 mt-1">Booked</span>
                                         </button>
                                     </div>
-                                </div>
 
-                                <!-- Manual Time Selection -->
-                                <div v-else-if="bookingForm.date" class="time-inputs">
-                                    <div class="form-group">
-                                        <label class="form-label">Start Time</label>
-                                        <input v-model="bookingForm.start_time" type="time" required
-                                            @change="onDateOrTimeChange" class="form-input" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">End Time</label>
-                                        <input v-model="bookingForm.end_time" type="time" required
-                                            @change="onDateOrTimeChange" class="form-input" />
-                                    </div>
-                                </div>
-
-                                <!-- Booking Summary -->
-                                <div v-if="bookingForm.date && selectedSlots.length > 0" class="booking-summary">
-                                    <div class="summary-row">
-                                        <span>Court Fee ({{ totalDuration.toFixed(1) }} hrs)</span>
-                                        <span>Rs {{ courtFeeDisplay }}</span>
-                                    </div>
-                                    <div class="summary-divider"></div>
-                                    <div class="summary-row total">
-                                        <span>Total</span>
-                                        <span>Rs {{ estimatedTotalDisplay }}</span>
+                                    <!-- Fallback manual time input -->
+                                    <div v-else class="grid grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="block text-sm font-semibold text-gray-700">Start</label>
+                                            <input v-model="bookingForm.start_time" type="time" required
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                                @change="onDateOrTimeChange" />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="block text-sm font-semibold text-gray-700">End</label>
+                                            <input v-model="bookingForm.end_time" type="time" required
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                                @change="onDateOrTimeChange" />
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Submit Button -->
-                                <button type="submit" :disabled="bookingLoading || !canBook" class="book-button">
-                                    <span v-if="bookingLoading">Processing...</span>
-                                    <span v-else>Book Now</span>
+                                <!-- Total & Book Button -->
+                                <button type="submit" :disabled="bookingLoading || !canBook"
+                                    class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    {{ bookingLoading ? 'Processing...' : 'Book Now' }}
                                 </button>
                             </form>
                         </div>
@@ -227,7 +240,6 @@
         </div>
     </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'

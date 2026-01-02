@@ -1,15 +1,19 @@
 <template>
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Header + Filters -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">My Bookings</h1>
+                    <p class="mt-2 text-lg text-gray-600">Manage your upcoming games and past reservations</p>
+                </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Filters -->
-            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-                <div class="flex items-center gap-4 flex-wrap">
+                <div class="flex flex-wrap gap-3">
                     <button v-for="status in statuses" :key="status.value" @click="filterStatus = status.value" :class="[
-                        'px-4 py-2 rounded-lg font-medium transition-colors',
+                        'px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm text-sm sm:text-base',
                         filterStatus === status.value
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-emerald-50 hover:border-emerald-400'
                     ]">
                         {{ status.label }}
                     </button>
@@ -17,234 +21,165 @@
             </div>
 
             <!-- Loading State -->
-            <div v-if="loading" class="flex justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div v-if="loading" class="flex justify-center py-32">
+                <div class="w-14 h-14 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
             </div>
 
             <!-- Error State -->
             <div v-else-if="error" class="text-center py-20">
-                <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-20 h-20 mx-auto text-red-500 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-xl text-gray-600 mb-4">{{ error }}</p>
-                <button @click="loadBookings" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <p class="text-xl text-gray-700 font-medium mb-6">{{ error }}</p>
+                <button @click="loadBookings"
+                    class="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all">
                     Try Again
                 </button>
             </div>
 
             <!-- Bookings List -->
-            <div v-else-if="filteredBookings.length > 0" class="space-y-4">
+            <div v-else-if="filteredBookings.length > 0" class="space-y-6">
                 <div v-for="booking in filteredBookings" :key="booking.id"
-                    class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between mb-4">
+                    class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8 hover:shadow-xl transition-all duration-300">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900">{{ booking.court?.name || 'Court' }}</h3>
-                            <p class="text-gray-600">{{ booking.court?.address || booking.court?.city }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Ref: {{ booking.booking_reference }}</p>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                {{ booking.court?.name || 'Court Booking' }}
+                            </h3>
+                            <p class="text-gray-600 mb-1">{{ booking.court?.address || booking.court?.city || 'Location'
+                            }}</p>
+                            <p class="text-sm text-gray-500">
+                                Ref: <span class="font-mono font-medium">{{ booking.booking_reference }}</span>
+                            </p>
                         </div>
+
                         <span :class="getStatusClass(booking.status)"
-                            class="px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap">
+                            class="inline-flex px-5 py-2 rounded-full text-sm font-semibold self-start whitespace-nowrap">
                             {{ booking.status }}
                         </span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div class="flex items-center gap-2 text-gray-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span>{{ formatDate(booking.booking_date) }}</span>
+                    <!-- Details Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Date</p>
+                                <p class="font-semibold text-gray-900">{{ formatDate(booking.booking_date) }}</p>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2 text-gray-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{{ booking.start_time }} - {{ booking.end_time }}</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-gray-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-bold">Rs {{ booking.total_amount }}</span>
-                        </div>
-                    </div>
 
-                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                        <span>Payment: {{ booking.payment_method }}</span>
-                        <span>•</span>
-                        <span :class="getPaymentStatusClass(booking.payment_status)">
-                            {{ booking.payment_status }}
-                        </span>
-                    </div>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Time Slot</p>
+                                <p class="font-semibold text-gray-900">{{ booking.start_time }} – {{ booking.end_time }}
+                                </p>
+                            </div>
+                        </div>
 
-                    <!-- Equipment Rentals -->
-                    <div v-if="booking.equipment_rentals && booking.equipment_rentals.length > 0"
-                        class="mb-4 p-3 bg-blue-50 rounded-lg">
-                        <p class="font-medium text-blue-900 mb-2">Equipment Rented:</p>
-                        <div class="space-y-1">
-                            <div v-for="rental in booking.equipment_rentals" :key="rental.id"
-                                class="text-sm text-blue-800 flex items-center justify-between">
-                                <span>{{ rental.equipment?.name }} (x{{ rental.quantity }})</span>
-                                <span class="font-medium">Rs {{ rental.rental_cost }}</span>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Total Amount</p>
+                                <p class="font-bold text-emerald-700 text-xl">Rs {{ booking.total_amount }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="booking.notes" class="text-sm text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">
-                        <p class="font-medium text-gray-700">Notes:</p>
-                        <p>{{ booking.notes }}</p>
+                    <!-- Payment Info -->
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm mb-6">
+                        <div>
+                            <span class="font-medium text-gray-700">Payment Method:</span>
+                            <span class="ml-1.5">{{ booking.payment_method || '—' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Payment Status:</span>
+                            <span :class="getPaymentStatusClass(booking.payment_status)" class="ml-1.5 font-semibold">
+                                {{ booking.payment_status || '—' }}
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="flex items-center justify-between border-t pt-4">
-                        <span class="text-xs text-gray-400">
-                            Booked {{ formatDateTime(booking.created_at) }}
-                        </span>
-                        <div class="flex items-center gap-2">
-                            <button v-if="canShare(booking)" @click="shareBooking(booking)"
-                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
-                                Share
-                            </button>
-                            <button v-if="canCancel(booking)" @click="showCancelModal(booking)"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
-                                Cancel
-                            </button>
-                            <button v-if="canReview(booking)" @click="showReviewModal(booking)"
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                                Leave Review
-                            </button>
-                        </div>
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-4">
+                        <button v-if="canCancel(booking)" @click="showCancelModal(booking)"
+                            class="px-6 py-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl font-medium transition-colors flex items-center gap-2 border border-red-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel Booking
+                        </button>
+
+                        <button v-if="canShare(booking)" @click="shareBooking(booking)"
+                            class="px-6 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-medium transition-colors flex items-center gap-2 border border-emerald-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                            </svg>
+                            Share Booking
+                        </button>
+
+                        <button v-if="canReview(booking)" @click="showReviewModal(booking)"
+                            class="px-6 py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-medium transition-colors flex items-center gap-2 border border-amber-200">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                            Leave Review
+                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- Empty State -->
-            <div v-else class="text-center py-20">
-                <svg class="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p class="text-xl text-gray-600 mb-4">No bookings found</p>
-                <router-link to="/courts"
-                    class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    Browse Courts
-                </router-link>
-            </div>
-        </div>
+            <div v-else class="text-center py-32">
+                <div class="inline-block p-12 bg-white rounded-2xl shadow-xl border border-emerald-100">
+                    <svg class="w-24 h-24 mx-auto text-emerald-400 mb-6" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                        {{ filterStatus === 'all' ? 'No bookings yet' : `No ${filterStatus.toLowerCase()} bookings` }}
+                    </h3>
+                    <p class="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+                        {{ filterStatus === 'all'
+                            ? 'Start exploring courts and make your first booking!'
+                            : 'No bookings match the selected filter' }}
+                    </p>
 
-        <!-- Cancel Modal -->
-        <div v-if="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Cancel Booking</h3>
-                <p class="text-gray-600 mb-4">Are you sure you want to cancel this booking?</p>
-                <textarea v-model="cancelReason" placeholder="Reason for cancellation (optional)"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
-                <div class="flex gap-3">
-                    <button @click="cancelModal = null"
-                        class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                        Keep Booking
-                    </button>
-                    <button @click="confirmCancel" :disabled="cancelling"
-                        class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400">
-                        {{ cancelling ? 'Cancelling...' : 'Cancel Booking' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Share Modal -->
-        <div v-if="shareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Share Booking</h3>
-
-                <div v-if="shareLink" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Share Link</label>
-                        <div class="flex gap-2">
-                            <input :value="shareLink" readonly
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" />
-                            <button @click="copyShareLink"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                Copy
-                            </button>
-                        </div>
-                        <p v-if="linkCopied" class="text-sm text-green-600 mt-1">Link copied!</p>
-                    </div>
-
-                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p class="text-sm text-blue-800">
-                            This link allows up to {{ shareSettings.maxJoins }} people to join your booking
-                            and expires in {{ shareSettings.expiresInHours }} hours.
-                        </p>
-                    </div>
-                </div>
-
-                <div v-else class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Participants</label>
-                        <input v-model.number="shareSettings.maxJoins" type="number" min="1" max="10"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Link Expires In (hours)</label>
-                        <input v-model.number="shareSettings.expiresInHours" type="number" min="1" max="72"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                    </div>
-
-                    <button @click="createShareLink" :disabled="creatingShare"
-                        class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-                        {{ creatingShare ? 'Creating...' : 'Create Share Link' }}
-                    </button>
-                </div>
-
-                <button @click="closeShareModal"
-                    class="mt-4 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                    Close
-                </button>
-            </div>
-        </div>
-
-        <!-- Review Modal -->
-        <div v-if="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Leave a Review</h3>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                        <div class="flex gap-2">
-                            <button v-for="i in 5" :key="i" type="button" @click="reviewForm.rating = i"
-                                class="w-10 h-10">
-                                <svg class="w-full h-full"
-                                    :class="i <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'"
-                                    fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
-                        <textarea v-model="reviewForm.review_text" rows="4" placeholder="Share your experience..."
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"></textarea>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button @click="reviewModal = null"
-                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                            Cancel
-                        </button>
-                        <button @click="submitReview" :disabled="submittingReview || reviewForm.rating === 0"
-                            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400">
-                            {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
-                        </button>
-                    </div>
+                    <router-link to="/courts"
+                        class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                        Find & Book a Court
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </router-link>
                 </div>
             </div>
         </div>
@@ -281,7 +216,7 @@ const reviewForm = ref({
 const submittingReview = ref(false)
 
 const statuses = [
-    { value: 'all', label: 'All' },
+    { value: 'all', label: 'All Bookings' },
     { value: 'PENDING', label: 'Pending' },
     { value: 'CONFIRMED', label: 'Confirmed' },
     { value: 'COMPLETED', label: 'Completed' },
@@ -289,26 +224,24 @@ const statuses = [
 ]
 
 const filteredBookings = computed(() => {
-    if (filterStatus.value === 'all') {
-        return bookings.value
-    }
+    if (filterStatus.value === 'all') return bookings.value
     return bookings.value.filter(b => b.status === filterStatus.value)
 })
 
 const formatDate = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-const formatDateTime = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    })
 }
 
 const getStatusClass = (status) => {
     const classes = {
-        'PENDING': 'bg-yellow-100 text-yellow-800',
-        'CONFIRMED': 'bg-green-100 text-green-800',
+        'PENDING': 'bg-amber-100 text-amber-800',
+        'CONFIRMED': 'bg-emerald-100 text-emerald-800',
         'CANCELLED': 'bg-red-100 text-red-800',
         'COMPLETED': 'bg-blue-100 text-blue-800',
         'NO_SHOW': 'bg-gray-100 text-gray-800',
@@ -318,25 +251,17 @@ const getStatusClass = (status) => {
 
 const getPaymentStatusClass = (status) => {
     const classes = {
-        'PENDING': 'text-yellow-600',
-        'COMPLETED': 'text-green-600',
-        'REFUNDED': 'text-blue-600',
-        'FAILED': 'text-red-600',
+        'PENDING': 'text-amber-600 font-medium',
+        'COMPLETED': 'text-emerald-600 font-medium',
+        'REFUNDED': 'text-teal-600 font-medium',
+        'FAILED': 'text-red-600 font-medium',
     }
     return classes[status] || 'text-gray-600'
 }
 
-const canCancel = (booking) => {
-    return ['PENDING', 'CONFIRMED'].includes(booking.status)
-}
-
-const canShare = (booking) => {
-    return ['PENDING', 'CONFIRMED'].includes(booking.status)
-}
-
-const canReview = (booking) => {
-    return booking.status === 'COMPLETED' && !booking.has_review
-}
+const canCancel = (booking) => ['PENDING', 'CONFIRMED'].includes(booking.status)
+const canShare = (booking) => ['PENDING', 'CONFIRMED'].includes(booking.status)
+const canReview = (booking) => booking.status === 'COMPLETED' && !booking.has_review
 
 const loadBookings = async () => {
     loading.value = true
@@ -346,7 +271,7 @@ const loadBookings = async () => {
         bookings.value = response.results || response
     } catch (err) {
         console.error('Failed to load bookings:', err)
-        error.value = 'Failed to load bookings. Please try again.'
+        error.value = 'Failed to load your bookings. Please try again later.'
     } finally {
         loading.value = false
     }
