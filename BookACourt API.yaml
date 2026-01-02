@@ -7193,10 +7193,6 @@ components:
           $ref: '#/components/schemas/RoleEnum'
         is_active:
           type: boolean
-        profile_picture:
-          type: string
-          format: binary
-          nullable: true
         date_of_birth:
           type: string
           format: date
@@ -7791,8 +7787,7 @@ components:
           readOnly: true
         profile_picture:
           type: string
-          format: uri
-          nullable: true
+          readOnly: true
         date_of_birth:
           type: string
           format: date
@@ -7824,6 +7819,7 @@ components:
       - loyalty_points
       - phone_number
       - player_stats
+      - profile_picture
       - updated_at
     UserDetailsRequest:
       type: object
@@ -7845,10 +7841,6 @@ components:
           $ref: '#/components/schemas/RoleEnum'
         is_active:
           type: boolean
-        profile_picture:
-          type: string
-          format: binary
-          nullable: true
         date_of_birth:
           type: string
           format: date

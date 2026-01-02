@@ -24,16 +24,20 @@ api.interceptors.request.use(
 );
 
 // Handle token refresh on 401
+// In api.js (and copy to adminApi.js)
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    response => response,
+    async error => {
         const originalRequest = error.config;
 
+        // Only attempt refresh on 401, and only once
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
                 const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) throw new Error('No refresh token available');
+
                 const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
                     refresh: refreshToken,
                 });
@@ -41,12 +45,21 @@ api.interceptors.response.use(
                 const { access } = response.data;
                 localStorage.setItem('access_token', access);
 
+                // Update Authorization header and retry original request
                 originalRequest.headers.Authorization = `Bearer ${access}`;
                 return api(originalRequest);
             } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+
+                // Clean up tokens
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
-                window.location.href = '/login';
+                localStorage.removeItem('user');
+
+                // Use router for safe redirect (import at top of file)
+                const router = useRouter();
+                router.replace('/admin/login'); // ← Use your admin login path
+
                 return Promise.reject(refreshError);
             }
         }

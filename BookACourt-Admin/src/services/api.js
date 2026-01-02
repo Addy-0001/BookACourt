@@ -23,17 +23,20 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor - Handle token refresh
+// In api.js (and copy to adminApi.js)
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    response => response,
+    async error => {
         const originalRequest = error.config;
 
+        // Only attempt refresh on 401, and only once
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
                 const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) throw new Error('No refresh token available');
+
                 const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
                     refresh: refreshToken,
                 });
@@ -41,13 +44,21 @@ api.interceptors.response.use(
                 const { access } = response.data;
                 localStorage.setItem('access_token', access);
 
+                // Update Authorization header and retry original request
                 originalRequest.headers.Authorization = `Bearer ${access}`;
                 return api(originalRequest);
             } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+
+                // Clean up tokens
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
                 localStorage.removeItem('user');
-                window.location.href = '/login';
+
+                // Use router for safe redirect (import at top of file)
+                const router = useRouter();
+                router.replace('/admin/login'); // ← Use your admin login path
+
                 return Promise.reject(refreshError);
             }
         }
@@ -85,9 +96,9 @@ export const authApi = {
     },
 
     verifyOTP(phoneNumber, otpCode) {
-        return api.post('/auth/otp/verify/', { 
-            phone_number: phoneNumber, 
-            otp_code: otpCode 
+        return api.post('/auth/otp/verify/', {
+            phone_number: phoneNumber,
+            otp_code: otpCode
         });
     },
 
@@ -325,20 +336,20 @@ export const courtApi = {
     },
 
     getAvailableSlots(courtId, date) {
-        return api.get(`/courts/courts/${courtId}/available_slots/`, { 
-            params: { date } 
+        return api.get(`/courts/courts/${courtId}/available_slots/`, {
+            params: { date }
         });
     },
 
     addManager(courtId, managerId) {
-        return api.post(`/courts/courts/${courtId}/add_manager/`, { 
-            manager_id: managerId 
+        return api.post(`/courts/courts/${courtId}/add_manager/`, {
+            manager_id: managerId
         });
     },
 
     removeManager(courtId, managerId) {
-        return api.post(`/courts/courts/${courtId}/remove_manager/`, { 
-            manager_id: managerId 
+        return api.post(`/courts/courts/${courtId}/remove_manager/`, {
+            manager_id: managerId
         });
     },
 
@@ -370,8 +381,8 @@ export const courtApi = {
     },
 
     flagReview(courtId, reviewId, reason) {
-        return api.post(`/courts/courts/${courtId}/reviews/${reviewId}/flag/`, { 
-            reason 
+        return api.post(`/courts/courts/${courtId}/reviews/${reviewId}/flag/`, {
+            reason
         });
     },
 
@@ -506,8 +517,8 @@ export const bookingApi = {
     },
 
     cancelRecurringBooking(recurringId, cancelFuture = true) {
-        return api.post(`/bookings/recurring/${recurringId}/cancel/`, { 
-            cancel_future: cancelFuture 
+        return api.post(`/bookings/recurring/${recurringId}/cancel/`, {
+            cancel_future: cancelFuture
         });
     },
 
@@ -712,7 +723,7 @@ export const utilityApi = {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('path', path);
-        
+
         return api.post('/upload/', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });

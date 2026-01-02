@@ -1,597 +1,258 @@
 <template>
-    <nav class="admin-navbar">
-        <div class="navbar-container">
-            <!-- Logo and Brand -->
-            <div class="navbar-brand">
-                <router-link to="/" class="brand-link">
-                    <div class="brand-logo">🏟️</div>
-                    <div class="brand-text">
-                        <span class="brand-name">BookACourt</span>
-                        <span class="brand-subtitle">{{ roleLabel }}</span>
-                    </div>
-                </router-link>
-            </div>
-
-            <!-- Desktop Navigation Links -->
-            <div class="navbar-nav" :class="{ 'mobile-open': mobileMenuOpen }">
-                <!-- Dashboard - Available to All -->
-                <router-link to="/" class="nav-item" exact-active-class="active">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-text">Dashboard</span>
-                </router-link>
-
-                <!-- My Courts - Court Owners & Managers -->
-                <router-link v-if="isCourtOwnerOrManager" to="/admin/my-courts" class="nav-item" active-class="active">
-                    <span class="nav-icon">🏟️</span>
-                    <span class="nav-text">My Courts</span>
-                </router-link>
-
-                <!-- Bookings - Available to All -->
-                <router-link to="/admin/bookings" class="nav-item" active-class="active">
-                    <span class="nav-icon">📅</span>
-                    <span class="nav-text">Bookings</span>
-                    <span v-if="pendingBookingsCount > 0" class="nav-badge">{{ pendingBookingsCount }}</span>
-                </router-link>
-
-                <!-- Court Registrations - Super Users Only -->
-                <router-link v-if="isSuperUser" to="/admin/registrations" class="nav-item" active-class="active">
-                    <span class="nav-icon">📝</span>
-                    <span class="nav-text">Registrations</span>
-                    <span v-if="pendingCount > 0" class="nav-badge">{{ pendingCount }}</span>
-                </router-link>
-
-                <!-- All Courts - Super Users Only -->
-                <router-link v-if="isSuperUser" to="/admin/courts" class="nav-item" active-class="active">
-                    <span class="nav-icon">🏢</span>
-                    <span class="nav-text">All Courts</span>
-                </router-link>
-
-                <!-- Users Management - Super Users Only -->
-                <router-link v-if="isSuperUser" to="/admin/users" class="nav-item" active-class="active">
-                    <span class="nav-icon">👥</span>
-                    <span class="nav-text">Users</span>
-                </router-link>
-
-                <!-- Equipment - Court Owners & Managers -->
-                <router-link v-if="isCourtOwnerOrManager" to="/admin/equipment" class="nav-item" active-class="active">
-                    <span class="nav-icon">🎾</span>
-                    <span class="nav-text">Equipment</span>
-                </router-link>
-
-                <!-- Reviews - Court Owners & Managers -->
-                <router-link v-if="isCourtOwnerOrManager" to="/admin/reviews" class="nav-item" active-class="active">
-                    <span class="nav-icon">⭐</span>
-                    <span class="nav-text">Reviews</span>
-                    <span v-if="unansweredReviewsCount > 0" class="nav-badge">{{ unansweredReviewsCount }}</span>
-                </router-link>
-
-                <!-- Reports - Available to All -->
-                <router-link to="/admin/reports" class="nav-item" active-class="active">
-                    <span class="nav-icon">📈</span>
-                    <span class="nav-text">Reports</span>
-                </router-link>
-
-                <!-- Categories - Super Users Only -->
-                <router-link v-if="isSuperUser" to="/admin/categories" class="nav-item" active-class="active">
-                    <span class="nav-icon">📂</span>
-                    <span class="nav-text">Categories</span>
-                </router-link>
-            </div>
-
-            <!-- Right Side Actions -->
-            <div class="navbar-actions">
-                <!-- Quick Actions Dropdown -->
-                <div class="action-item quick-actions" @click="toggleQuickActions">
-                    <button class="action-button" title="Quick Actions">
-                        <span class="action-icon">⚡</span>
-                    </button>
-
-                    <!-- Quick Actions Dropdown -->
-                    <div v-if="showQuickActions" class="dropdown quick-actions-dropdown">
-                        <div class="dropdown-header">
-                            <h3>Quick Actions</h3>
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-emerald-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-4">
+                    <router-link to="/dashboard" class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white text-2xl shadow-md">
+                            🏟️
                         </div>
-                        <div class="dropdown-body">
-                            <!-- Court Owner/Manager Actions -->
-                            <template v-if="isCourtOwnerOrManager">
-                                <button class="dropdown-item" @click="handleQuickAction('new-court')">
-                                    <span class="item-icon">➕</span>
-                                    <span>Add New Court</span>
-                                </button>
-                                <button class="dropdown-item" @click="handleQuickAction('block-slot')">
-                                    <span class="item-icon">🚫</span>
-                                    <span>Block Time Slot</span>
-                                </button>
-                                <button class="dropdown-item" @click="handleQuickAction('add-equipment')">
-                                    <span class="item-icon">🎾</span>
-                                    <span>Add Equipment</span>
-                                </button>
-                                <button class="dropdown-item" @click="handleQuickAction('pricing-rule')">
-                                    <span class="item-icon">💰</span>
-                                    <span>Set Pricing Rule</span>
-                                </button>
-                                <div class="dropdown-divider"></div>
-                            </template>
-
-                            <!-- Common Actions -->
-                            <button class="dropdown-item" @click="handleQuickAction('manual-booking')">
-                                <span class="item-icon">📅</span>
-                                <span>Create Manual Booking</span>
-                            </button>
-                            <button class="dropdown-item" @click="handleQuickAction('export-data')">
-                                <span class="item-icon">📊</span>
-                                <span>Export Data</span>
-                            </button>
-
-                            <!-- Super User Actions -->
-                            <template v-if="isSuperUser">
-                                <div class="dropdown-divider"></div>
-                                <button class="dropdown-item" @click="handleQuickAction('system-settings')">
-                                    <span class="item-icon">⚙️</span>
-                                    <span>System Settings</span>
-                                </button>
-                            </template>
+                        <div class="hidden sm:block">
+                            <span
+                                class="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">
+                                Court Manager
+                            </span>
+                            <p class="text-xs text-emerald-700 font-medium">Venue Dashboard</p>
                         </div>
-                    </div>
+                    </router-link>
                 </div>
 
-                <!-- Notifications -->
-                <div class="action-item notifications" @click="toggleNotifications">
-                    <button class="action-button" :class="{ 'has-notifications': notificationCount > 0 }"
-                        title="Notifications">
-                        <span class="action-icon">🔔</span>
-                        <span v-if="notificationCount > 0" class="action-badge">{{ notificationCount }}</span>
-                    </button>
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center gap-2">
+                    <!-- Dashboard (always visible) -->
+                    <router-link to="/dashboard"
+                        class="px-5 py-2.5 rounded-xl font-medium transition-all hover:bg-emerald-50 hover:text-emerald-700"
+                        :class="{ 'bg-emerald-50 text-emerald-700 font-semibold': $route.path === '/dashboard' }">
+                        Dashboard
+                    </router-link>
 
-                    <!-- Notifications Dropdown -->
-                    <div v-if="showNotifications" class="dropdown notifications-dropdown">
-                        <div class="dropdown-header">
-                            <h3>Notifications</h3>
-                            <button class="btn-text" @click="markAllRead">Mark all read</button>
-                        </div>
-                        <div class="dropdown-body">
-                            <div v-if="notifications.length === 0" class="empty-state">
-                                <span class="empty-icon">✅</span>
-                                <p>No new notifications</p>
-                            </div>
-                            <div v-else class="notification-list">
-                                <div v-for="notification in notifications" :key="notification.id"
-                                    class="notification-item" :class="{ unread: !notification.read }"
-                                    @click="handleNotificationClick(notification)">
-                                    <div class="notification-icon">{{ notification.icon }}</div>
-                                    <div class="notification-content">
-                                        <p class="notification-text">{{ notification.message }}</p>
-                                        <span class="notification-time">{{ notification.time }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dropdown-footer">
-                            <router-link to="/admin/notifications" class="btn-view-all">
-                                View All Notifications
-                            </router-link>
-                        </div>
-                    </div>
+                    <!-- My Courts -->
+                    <router-link v-if="isCourtOwnerOrManager" to="/my-courts"
+                        class="px-5 py-2.5 rounded-xl font-medium transition-all hover:bg-emerald-50 hover:text-emerald-700"
+                        :class="{ 'bg-emerald-50 text-emerald-700 font-semibold': $route.path.startsWith('/my-courts') }">
+                        My Courts
+                    </router-link>
+
+                    <!-- Bookings -->
+                    <router-link to="/bookings"
+                        class="px-5 py-2.5 rounded-xl font-medium transition-all hover:bg-emerald-50 hover:text-emerald-700 relative"
+                        :class="{ 'bg-emerald-50 text-emerald-700 font-semibold': $route.path.startsWith('/bookings') }">
+                        Bookings
+                        <span v-if="pendingBookingsCount > 0"
+                            class="absolute -top-1 -right-1 px-2 py-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center">
+                            {{ pendingBookingsCount }}
+                        </span>
+                    </router-link>
+
+                    <!-- Registrations (Super User only) -->
+                    <router-link v-if="isSuperUser" to="/registrations"
+                        class="px-5 py-2.5 rounded-xl font-medium transition-all hover:bg-emerald-50 hover:text-emerald-700 relative"
+                        :class="{ 'bg-emerald-50 text-emerald-700 font-semibold': $route.path.startsWith('/registrations') }">
+                        Registrations
+                        <span v-if="pendingRegistrationsCount > 0"
+                            class="absolute -top-1 -right-1 px-2 py-1 bg-amber-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center">
+                            {{ pendingRegistrationsCount }}
+                        </span>
+                    </router-link>
+
+                    <!-- All Courts (Super User only) -->
+                    <router-link v-if="isSuperUser" to="/courts"
+                        class="px-5 py-2.5 rounded-xl font-medium transition-all hover:bg-emerald-50 hover:text-emerald-700"
+                        :class="{ 'bg-emerald-50 text-emerald-700 font-semibold': $route.path.startsWith('/courts') }">
+                        All Courts
+                    </router-link>
                 </div>
 
-                <!-- Court Selector - For Court Managers with multiple courts -->
-                <div v-if="managedCourts.length > 1" class="action-item court-selector">
-                    <button class="court-selector-button" @click="toggleCourtSelector" title="Switch Court">
-                        <span class="court-icon">🏟️</span>
-                        <span class="court-name">{{ selectedCourt?.name || 'Select Court' }}</span>
-                        <span class="arrow">▼</span>
-                    </button>
-
-                    <div v-if="showCourtSelector" class="dropdown court-dropdown">
-                        <div class="dropdown-header">
-                            <h3>Managed Courts</h3>
-                        </div>
-                        <div class="dropdown-body">
-                            <button v-for="court in managedCourts" :key="court.id" class="court-item"
-                                :class="{ active: selectedCourt?.id === court.id }" @click="selectCourt(court)">
-                                <div class="court-item-icon">🏟️</div>
-                                <div class="court-item-info">
-                                    <span class="court-item-name">{{ court.name }}</span>
-                                    <span class="court-item-location">{{ court.city }}</span>
-                                </div>
-                                <span v-if="selectedCourt?.id === court.id" class="check-icon">✓</span>
-                            </button>
-                        </div>
-                        <div class="dropdown-footer">
-                            <button class="btn-view-all" @click="viewAllCourts">
-                                View All My Courts
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- User Profile -->
-                <div class="action-item profile" @click="toggleProfile">
-                    <button class="profile-button">
-                        <div class="profile-avatar" :style="{ background: avatarColor }">
-                            {{ userInitials }}
-                        </div>
-                        <div class="profile-info">
-                            <span class="profile-name">{{ currentUser?.full_name || 'Admin' }}</span>
-                            <span class="profile-role">{{ roleLabel }}</span>
-                        </div>
-                        <span class="profile-arrow">▼</span>
+                <!-- Right Side: Notifications + Profile -->
+                <div class="flex items-center gap-4">
+                    <!-- Notifications Bell -->
+                    <button @click="showNotifications = !showNotifications"
+                        class="relative p-2 rounded-full hover:bg-emerald-50 transition-colors">
+                        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span v-if="unreadNotificationsCount > 0"
+                            class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                            {{ unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount }}
+                        </span>
                     </button>
 
                     <!-- Profile Dropdown -->
-                    <div v-if="showProfile" class="dropdown profile-dropdown">
-                        <div class="dropdown-header user-info">
-                            <div class="user-avatar-large" :style="{ background: avatarColor }">
-                                {{ userInitials }}
+                    <div class="relative">
+                        <button @click="showProfileMenu = !showProfileMenu"
+                            class="flex items-center gap-3 p-2 rounded-xl hover:bg-emerald-50 transition-colors">
+                            <div
+                                class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                {{ currentUser?.full_name?.charAt(0)?.toUpperCase() || '?' }}
                             </div>
-                            <div class="user-details">
-                                <h3>{{ currentUser?.full_name || 'Admin User' }}</h3>
-                                <p>{{ currentUser?.email || currentUser?.phone_number }}</p>
-                                <span class="user-role-badge" :class="roleClass">{{ roleLabel }}</span>
+                            <div class="hidden md:block text-left">
+                                <p class="text-sm font-semibold text-gray-900">{{ currentUser?.full_name || 'Court Owner' }}</p>
+                                <p class="text-xs text-gray-600">{{ roleLabel }}</p>
                             </div>
-                        </div>
-                        <div class="dropdown-body">
-                            <router-link to="/admin/profile" class="dropdown-item">
-                                <span class="item-icon">👤</span>
-                                <span>My Profile</span>
+                        </button>
+
+                        <!-- Profile Dropdown Menu -->
+                        <div v-if="showProfileMenu"
+                            class="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-emerald-100 py-2 z-50">
+                            <div class="px-5 py-4 border-b border-emerald-100">
+                                <p class="font-semibold text-gray-900">{{ currentUser?.full_name }}</p>
+                                <p class="text-sm text-gray-600">{{ currentUser?.phone_number }}</p>
+                            </div>
+
+                            <router-link to="/profile"
+                                class="block px-5 py-3 hover:bg-emerald-50 text-gray-800 transition-colors"
+                                @click="showProfileMenu = false">
+                                My Profile
                             </router-link>
-                            <router-link v-if="isCourtOwnerOrManager" to="/admin/my-courts" class="dropdown-item">
-                                <span class="item-icon">🏟️</span>
-                                <span>My Courts</span>
-                            </router-link>
-                            <router-link to="/admin/preferences" class="dropdown-item">
-                                <span class="item-icon">⚙️</span>
-                                <span>Preferences</span>
-                            </router-link>
-                            <router-link to="/admin/security" class="dropdown-item">
-                                <span class="item-icon">🔒</span>
-                                <span>Security & Password</span>
-                            </router-link>
-                            <router-link to="/admin/help" class="dropdown-item">
-                                <span class="item-icon">❓</span>
-                                <span>Help & Support</span>
-                            </router-link>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item logout" @click="handleLogout">
-                                <span class="item-icon">🚪</span>
-                                <span>Logout</span>
+
+                            <button @click="handleLogout"
+                                class="w-full text-left px-5 py-3 hover:bg-red-50 text-red-700 font-medium transition-colors">
+                                Sign Out
                             </button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Mobile Menu Toggle -->
-                <button class="mobile-menu-toggle" @click="toggleMobileMenu">
-                    <span class="hamburger" :class="{ open: mobileMenuOpen }">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </span>
-                </button>
+                    <!-- Mobile Menu Toggle -->
+                    <button class="lg:hidden p-2 rounded-full hover:bg-emerald-50 text-gray-700"
+                        @click="mobileMenuOpen = !mobileMenuOpen">
+                        <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Mobile Overlay -->
-        <div v-if="mobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
+        <!-- Mobile Menu -->
+        <div v-if="mobileMenuOpen" class="lg:hidden fixed inset-0 bg-black/50 z-40" @click="mobileMenuOpen = false">
+            <div class="absolute top-16 left-0 right-0 bg-white shadow-xl rounded-b-2xl overflow-hidden" @click.stop>
+                <div class="p-6 space-y-2">
+                    <!-- Mobile Nav Links -->
+                    <router-link to="/dashboard"
+                        class="block px-5 py-4 rounded-xl hover:bg-emerald-50 text-gray-800 font-medium transition-colors"
+                        :class="{ 'bg-emerald-50 text-emerald-700': $route.path === '/dashboard' }"
+                        @click="mobileMenuOpen = false">
+                        Dashboard
+                    </router-link>
+
+                    <router-link v-if="isCourtOwnerOrManager" to="/my-courts"
+                        class="block px-5 py-4 rounded-xl hover:bg-emerald-50 text-gray-800 font-medium transition-colors"
+                        :class="{ 'bg-emerald-50 text-emerald-700': $route.path.startsWith('/my-courts') }"
+                        @click="mobileMenuOpen = false">
+                        My Courts
+                    </router-link>
+
+                    <router-link to="/bookings"
+                        class="block px-5 py-4 rounded-xl hover:bg-emerald-50 text-gray-800 font-medium transition-colors"
+                        :class="{ 'bg-emerald-50 text-emerald-700': $route.path.startsWith('/bookings') }"
+                        @click="mobileMenuOpen = false">
+                        Bookings
+                    </router-link>
+
+                    <router-link v-if="isSuperUser" to="/registrations"
+                        class="block px-5 py-4 rounded-xl hover:bg-emerald-50 text-gray-800 font-medium transition-colors"
+                        :class="{ 'bg-emerald-50 text-emerald-700': $route.path.startsWith('/registrations') }"
+                        @click="mobileMenuOpen = false">
+                        Registrations
+                    </router-link>
+
+                    <router-link v-if="isSuperUser" to="/courts"
+                        class="block px-5 py-4 rounded-xl hover:bg-emerald-50 text-gray-800 font-medium transition-colors"
+                        :class="{ 'bg-emerald-50 text-emerald-700': $route.path.startsWith('/courts') }"
+                        @click="mobileMenuOpen = false">
+                        All Courts
+                    </router-link>
+                </div>
+            </div>
+        </div>
     </nav>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAdminStore } from '@/stores/admin';
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter();
-const adminStore = useAdminStore();
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
 
-// State
-const mobileMenuOpen = ref(false);
-const showNotifications = ref(false);
-const showProfile = ref(false);
-const showQuickActions = ref(false);
-const showCourtSelector = ref(false);
-const pendingCount = ref(0);
-const pendingBookingsCount = ref(0);
-const unansweredReviewsCount = ref(0);
-const notificationCount = ref(0);
-const selectedCourt = ref(null);
-const managedCourts = ref([]);
+const mobileMenuOpen = ref(false)
+const showProfileMenu = ref(false)
 
-// Get current user from store or localStorage
-const currentUser = computed(() => {
-    return adminStore.currentUser || JSON.parse(localStorage.getItem('user') || 'null');
-});
+// Computed role checks
+const isCourtOwner = computed(() => authStore.user?.role === 'COURT_OWNER')
+const isCourtManager = computed(() => authStore.user?.role === 'COURT_MANAGER')
+const isCourtOwnerOrManager = computed(() => isCourtOwner.value || isCourtManager.value)
+const isSuperUser = computed(() => authStore.user?.role === 'SUPER_USER')
 
-// Role checks
-const isSuperUser = computed(() => {
-    return currentUser.value?.role === 'SUPER_USER';
-});
-
-const isCourtOwner = computed(() => {
-    return currentUser.value?.role === 'COURT_OWNER';
-});
-
-const isCourtManager = computed(() => {
-    return currentUser.value?.role === 'COURT_MANAGER';
-});
-
-const isCourtOwnerOrManager = computed(() => {
-    return isCourtOwner.value || isCourtManager.value;
-});
+// Current user
+const currentUser = computed(() => authStore.user)
 
 // Role label
 const roleLabel = computed(() => {
-    const roleMap = {
-        SUPER_USER: 'Super Admin',
-        COURT_OWNER: 'Court Owner',
-        COURT_MANAGER: 'Court Manager',
-        PLAYER: 'Player',
-    };
-    return roleMap[currentUser.value?.role] || 'Admin Panel';
-});
+    const role = authStore.user?.role
+    if (role === 'COURT_OWNER') return 'Court Owner'
+    if (role === 'COURT_MANAGER') return 'Court Manager'
+    if (role === 'SUPER_USER') return 'Administrator'
+    return 'User'
+})
 
-// Role class for styling
-const roleClass = computed(() => {
-    const classMap = {
-        SUPER_USER: 'role-super',
-        COURT_OWNER: 'role-owner',
-        COURT_MANAGER: 'role-manager',
-        PLAYER: 'role-player',
-    };
-    return classMap[currentUser.value?.role] || 'role-default';
-});
+// Placeholder counts (replace with real data from store)
+const pendingBookingsCount = ref(0) // Fetch from store or API
+const pendingRegistrationsCount = ref(0) // Fetch from store or API
+const unreadNotificationsCount = ref(0) // Fetch from store or API
 
-// User initials
-const userInitials = computed(() => {
-    if (!currentUser.value?.full_name) return 'A';
-    const names = currentUser.value.full_name.split(' ');
-    if (names.length === 1) return names[0][0].toUpperCase();
-    return (names[0][0] + names[names.length - 1][0]).toUpperCase();
-});
-
-// Avatar color based on role
-const avatarColor = computed(() => {
-    const colorMap = {
-        SUPER_USER: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        COURT_OWNER: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        COURT_MANAGER: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        PLAYER: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    };
-    return colorMap[currentUser.value?.role] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-});
-
-// Mock notifications - replace with actual data from store
-const notifications = ref([
-    {
-        id: 1,
-        icon: '📅',
-        message: 'New booking for Downtown Arena - Court 1',
-        time: '2 minutes ago',
-        read: false,
-    },
-    {
-        id: 2,
-        icon: '⭐',
-        message: 'New review posted for your court',
-        time: '15 minutes ago',
-        read: false,
-    },
-    {
-        id: 3,
-        icon: '💰',
-        message: 'Payment received for booking #12345',
-        time: '1 hour ago',
-        read: true,
-    },
-]);
-
-// Lifecycle
-onMounted(async () => {
-    await loadData();
-    setupClickOutside();
-});
-
-onUnmounted(() => {
-    document.body.style.overflow = '';
-});
-
-// Watch for user changes
-watch(() => currentUser.value, async (newUser) => {
-    if (newUser) {
-        await loadUserSpecificData();
-    }
-});
-
-// Methods
-async function loadData() {
+const handleLogout = async () => {
     try {
-        // Fetch current user if not in store
-        if (!adminStore.currentUser) {
-            await adminStore.fetchCurrentUser();
+        await authStore.logout()
+        router.push('/login')
+    } catch (err) {
+        console.error('Logout failed:', err)
+    }
+}
+
+// Close dropdowns on outside click
+onMounted(() => {
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.profile-dropdown')) {
+            showProfileMenu.value = false
         }
-
-        // Load notifications
-        await adminStore.fetchNotifications();
-        notificationCount.value = adminStore.unreadNotificationsCount;
-
-        // Load user-specific data
-        await loadUserSpecificData();
-    } catch (error) {
-        console.error('Error loading navbar data:', error);
-    }
-}
-
-async function loadUserSpecificData() {
-    if (isSuperUser.value) {
-        // Load pending registrations for super users
-        await adminStore.fetchRegistrations({ status: 'PENDING' });
-        pendingCount.value = adminStore.pendingRegistrations.length;
-    }
-
-    if (isCourtOwnerOrManager.value) {
-        // Load managed courts
-        await loadManagedCourts();
-
-        // Load pending bookings
-        await adminStore.fetchBookings({ status: 'PENDING' });
-        pendingBookingsCount.value = adminStore.pendingBookings.length;
-
-        // Load unanswered reviews count
-        unansweredReviewsCount.value = 3; // Replace with actual API call
-    }
-}
-
-async function loadManagedCourts() {
-    try {
-        // Fetch courts owned or managed by current user
-        const params = isCourtOwner.value
-            ? { owner: currentUser.value.id }
-            : { manager: currentUser.value.id };
-
-        await adminStore.fetchCourts(params);
-        managedCourts.value = adminStore.courts;
-
-        // Set first court as selected if none selected
-        if (managedCourts.value.length > 0 && !selectedCourt.value) {
-            selectedCourt.value = managedCourts.value[0];
-            localStorage.setItem('selectedCourtId', selectedCourt.value.id);
-        }
-    } catch (error) {
-        console.error('Error loading managed courts:', error);
-    }
-}
-
-function toggleMobileMenu() {
-    mobileMenuOpen.value = !mobileMenuOpen.value;
-    if (mobileMenuOpen.value) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
-    }
-}
-
-function closeMobileMenu() {
-    mobileMenuOpen.value = false;
-    document.body.style.overflow = '';
-}
-
-function toggleNotifications() {
-    showNotifications.value = !showNotifications.value;
-    showProfile.value = false;
-    showQuickActions.value = false;
-    showCourtSelector.value = false;
-}
-
-function toggleProfile() {
-    showProfile.value = !showProfile.value;
-    showNotifications.value = false;
-    showQuickActions.value = false;
-    showCourtSelector.value = false;
-}
-
-function toggleQuickActions() {
-    showQuickActions.value = !showQuickActions.value;
-    showNotifications.value = false;
-    showProfile.value = false;
-    showCourtSelector.value = false;
-}
-
-function toggleCourtSelector() {
-    showCourtSelector.value = !showCourtSelector.value;
-    showNotifications.value = false;
-    showProfile.value = false;
-    showQuickActions.value = false;
-}
-
-function selectCourt(court) {
-    selectedCourt.value = court;
-    localStorage.setItem('selectedCourtId', court.id);
-    showCourtSelector.value = false;
-
-    // Optionally refresh data for selected court
-    loadUserSpecificData();
-}
-
-function viewAllCourts() {
-    showCourtSelector.value = false;
-    router.push('/admin/my-courts');
-}
-
-async function markAllRead() {
-    try {
-        await adminStore.markAllNotificationsRead();
-        notifications.value.forEach(n => n.read = true);
-        notificationCount.value = 0;
-    } catch (error) {
-        console.error('Error marking all as read:', error);
-    }
-}
-
-function handleNotificationClick(notification) {
-    // Mark as read
-    notification.read = true;
-    notificationCount.value = notifications.value.filter(n => !n.read).length;
-
-    // Navigate based on notification type
-    // Add your navigation logic here
-}
-
-function handleQuickAction(action) {
-    showQuickActions.value = false;
-
-    const actionRoutes = {
-        'new-court': '/admin/my-courts/create',
-        'block-slot': '/admin/blocked-slots',
-        'add-equipment': '/admin/equipment/create',
-        'pricing-rule': '/admin/pricing',
-        'manual-booking': '/admin/bookings/create',
-        'export-data': '/admin/reports/export',
-        'system-settings': '/admin/settings',
-    };
-
-    if (actionRoutes[action]) {
-        router.push(actionRoutes[action]);
-    }
-}
-
-function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-        // Clear auth tokens
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('selectedCourtId');
-
-        // Reset store
-        adminStore.resetState();
-
-        // Navigate to login
-        router.push('/login');
-    }
-}
-
-function setupClickOutside() {
-    document.addEventListener('click', handleClickOutside);
-}
-
-function handleClickOutside(event) {
-    const target = event.target;
-    if (!target.closest('.notifications') && showNotifications.value) {
-        showNotifications.value = false;
-    }
-    if (!target.closest('.profile') && showProfile.value) {
-        showProfile.value = false;
-    }
-    if (!target.closest('.quick-actions') && showQuickActions.value) {
-        showQuickActions.value = false;
-    }
-    if (!target.closest('.court-selector') && showCourtSelector.value) {
-        showCourtSelector.value = false;
-    }
-}
+    })
+})
 </script>
 
 <style scoped>
+.admin-navbar {
+  background: white;
+  border-bottom: 1px solid #d1fae5; /* emerald-100 */
+}
+
+.nav-item.active {
+  background: #ecfdf5; /* emerald-50 */
+  color: #059669; /* emerald-600 */
+  font-weight: 600;
+}
+
+.nav-badge {
+  background: #ef4444; /* red-500 */
+  color: white;
+}
+
+.profile-dropdown {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+
 .admin-navbar {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;

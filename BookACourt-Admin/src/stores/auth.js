@@ -35,7 +35,15 @@ export const useAuthStore = defineStore('auth', {
             return response.data;
         },
 
-        logout() {
+        async logout() {
+            try {
+                // Optional: Call server logout to blacklist token
+                await authApi.logout(this.refreshToken);
+            } catch (err) {
+                console.warn('Server logout failed, clearing local data anyway');
+            }
+
+            // Clear everything
             this.user = null;
             this.token = null;
             this.refreshToken = null;
@@ -44,6 +52,10 @@ export const useAuthStore = defineStore('auth', {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
+
+            // Safe redirect
+            const router = useRouter();
+            router.replace('/admin/login');
         },
 
         async refreshAccessToken() {
